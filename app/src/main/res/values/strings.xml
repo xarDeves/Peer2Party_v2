@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Peer2Party</string>
+
+    <!--startup activity-->
+    <string name="usernameHint">Enter Username:</string>
+    <string name="connect">Connect</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!--main activity-->
+
+</resources>

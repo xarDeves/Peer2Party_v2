@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearRecieved"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="start"
+    android:layout_marginStart="7dp"
+    android:layout_marginTop="5dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/linearUsernameReceived"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/userText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/username"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp"
+            android:textColor="#FFF"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearTextReceived"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/chatTextRec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/received_bubble"
+            android:maxWidth="280dp"
+            android:padding="5dp"
+            android:textColor="#FFF"
+            android:textSize="20sp" />
+
+        <ImageView
+            android:id="@+id/deleteChatRec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/delete_sprite"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/infoChatRec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/dateChatRec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="280dp"
+            android:text="12/5/2021 at 15:53pm, "
+            android:textSize="12sp" />
+
+    </LinearLayout>
+</LinearLayout>
+
+
+
+

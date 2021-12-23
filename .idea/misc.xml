@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/drawable/attachment_sprite.xml" value="0.36153846153846153" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/drawable/button_rounded_corners.xml" value="0.3388888888888889" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/drawable/camera_sprite.xml" value="0.3175925925925926" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/drawable/delete_sprite.xml" value="0.3175925925925926" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/drawable/mic_sprite.xml" value="0.3175925925925926" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/drawable/more_sprite.xml" value="0.36153846153846153" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/drawable/not_found.xml" value="0.36153846153846153" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/drawable/received_bubble.xml" value="0.2109375" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/drawable/send_sprite.xml" value="0.2109375" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/drawable/sent_bubble.xml" value="0.2109375" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/layout/activity_main.xml" value="0.2558876811594203" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/layout/activity_startup.xml" value="0.33" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/layout/chat_head_recieve.xml" value="0.245018115942029" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/layout/chat_head_send.xml" value="0.18385416666666668" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/layout/fragment_chat.xml" value="0.245018115942029" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/layout/fragment_peer_list.xml" value="0.245018115942029" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/layout/image_recieve.xml" value="0.18385416666666668" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/layout/image_send.xml" value="0.18385416666666668" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/layout/peer_inflatable.xml" value="0.18385416666666668" />
+        <entry key="..\:/Users/chnte/AndroidStudioProjects/Peer2Party/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2109375" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

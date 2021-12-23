@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearRecieved"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="end"
+    android:layout_marginTop="5dp"
+    android:layout_marginEnd="7dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end">
+
+        <ImageView
+            android:id="@+id/deleteImageSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/delete_sprite"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/imageViewSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:adjustViewBounds="true"
+            android:background="@drawable/sent_bubble"
+            android:maxWidth="280dp"
+            android:maxHeight="400dp"
+            android:padding="5dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/infoImageSend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end">
+
+        <TextView
+            android:id="@+id/dateImageSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/sizeImageSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:textColor="@color/outline"
+            android:textSize="12sp" />
+
+
+    </LinearLayout>
+</LinearLayout>
+
