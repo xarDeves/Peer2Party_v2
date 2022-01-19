@@ -26,6 +26,8 @@ class StartupActivity : AppCompatActivity() {
         binding = ActivityStartupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        supportActionBar!!.hide()
+
         sharedPrefs = getSharedPreferences("id", Context.MODE_PRIVATE)
         alias = sharedPrefs.getString("ID", "")!!
         binding.usernameText.setText(alias)
@@ -41,7 +43,7 @@ class StartupActivity : AppCompatActivity() {
                 intent.putExtra("ID", ID)
                 startActivity(intent)
                 finish()
-            } else Toast.makeText(this, "Please Enter A Username", Toast.LENGTH_SHORT).show();
+            } else Toast.makeText(this, "Please Enter A Username", Toast.LENGTH_SHORT).show()
         }
 
     }

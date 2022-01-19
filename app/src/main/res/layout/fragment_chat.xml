@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
     tools:context="fragments.ChatFragment">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -131,9 +130,12 @@
 
             <Button
                 android:id="@+id/selectFile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/more_sprite" />
+
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:background="@drawable/more_sprite"
+                android:tint="?colorPrimary" />
+
             <!--
             <Button
                 android:id="@+id/selectFile"
@@ -164,9 +166,10 @@
 
             <Button
                 android:id="@+id/buttonSend"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/send_sprite" />
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:background="@drawable/send_sprite"
+                android:tint="?colorPrimary" />
 
         </TableRow>
     </TableLayout>

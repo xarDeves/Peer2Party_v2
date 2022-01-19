@@ -7,7 +7,6 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentManager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.peer2party.R
 import viewmodels.MainViewModel
@@ -19,9 +18,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ID: String
     private val bundle: Bundle = Bundle()
     private var doubleBackCheck = false
-
-    private lateinit var fragmentManager: FragmentManager
-    private lateinit var transactionManager: androidx.fragment.app.FragmentTransaction
 
     override fun onBackPressed() {
 
@@ -40,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        supportActionBar!!.hide()
 
         val viewPager: ViewPager2 = findViewById(R.id.viewpager)
         val adapter = MainViewPagerAdapter(viewModel.fragments, this)
