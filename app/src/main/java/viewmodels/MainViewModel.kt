@@ -1,6 +1,6 @@
 package viewmodels
 
-import Networking.Model
+import networker.Model
 import android.app.Application
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AndroidViewModel
