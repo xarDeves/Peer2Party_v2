@@ -1,31 +1,30 @@
 package networker.helpers;
 
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import networker.exceptions.InvalidPortValueException;
-
 // placeholder name, must find something more specific...
 public class NetworkInformation {
-    public static final String multicastAddressString = "FF7E:230::1234";
-    private final InetAddress multicastGroup;
-    private final int port;
+    public static final String multicastMessagesAddress = "FF7E:230::1235";
+    private final InetAddress multicastMessagesGroup;
+
+    public static final String multicastDiscoveryAddress = "FF7E:230::1234";
+    private final InetAddress multicastDiscoverGroup;
+
     private final String friendlyName;
 
-    public NetworkInformation(int port, String friendlyName) throws UnknownHostException, InvalidPortValueException {
-        this.multicastGroup = Inet6Address.getByName(multicastAddressString);
-        if (port < 1025 || port > 49151) throw new InvalidPortValueException();
-        this.port = port;
+    public NetworkInformation(String friendlyName) throws UnknownHostException {
+        this.multicastDiscoverGroup = InetAddress.getByName(multicastDiscoveryAddress);
+        this.multicastMessagesGroup = InetAddress.getByName(multicastMessagesAddress);
         this.friendlyName = friendlyName;
     }
 
-    public InetAddress getMulticastGroup() {
-        return multicastGroup;
+    public InetAddress getMulticastMessagesGroup() {
+        return multicastMessagesGroup;
     }
 
-    public int getPort() {
-        return port;
+    public InetAddress getMulticastDiscoverGroup() {
+        return multicastDiscoverGroup;
     }
 
     public String getFriendlyName() {

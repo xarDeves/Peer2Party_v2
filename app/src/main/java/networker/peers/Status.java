@@ -1,4 +1,4 @@
-package networker;
+package networker.peers;
 
 public enum Status {
     AVAILABLE, AWAY, BUSY, UNKNOWN;

@@ -1,7 +1,6 @@
 package networker.sockets;
 
 import java.io.IOException;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
@@ -14,7 +13,7 @@ public class StaticSocketFactory {
         return new ServerSocket();
     }
 
-    static ServerSocket createServerSocket(Inet6Address addr, int port, int backlog) throws IOException {
+    static ServerSocket createServerSocket(InetAddress addr, int port, int backlog) throws IOException {
         return new ServerSocket(port, backlog, addr);
     }
 
@@ -22,7 +21,7 @@ public class StaticSocketFactory {
         return new Socket();
     }
 
-    static Socket createSocket(Inet6Address addr, int port) throws IOException {
+    static Socket createSocket(InetAddress addr, int port) throws IOException {
         return new Socket(addr, port);
     }
 

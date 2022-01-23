@@ -4,17 +4,18 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.MulticastSocket;
+import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import networker.discovery.interfaces.PeerReceiver;
 import networker.helpers.NetworkUtilities;
 
-class PeerGroupReceiver {
+public class MulticastGroupReceiver implements PeerReceiver {
     // this must run as a server with a timed delay (15s receive, with a random +/- of 1s, then send twice)
 
-    Queue<String> discoverPeers(MulticastSocket socket, int timeToReceiveMillis) throws IOException {
+    public Queue<String> discoverPeers(DatagramSocket socket, int timeToReceiveMillis) throws IOException {
         // https://developer.android.com/reference/java/net/MulticastSocket
         // we must have joined the group (with the current socket) in order to receive messages
         // timeout must also be set BEFORE receiving...

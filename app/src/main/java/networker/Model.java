@@ -3,20 +3,18 @@ package networker;
 import android.util.Log;
 
 import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
 import java.util.LinkedList;
-import java.util.List;
 
 import data.Message;
 import data.MessageType;
 import helpers.DateTimeHelper;
+import networker.helpers.NetworkUtilities;
 import viewmodels.MainViewModel;
 
 public class Model {
 
     private final MainViewModel viewModel;
-    private final List<NetworkInterface> networkInterfaces = new LinkedList<>();
+    private final LinkedList<NetworkInterface> networkInterfaces = new LinkedList<>();
 
     public Model(MainViewModel viewModel) {
         this.viewModel = viewModel;
@@ -54,20 +52,9 @@ public class Model {
         );
     }
 
-    //TODO MIGRATE THIS SOMEWHERE ELSE
     public void refreshViableNetworkInterfaces() {
         networkInterfaces.clear();
-        // https://stackoverflow.com/a/6238459/10007109
-        try {
-            for(Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces(); list.hasMoreElements();)  {
-                NetworkInterface i = list.nextElement();
-                Log.e("networker", "network_interface displayName " + i.getDisplayName());
-                networkInterfaces.add(i);
-            }
-        } catch (SocketException e) {
-            Log.d("networker", "NetworkInterface.getNetworkInterfaces()", e);
-        }
-
+        NetworkUtilities.getViableNetworkInterfaces(networkInterfaces);
     }
 
 }

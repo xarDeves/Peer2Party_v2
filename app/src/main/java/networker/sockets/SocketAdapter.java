@@ -1,8 +1,11 @@
 package networker.sockets;
 
 import java.io.IOException;
-import java.net.Inet6Address;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class SocketAdapter {
     private Socket socket = null;
@@ -15,8 +18,28 @@ public class SocketAdapter {
 
     }
 
-    public SocketAdapter(Inet6Address address, int port) throws IOException {
+    public SocketAdapter(InetAddress address, int port) throws IOException {
         socket = StaticSocketFactory.createSocket(address, port);
+    }
+
+    public InetAddress getInetAddress() {
+        return socket.getInetAddress();
+    }
+
+    public void setTimeout(int timeout) throws SocketException {
+        socket.setSoTimeout(timeout);
+    }
+
+    public int getPort() {
+        return socket.getPort();
+    }
+
+    public OutputStream getOutputStream() throws IOException {
+        return socket.getOutputStream();
+    }
+
+    public InputStream getInputStream() throws IOException {
+        return socket.getInputStream();
     }
 
     public boolean isClosed() {
