@@ -1,4 +1,4 @@
-package networker.discovery.interfaces;
+package networker.discovery;
 
 import java.io.IOException;
 import java.net.DatagramSocket;

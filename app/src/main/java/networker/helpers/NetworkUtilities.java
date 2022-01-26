@@ -20,6 +20,7 @@ import networker.MessageType;
 import networker.exceptions.InvalidPortValueException;
 import networker.peers.Status;
 import networker.peers.User;
+import networker.sockets.SocketAdapter;
 
 public class NetworkUtilities {
 
@@ -104,6 +105,11 @@ public class NetworkUtilities {
         return new MessageDeclaration(contentSize, messageType, receiverIDs);
     }
 
+    //port might be different user to socket, since listening port is different than the one contacting us
+    public static boolean userDataIsConsistentToSocket(SocketAdapter s, User u) {
+        return s.getInetAddress() == u.getLogicalAddress();
+    }
+
     //TODO MIGRATE THIS SOMEWHERE ELSE
     public static void getViableNetworkInterfaces(LinkedList<NetworkInterface> networkInterfaces) {
 
@@ -112,6 +118,14 @@ public class NetworkUtilities {
             for(Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces(); list.hasMoreElements();)  {
                 NetworkInterface i = list.nextElement();
                 Log.e("networker", "network_interface displayName " + i.getDisplayName());
+                Log.e("networker", "network_interface Name " + i.getName());
+                Log.e("networker", "network_interface InetAddresses ");
+                for (Enumeration<InetAddress> l = i.getInetAddresses(); l.hasMoreElements();) {
+                    InetAddress ia = l.nextElement();
+                    Log.e("networker", "network_interface address toString" + ia.toString());
+                    //Log.e("networker", "network_interface address getHostName " + ia.getHostName()); // this throws an exception if it's run on the main thread
+                    Log.e("networker", "network_interface address getHostAddress " + ia.getHostAddress());
+                }
                 networkInterfaces.add(i);
             }
         } catch (SocketException e) {

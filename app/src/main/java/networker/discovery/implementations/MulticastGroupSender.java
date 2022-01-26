@@ -1,4 +1,4 @@
-package networker.discovery;
+package networker.discovery.implementations;
 
 import android.util.Log;
 
@@ -8,11 +8,18 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-import networker.discovery.interfaces.PeerSender;
+import networker.discovery.PeerSender;
 import networker.helpers.NetworkInformation;
 import networker.helpers.NetworkUtilities;
 import networker.peers.User;
 
+/** Requires multicast permissions.
+ * Requires acquiring WifiManager.MulticastLock.
+ * Even then, depending on the device this might not work (it will either fail silently,
+ * or with a bang depending on the device, we cannot know).
+ * source:
+ * @link https://codeisland.org/2012/udp-multicast-on-android
+ */
 public class MulticastGroupSender implements PeerSender {
     // this must later run as a client (send only when prompted)
     // this must have the input of ourself (the current user)

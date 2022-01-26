@@ -1,5 +1,7 @@
 package networker.sockets;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,8 +40,16 @@ public class SocketAdapter {
         return socket.getOutputStream();
     }
 
+    public DataOutputStream getDataOutputStream() throws IOException {
+        return new DataOutputStream(socket.getOutputStream());
+    }
+
     public InputStream getInputStream() throws IOException {
         return socket.getInputStream();
+    }
+
+    public DataInputStream getDataInputStream() throws IOException {
+        return new DataInputStream(socket.getInputStream());
     }
 
     public boolean isClosed() {

@@ -10,7 +10,6 @@ import java.net.InetAddress;
 import java.util.Objects;
 
 import networker.exceptions.InvalidPortValueException;
-import networker.exceptions.UninitializedPeerException;
 import networker.helpers.NetworkUtilities;
 import networker.sockets.SocketAdapter;
 
@@ -57,7 +56,7 @@ public class User {
     }
 
     public boolean isUsable() {
-        return port != -1;
+        return NetworkUtilities.portIsValid(port);
     }
 
     public boolean isOnline(SocketAdapter socket) {
@@ -65,8 +64,8 @@ public class User {
         return false;
     }
 
-    public SocketAdapter createUserSocket() throws UninitializedPeerException, IOException {
-        if (!isUsable()) throw new UninitializedPeerException();
+    public SocketAdapter createUserSocket() throws IOException, InvalidPortValueException {
+        if (!isUsable()) throw new InvalidPortValueException();
         shutdownUser();
 
         currentUserSocket = new SocketAdapter(address, port);
@@ -144,7 +143,7 @@ public class User {
     }
 
     public void sendSalutation() throws IOException, JSONException {
-        DataOutputStream os = new DataOutputStream(currentUserSocket.getOutputStream());
+        DataOutputStream os = currentUserSocket.getDataOutputStream();
         os.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.getUserSalutationJson(this)));
         os.flush();
     }

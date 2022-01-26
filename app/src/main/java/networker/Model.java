@@ -24,18 +24,20 @@ public class Model {
     }
 
     private void attachSendObserver() {
-//        viewModel.getAllMessages().observeForever(messageList -> {
-//            Message message = messageList.get(messageList.size() - 1);
-//
-//            switch (message.getMessageType()) {
-//                case TEXT_SEND:
-//                    onTextSend(message);
-//                    break;
-//                case IMAGE_SEND:
-//                    break;
-//            }
-//
-//        });
+        viewModel.getAllMessages().observeForever(messageList -> {
+            if (!messageList.isEmpty()) {
+                Message message = messageList.get(messageList.size() - 1);
+
+                switch (message.getMessageType()) {
+                    case TEXT_SEND:
+                        onTextSend(message);
+                        break;
+                    case IMAGE_SEND:
+                        break;
+                }
+            }
+
+        });
     }
 
     public void onTextSend(Message message) {

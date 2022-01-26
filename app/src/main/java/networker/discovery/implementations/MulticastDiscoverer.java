@@ -1,4 +1,4 @@
-package networker.discovery;
+package networker.discovery.implementations;
 
 import android.util.Log;
 
@@ -13,18 +13,24 @@ import java.util.List;
 import java.util.Queue;
 
 import networker.RoomKnowledge;
-import networker.discovery.interfaces.PeerDiscoverer;
-import networker.discovery.interfaces.PeerReceiver;
-import networker.discovery.interfaces.PeerSender;
-import networker.discovery.interfaces.PeerServer;
+import networker.discovery.PeerDiscoverer;
+import networker.discovery.PeerReceiver;
+import networker.discovery.PeerSender;
+import networker.discovery.PeerServer;
 import networker.exceptions.InvalidPortValueException;
-import networker.exceptions.UninitializedPeerException;
 import networker.helpers.NetworkInformation;
 import networker.helpers.NetworkUtilities;
 import networker.peers.Peer;
 import networker.peers.User;
 import networker.sockets.ServerSocketAdapter;
 
+/** Requires multicast permissions.
+ * Requires acquiring WifiManager.MulticastLock.
+ * Even then, depending on the device this might not work (it will either fail silently,
+ * or with a bang depending on the device, we cannot know).
+ * source:
+ * @link https://codeisland.org/2012/udp-multicast-on-android
+ */
 public class MulticastDiscoverer implements PeerDiscoverer {
     private static final int SO_TIMEOUT_MILLIS = 5_000;
     private static final int SS_TIMEOUT_MILLIS = 5_000;
@@ -95,7 +101,7 @@ public class MulticastDiscoverer implements PeerDiscoverer {
 
         try {
             u.createUserSocket();
-        } catch (UninitializedPeerException e) {
+        } catch (InvalidPortValueException e) {
             Log.d("networker", "u.createUserSocket()", e);
         }
     }
@@ -109,10 +115,9 @@ public class MulticastDiscoverer implements PeerDiscoverer {
             try {
                 //update socket if port changed
                 uExisting.createUserSocket();
-            } catch (UninitializedPeerException e) {
+            } catch (InvalidPortValueException e) {
                 Log.d("networker", "u.createUserSocket() 2", e);
             }
-
         }
     }
 
