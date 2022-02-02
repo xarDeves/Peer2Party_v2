@@ -31,7 +31,7 @@ public class User {
     private Status status = Status.UNKNOWN;
 
     public User(InetAddress adr, String name, int p) throws InvalidPortValueException {
-        if (p < 1 || p > 65535) throw new InvalidPortValueException();
+        if (!NetworkUtilities.portIsValid(p)) throw new InvalidPortValueException();
 
         address = adr;
         username = name;
@@ -41,7 +41,8 @@ public class User {
     }
 
     public User(InetAddress adr, String name, int p, Status st) throws InvalidPortValueException {
-        if (p < 1 || p > 65535) throw new InvalidPortValueException();
+        if (!NetworkUtilities.portIsValid(p)) throw new InvalidPortValueException();
+
 
         address = adr;
         username = name;
@@ -155,7 +156,8 @@ public class User {
         User user = (User) o;
 
         // the unique identifier comparison is not needed right now, but is here later on for completeness sake
-        return getPort() == user.getPort() && getIDENTIFIER().equals(user.getIDENTIFIER()) && getAddress().equals(user.getAddress()) && Objects.equals(uniqueIndentifier, user.uniqueIndentifier) && getUsername().equals(user.getUsername()) && getStatus() == user.getStatus();
+        return getPort() == user.getPort() && getIDENTIFIER().equals(user.getIDENTIFIER()) && getAddress().equals(user.getAddress()) &&
+                Objects.equals(uniqueIndentifier, user.uniqueIndentifier) && getUsername().equals(user.getUsername()) && getStatus() == user.getStatus();
     }
 
     @Override

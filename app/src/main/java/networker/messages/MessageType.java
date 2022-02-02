@@ -1,4 +1,4 @@
-package networker;
+package networker.messages;
 
 public enum MessageType {
     TEXT, IMAGE, GIF, VIDEO, AUDIO, MULTIMEDIA, INVALID;

@@ -5,11 +5,10 @@ import android.util.Log;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.net.MulticastSocket;
+import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 import networker.RoomKnowledge;
@@ -24,14 +23,25 @@ import networker.peers.Peer;
 import networker.peers.User;
 import networker.sockets.ServerSocketAdapter;
 
-/** Requires multicast permissions.
+/**
+ * ---------------------------- For multicast sender/receiver ----------------------------
+ * Requires multicast permissions.
+ *
  * Requires acquiring WifiManager.MulticastLock.
  * Even then, depending on the device this might not work (it will either fail silently,
  * or with a bang depending on the device, we cannot know).
+ *
+ * Requires the MulticastSocket to have joined the multicastDiscoverGroup of NetworkInformation
+ * before passing it (with .joinGroup (SocketAddress mcastaddr, NetworkInterface netIf)
+ *
+ * ---------------------------- For broadcast sender/receiver ----------------------------
+ *
+ * N/A, currently doesn't require anything (there is no such impl yet)
+ *
  * source:
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
-public class MulticastDiscoverer implements PeerDiscoverer {
+public class Discoverer implements PeerDiscoverer {
     private static final int SO_TIMEOUT_MILLIS = 5_000;
     private static final int SS_TIMEOUT_MILLIS = 5_000;
 
@@ -39,31 +49,31 @@ public class MulticastDiscoverer implements PeerDiscoverer {
     private final PeerSender sender;
     private final PeerServer inboundServer;
 
-    private final MulticastSocket socket;
+    private final DatagramSocket udpSocket;
     private final ServerSocketAdapter serverSocket;
     private final NetworkInformation netInfo;
 
     private final RoomKnowledge room;
 
-    public MulticastDiscoverer(PeerReceiver recv, PeerSender sendr, PeerServer peerServer,
-                               ServerSocketAdapter ss, MulticastSocket ms, NetworkInformation info,
-                               RoomKnowledge roomKnowledge) throws SocketException {
+    public Discoverer(PeerReceiver recv, PeerSender sendr, PeerServer peerServer,
+                      ServerSocketAdapter ss, DatagramSocket ms, NetworkInformation info,
+                      RoomKnowledge roomKnowledge) throws SocketException {
         receiver = recv;
         sender = sendr;
         inboundServer = peerServer;
 
-        socket = ms;
+        udpSocket = ms;
         serverSocket = ss;
         room = roomKnowledge;
 
         netInfo = info;
         // FOR COMPLETENESS SAKE
-        socket.setSoTimeout(SO_TIMEOUT_MILLIS);
+        udpSocket.setSoTimeout(SO_TIMEOUT_MILLIS);
         serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
     }
 
-    public List<User> processOnce() throws IOException {
-        Queue<String> groupBroadcasts = receiver.discoverPeers(socket, SO_TIMEOUT_MILLIS);
+    public void processOnce() throws IOException {
+        Queue<String> groupBroadcasts = receiver.discoverPeers(udpSocket, SO_TIMEOUT_MILLIS);
 
         LinkedList<User> usersFound = new LinkedList<>();
         for (String bCast : groupBroadcasts) {
@@ -79,11 +89,9 @@ public class MulticastDiscoverer implements PeerDiscoverer {
             processFoundUser(u);
         }
 
-        sender.announce(socket, netInfo);
+        sender.announce(udpSocket, netInfo);
 
         inboundServer.listen(serverSocket, SS_TIMEOUT_MILLIS, room);
-
-        return usersFound;
     }
 
     private void processFoundUser(User u) throws IOException {

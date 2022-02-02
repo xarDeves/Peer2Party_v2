@@ -8,7 +8,7 @@ public enum Status {
         if (st.equals(AWAY)) return 1;
         if (st.equals(BUSY)) return 2;
 
-        return 3; // UNKNOWN
+        return -1; // UNKNOWN
     }
 
     public static Status toStatus(int st) {
@@ -16,7 +16,7 @@ public enum Status {
         if (st == 1) return AWAY;
         if (st == 2) return BUSY;
 
-        // st == 3
+        // st == -1
         return UNKNOWN;
     }
 }

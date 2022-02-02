@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 // placeholder name, must find something more specific...
 public class NetworkInformation {
     public static final String multicastMessagesAddressv6 = "FF7E:230::1235";
-    public static final String multicastMessagesAddressv4 = "230.0.0.1";
+    public static final String multicastMessagesAddressv4 = "230.0.0.2";
     private final InetAddress multicastMessagesGroup;
 
     public static final String multicastDiscoveryAddressv6 = "FF7E:230::1234";

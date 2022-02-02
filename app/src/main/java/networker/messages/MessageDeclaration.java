@@ -1,17 +1,12 @@
-package networker;
-
-import java.util.LinkedList;
+package networker.messages;
 
 public class MessageDeclaration {
     private final int contentSize;
     private final MessageType contentType;
 
-    private final LinkedList<String> receivers;
-
-    public MessageDeclaration(int contentSize, MessageType contentType, LinkedList<String> receivers) {
+    public MessageDeclaration(int contentSize, MessageType contentType) {
         this.contentSize = contentSize;
         this.contentType = contentType;
-        this.receivers = receivers;
     }
 
     public int getContentSize() {
@@ -20,9 +15,5 @@ public class MessageDeclaration {
 
     public MessageType getContentType() {
         return contentType;
-    }
-
-    public LinkedList<String> getReceivers() {
-        return receivers;
     }
 }
