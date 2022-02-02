@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build.ID
 import android.os.Bundle
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
@@ -19,6 +20,15 @@ class StartupActivity : AppCompatActivity() {
     private fun idIsEligible(): Boolean {
         if (alias.isNotEmpty() || alias.isNotBlank()) return true
         return false
+    }
+
+    private fun initChat() {
+        if (idIsEligible()) {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("ID", ID)
+            startActivity(intent)
+            finish()
+        } else Toast.makeText(this, "Please Enter A Username", Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,15 +47,19 @@ class StartupActivity : AppCompatActivity() {
             if (idIsEligible()) sharedPrefs.edit().putString("ID", alias).apply()
         }
 
-        binding.connect.setOnClickListener {
-            if (idIsEligible()) {
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("ID", ID)
-                startActivity(intent)
-                finish()
-            } else Toast.makeText(this, "Please Enter A Username", Toast.LENGTH_SHORT).show()
+        binding.usernameText.setOnEditorActionListener { _, actionId, _ ->
+            return@setOnEditorActionListener when (actionId) {
+                EditorInfo.IME_ACTION_GO -> {
+                    initChat()
+                    true
+                }
+                else -> false
+            }
         }
 
+        binding.connect.setOnClickListener {
+            initChat()
+        }
     }
 
 }

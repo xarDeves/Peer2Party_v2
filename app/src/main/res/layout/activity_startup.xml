@@ -37,6 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight='1.0'
+                android:imeOptions="actionGo"
                 android:hint="@string/usernameHint"
                 android:inputType="textPersonName" />
         </TableRow>

@@ -13,16 +13,13 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import networker.exceptions.InvalidPortValueException;
-import networker.messages.MessageIntent;
 import networker.messages.MessageDeclaration;
 import networker.messages.MessageType;
 import networker.peers.Status;
 import networker.peers.User;
-import networker.sockets.SocketAdapter;
 
 public class NetworkUtilities {
 
@@ -32,12 +29,10 @@ public class NetworkUtilities {
     public static final String JSON_ADDRESS_PORT = "port";
     public static final String JSON_ADDRESS_USERNAME = "username";
     public static final String JSON_ADDRESS_STATUS = "status";
-    
-    // users should also declare themselves along with the message declaration(s)
-    public static final int MAX_MESSAGE_DECLARATION_BUFFER_SIZE = 8192 + DISCOVERY_BUFFER_SIZE;
 
-    public static final String JSON_USER_DECLARATION = "declr";
-    public static final String JSON_MESSAGE_COUNT = "count";
+    private static final int MESSAGE_DECLARATION_OVERHEAD_SIZE = 100;
+    public static final int MAX_MESSAGE_DECLARATION_BUFFER_SIZE = 8192 + MESSAGE_DECLARATION_OVERHEAD_SIZE;
+
     public static final String JSON_MCONTENT_SIZE = "msize";
     public static final String JSON_MCONTENT_TYPE = "mtype";
     public static final String JSON_RECIPIENT_ARRAY = "recvs";
@@ -69,82 +64,44 @@ public class NetworkUtilities {
     public static User processUserSalutationJson(String salutation) throws JSONException, UnknownHostException, InvalidPortValueException {
         JSONObject jObj = new JSONObject(salutation);
 
-        Status status    = Status.toStatus(jObj.getInt(JSON_ADDRESS_STATUS));
-        String username  = jObj.getString(JSON_ADDRESS_USERNAME);
-        int port         = jObj.getInt(JSON_ADDRESS_PORT);
+        Status status = Status.toStatus(jObj.getInt(JSON_ADDRESS_STATUS));
+        String username = jObj.getString(JSON_ADDRESS_USERNAME);
+        int port = jObj.getInt(JSON_ADDRESS_PORT);
         InetAddress addr = InetAddress.getByName(jObj.getString(JSON_ADDRESS_IP));
 
         return new User(addr, username, port, status);
     }
-    
-    public static String getDeclarationBroadcast(MessageIntent msg) throws JSONException {
-        JSONObject declaration = new JSONObject();
-        /* --------------- PUT USER DECLARATION AND MESSAGE COUNT --------------- */
-        declaration.put(JSON_USER_DECLARATION, getUserSalutationJson(msg.getSource()));
-        declaration.put(JSON_MESSAGE_COUNT, msg.getCount());
 
-        /* --------------- PUT RECEIVER IDs --------------- */
+    public static String getMessageDeclarationJson(MessageDeclaration messageDeclaration) throws JSONException {
+        JSONObject declaration = new JSONObject();
+
+        declaration.put(JSON_MCONTENT_SIZE, messageDeclaration.getContentSize());
+        declaration.put(JSON_MCONTENT_TYPE, MessageType.toInt(messageDeclaration.getContentType()));
         JSONArray array = new JSONArray();
-        for (String id: msg.getReceivers()) {
+
+        for (String id : messageDeclaration.getReceivers()) {
             array.put(id);
         }
+
         declaration.put(JSON_RECIPIENT_ARRAY, array);
 
-        /* --------------- PUT MESSAGE DECLARATIONS --------------- */
-        int count = 0;
-        for (Iterator<MessageDeclaration> it = msg.getMessageDeclarations(); it.hasNext(); ) {
-            MessageDeclaration mdl = it.next();
-            // json of jsons
-            declaration.put(String.valueOf(count), getSingularMessageDeclaration(mdl));
-        }
-        
         return declaration.toString();
     }
 
-    private static JSONObject getSingularMessageDeclaration(MessageDeclaration messageDeclaration) throws JSONException {
-        JSONObject declaration = new JSONObject();
+    public static MessageDeclaration processMessageDeclarationJson(String declaration) throws JSONException {
+        JSONObject jObj = new JSONObject(declaration);
 
-        declaration.put(JSON_MCONTENT_SIZE,  messageDeclaration.getContentSize());
-        declaration.put(JSON_MCONTENT_TYPE,  MessageType.toInt(messageDeclaration.getContentType()));
+        int contentSize = jObj.getInt(JSON_MCONTENT_SIZE);
+        MessageType messageType = MessageType.toDeclarationType(jObj.getInt(JSON_MCONTENT_TYPE));
 
-        return declaration;
-    }
-    
-    public static MessageIntent processMessageDeclaration(String message) throws JSONException, InvalidPortValueException, UnknownHostException {
-        JSONObject jObj = new JSONObject(message);
-        /* --------------- GET USER DECLARATION AND MESSAGE COUNT --------------- */
-        User src = processUserSalutationJson(jObj.getJSONObject(JSON_USER_DECLARATION).toString());
-        int mdlSize = jObj.getInt(JSON_MESSAGE_COUNT);
-
-        /* --------------- GET RECEIVER IDs --------------- */
         JSONArray jArray = jObj.getJSONArray(JSON_RECIPIENT_ARRAY);
+
         LinkedList<String> receiverIDs = new LinkedList<>();
         for (int i = 0; i < jArray.length(); i++) {
             receiverIDs.add(jArray.getString(i));
         }
 
-        /* --------------- GET MESSAGE DECLARATIONS --------------- */
-        MessageIntent msg = new MessageIntent(src, receiverIDs);
-        for (int i = 0; i < mdlSize; ++i) {
-            //get mdl
-            JSONObject jMdl = jObj.getJSONObject(String.valueOf(i));
-            //process each mdl individually, and treat it as a single message declaration
-            msg.addMessageDeclaration(processSingularMessageDeclaration(jMdl));
-        }
-
-        return msg;
-    }
-
-    private static MessageDeclaration processSingularMessageDeclaration(JSONObject jObj) throws JSONException {
-        int contentSize = jObj.getInt(JSON_MCONTENT_SIZE);
-        MessageType messageType = MessageType.toDeclarationType(jObj.getInt(JSON_MCONTENT_TYPE));
-
-        return new MessageDeclaration(contentSize, messageType);
-    }
-
-    //port might be different user to socket, since listening port is different than the one contacting us
-    public static boolean userDataIsConsistentToSocket(SocketAdapter s, User u) {
-        return s.getInetAddress() == u.getLogicalAddress();
+        return new MessageDeclaration(contentSize, messageType, receiverIDs);
     }
 
     //TODO MIGRATE THIS SOMEWHERE ELSE
@@ -152,17 +109,9 @@ public class NetworkUtilities {
 
         // https://stackoverflow.com/a/6238459/10007109
         try {
-            for(Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces(); list.hasMoreElements();)  {
+            for (Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces(); list.hasMoreElements(); ) {
                 NetworkInterface i = list.nextElement();
                 Log.e("networker", "network_interface displayName " + i.getDisplayName());
-                Log.e("networker", "network_interface Name " + i.getName());
-                Log.e("networker", "network_interface InetAddresses ");
-                for (Enumeration<InetAddress> l = i.getInetAddresses(); l.hasMoreElements();) {
-                    InetAddress ia = l.nextElement();
-                    Log.e("networker", "network_interface address toString" + ia.toString());
-                    //Log.e("networker", "network_interface address getHostName " + ia.getHostName()); // this throws an exception if it's run on the main thread
-                    Log.e("networker", "network_interface address getHostAddress " + ia.getHostAddress());
-                }
                 networkInterfaces.add(i);
             }
         } catch (SocketException e) {

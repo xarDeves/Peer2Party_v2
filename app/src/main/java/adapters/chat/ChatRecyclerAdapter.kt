@@ -1,12 +1,12 @@
-package adapters
+package adapters.chat
 
+import adapters.chat.viewholders.ImageSendViewHolder
+import adapters.chat.viewholders.TextSendViewHolder
 import android.content.Context
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.peer2party.R
 import data.DatabaseHolder
@@ -23,45 +23,10 @@ class ChatRecyclerAdapter internal constructor(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var allMessages = emptyList<Message>()
+    private lateinit var viewHolder: RecyclerView.ViewHolder
+    private lateinit var view: View
 
-    abstract class TextViewHolder(
-        view: View,
-        val textView: TextView = view.findViewById(R.id.chatTextSend),
-        val delete: ImageView = view.findViewById(R.id.deleteChatSend),
-        val info: LinearLayout = view.findViewById(R.id.infoChatSend),
-        val date: TextView = view.findViewById(R.id.dateChatSend),
-        var clicked: Boolean = false
-    ) : RecyclerView.ViewHolder(view)
-
-    abstract class ImageViewHolder(
-        view: View,
-        val imageView: ImageView = view.findViewById(R.id.imageViewSend),
-        val delete: ImageView = view.findViewById(R.id.deleteImageSend),
-        val info: LinearLayout = view.findViewById(R.id.infoImageSend),
-        val date: TextView = view.findViewById(R.id.dateImageSend),
-        val size: TextView = view.findViewById(R.id.sizeImageSend)
-    ) : RecyclerView.ViewHolder(view)
-
-    class TextSendViewHolder(
-        view: View
-    ) : TextViewHolder(view)
-
-    class TextReceivedViewHolder(
-        view: View,
-        val alias: TextView = view.findViewById(R.id.userText),
-    ) : TextViewHolder(view)
-
-    class ImageSendViewHolder(
-        view: View,
-    ) : ImageViewHolder(view)
-
-    class ImageReceivedViewHolder(
-        view: View,
-        val alias: TextView = view.findViewById(R.id.userTextImage),
-    ) : ImageViewHolder(view)
-
-    internal fun setMessages(entities: List<Message>) {
-
+    fun setMessages(entities: List<Message>) {
         this.allMessages = entities
         notifyDataSetChanged()
     }
@@ -72,8 +37,18 @@ class ChatRecyclerAdapter internal constructor(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
-        val view = inflater.inflate(viewType, parent, false)
-        return TextSendViewHolder(view)
+        when (viewType) {
+            R.layout.chat_head_send -> {
+                view = inflater.inflate(viewType, parent, false)
+                viewHolder = TextSendViewHolder(view)
+            }
+            R.layout.image_send -> {
+                view = inflater.inflate(viewType, parent, false)
+                viewHolder = ImageSendViewHolder(view)
+            }
+        }
+
+        return viewHolder
     }
 
     //FIXME viewholders retain toggle state after deletion
@@ -85,18 +60,9 @@ class ChatRecyclerAdapter internal constructor(
                 (holder as TextSendViewHolder).textView.text = allMessages[position].payload
                 holder.date.text = allMessages[position].date
 
-                /*if (holder.clicked) {
-                    holder.delete.visibility = View.VISIBLE
-                    holder.info.visibility = View.VISIBLE
-                } else {
-                    holder.delete.visibility = View.GONE
-                    holder.info.visibility = View.GONE
-                }*/
-                //toggleBubbleState(holder)
-
                 holder.delete.setOnClickListener {
-                    holder.clicked = false
                     CoroutineScope(IO).launch { dao.delete(allMessages[position].key!!) }
+                    toggleBubbleState(holder)
                     notifyItemRemoved(position)
                 }
 
@@ -105,23 +71,39 @@ class ChatRecyclerAdapter internal constructor(
                     clip = ClipData.newPlainText("copied", holder.textView.text)
                     clipboard.primaryClip = clip*/
 
-                    holder.clicked = holder.clicked != true
-
                     toggleBubbleState(holder)
                 }
 
             }
+
+            R.layout.image_send -> {
+                (holder as ImageSendViewHolder)
+                holder.imageView.setImageURI(Uri.parse(allMessages[position].payload!!))
+
+                /*if (file.absoluteFile.exists()) {
+                    holder.imageView.setImageURI(Uri.parse(path))
+                } else {
+                    holder.imageView.setImageResource(
+                        R.drawable.not_found
+                    )
+                }*/
+
+                //holder.date.text = allMessages[position].date
+                //holder.size.text = allMessages[position].size
+            }
+
         }
     }
 
     private fun toggleBubbleState(holder: TextSendViewHolder) {
-        if (holder.clicked) {
+        /*if (holder.clicked) {
             holder.delete.visibility = View.GONE
             holder.info.visibility = View.GONE
         } else {
             holder.delete.visibility = View.VISIBLE
             holder.info.visibility = View.VISIBLE
         }
+        holder.clicked = holder.clicked == false*/
     }
 
     override fun getItemCount(): Int {

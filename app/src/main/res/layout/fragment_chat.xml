@@ -114,6 +114,33 @@
 
         </TableRow>
     </TableLayout>-->
+    <LinearLayout
+        android:id="@+id/operationsLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/chatRecycler"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/selectFile"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/attachment_sprite"
+            android:rotation="45" />
+
+        <Button
+            android:id="@+id/openCamera"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/camera_sprite" />
+
+        <Button
+            android:id="@+id/recVoice"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/mic_sprite" />
+    </LinearLayout>
 
     <TableLayout
         android:id="@+id/tableLayout"
@@ -124,44 +151,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chatRecycler">
 
+
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <Button
-                android:id="@+id/selectFile"
+                android:id="@+id/selectOperation"
 
                 android:layout_width="60dp"
                 android:layout_height="50dp"
                 android:background="@drawable/more_sprite"
                 android:tint="?colorPrimary" />
 
-            <!--
-            <Button
-                android:id="@+id/selectFile"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="@drawable/attachment_sprite"
-                android:rotation="45" />
-
-            <Button
-                android:id="@+id/openCapture"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="@drawable/camera_sprite" />
-
-            <Button
-                android:id="@+id/recVoice"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="@drawable/mic_sprite" />
-                -->
-
             <EditText
                 android:id="@+id/textInput"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:imeOptions="actionSend"
                 android:inputType="text" />
 
             <Button
