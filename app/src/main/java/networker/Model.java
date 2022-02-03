@@ -50,6 +50,7 @@ public class Model {
         viewModel.insertEntity(new Message(MessageType.TEXT_RECEIVE,
                 "text to receive(?)",
                 DateTimeHelper.fetchDateTime(),
+                null,
                 "alias")
         );
     }

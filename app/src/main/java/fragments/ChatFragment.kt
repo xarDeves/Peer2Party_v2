@@ -2,10 +2,13 @@ package fragments
 
 import adapters.chat.ChatRecyclerAdapter
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Intent
+import android.content.res.AssetFileDescriptor
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.provider.MediaStore
+import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,9 +33,8 @@ class ChatFragment : Fragment() {
     private lateinit var binding: FragmentChatBinding
 
     private lateinit var fileSelectorLauncher: ActivityResultLauncher<Intent>
-    //private lateinit var cameraLuncher: ActivityResultLauncher<Intent>
-    //private lateinit var voiceRecLauncher: ActivityResultLauncher<Intent>
-
+    private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
+    private var cameraImageUri: Uri = Uri.EMPTY
 
     private fun setupRecycler() {
         layoutManager = LinearLayoutManager(requireActivity())
@@ -78,15 +80,59 @@ class ChatFragment : Fragment() {
         }
 
         binding.selectFile.setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "*/*"
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).also {
+                it.addCategory(Intent.CATEGORY_OPENABLE)
+                it.type = "*/*"
+                //it.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                it.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                it.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                it.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            }
             fileSelectorLauncher.launch(intent)
-            //fileSelectorLauncher.launch("*/*")
+            binding.operationsLayout.visibility = View.GONE
         }
 
         binding.openCamera.setOnClickListener {
 
+            cameraImageUri = requireContext().contentResolver.insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                ContentValues()
+            )!!
+
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
+            cameraLauncher.launch(intent)
+            binding.operationsLayout.visibility = View.GONE
         }
+    }
+
+    private fun setupActivityLaunchers() {
+        fileSelectorLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+
+                    val data: Intent? = result.data
+                    val parsedUri = Uri.parse(data!!.dataString)
+
+                    val contentResolver = requireContext().contentResolver
+                    contentResolver.takePersistableUriPermission(
+                        parsedUri!!,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                    val type = contentResolver.getType(parsedUri)
+
+                    if ("image" in type!!)
+                        sendImage(parsedUri)
+                }
+            }
+
+        //TODO save images ? (fetch state from settings activity)
+        cameraLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    sendImage(cameraImageUri)
+                }
+            }
     }
 
     private fun sendText() {
@@ -96,16 +142,26 @@ class ChatFragment : Fragment() {
             viewModel.insertEntity(
                 Message(MessageType.TEXT_SEND, textToSend, fetchDateTime())
             )
-            requireActivity().runOnUiThread {
-                binding.textInput.setText("")
-            }
+            binding.textInput.setText("")
         }
     }
 
     private fun sendImage(uri: Uri) {
+
+        val fd: AssetFileDescriptor =
+            requireContext().contentResolver.openAssetFileDescriptor(uri, "r")!!
+
+        val size = Formatter.formatFileSize(requireContext(), fd.length)
+
         viewModel.insertEntity(
-            Message(MessageType.IMAGE_SEND, uri.toString(), fetchDateTime())
+            Message(
+                MessageType.IMAGE_SEND,
+                uri.toString(),
+                fetchDateTime(),
+                size.toString()
+            )
         )
+
     }
 
     override fun onCreateView(
@@ -114,43 +170,14 @@ class ChatFragment : Fragment() {
     ): View {
         binding = FragmentChatBinding.inflate(inflater, container, false)
 
-        //working file browser with responsive ui, change fileSelectorLauncher to <String>
-        /*fileSelectorLauncher =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-
-                val cR = requireContext().contentResolver
-                val type = cR.getType(uri!!)
-
-                if ("image" in type!!)
-                    sendImage(uri)
-
-                binding.operationsLayout.visibility = View.GONE
-            }*/
-        fileSelectorLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val data: Intent? = result.data
-                    Log.d("fuck", "$data")
-
-                    /*val cR = requireContext().contentResolver
-                    val type = cR.getType(Uri(data))
-
-                    if ("image" in type!!)
-                        sendImage(data)
-
-                    binding.operationsLayout.visibility = View.GONE*/
-                }
-            }
-
+        setupActivityLaunchers()
         return binding.root
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecycler()
         attachListeners()
-
     }
 }
