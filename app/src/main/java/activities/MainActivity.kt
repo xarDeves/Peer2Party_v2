@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         supportActionBar!!.hide()
 
+
         val viewPager: ViewPager2 = findViewById(R.id.viewpager)
         val adapter = MainViewPagerAdapter(viewModel.fragments, this)
         viewPager.adapter = adapter
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             ID = intent.extras!!.getString("ID")!!
             bundle.putString("ID", ID)
+            viewModel.setUsername(ID)
         }
     }
 

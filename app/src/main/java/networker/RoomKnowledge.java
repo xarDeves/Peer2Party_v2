@@ -18,6 +18,11 @@ public class RoomKnowledge {
 
     public void addPeer(Peer p) {
         map.put(p.getUser().getIDENTIFIER(), p);
+        //call livedata post()
+    }
+
+    public void removePeer(Peer p) {
+        map.remove(p.getUser().getIDENTIFIER());
     }
 
     public boolean hasPeer(Peer p) {
@@ -26,10 +31,6 @@ public class RoomKnowledge {
 
     public boolean hasPeer(User u) {
         return map.containsKey(u.getIDENTIFIER());
-    }
-
-    public void removePeer(Peer p) {
-        map.remove(p.getUser().getIDENTIFIER());
     }
 
     public Peer getPeer(String k) {

@@ -155,12 +155,22 @@ public class NetworkUtilities {
     }
 
     //TODO MIGRATE THIS SOMEWHERE ELSE
-    public static void getViableNetworkInterfaces(LinkedList<NetworkInterface> networkInterfaces) {
+    public static void getViableNetworkInterfaces(NetworkType netType) {
+
+        LinkedList<NetworkInterface> networkInterfaces = new LinkedList<>();
 
         // https://stackoverflow.com/a/6238459/10007109
         try {
             for (Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces(); list.hasMoreElements(); ) {
                 NetworkInterface i = list.nextElement();
+
+                /*String[] hexadecimal = new String[i.getHardwareAddress().length];
+                for (int j = 0; j < i.getHardwareAddress().length; j++) {
+                    hexadecimal[j] = String.format("%02X", i.getHardwareAddress()[j]);
+                }
+                String macAddress = String.join("-", hexadecimal);
+                Log.e("networker", "network_interface mac" + macAddress);*/
+
                 Log.e("networker", "network_interface displayName " + i.getDisplayName());
                 Log.e("networker", "network_interface Name " + i.getName());
                 Log.e("networker", "network_interface InetAddresses ");

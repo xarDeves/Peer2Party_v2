@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import data.Message;
 import data.MessageType;
 import helpers.DateTimeHelper;
+import networker.helpers.NetworkType;
 import networker.helpers.NetworkUtilities;
 import viewmodels.MainViewModel;
 
@@ -57,7 +58,7 @@ public class Model {
 
     public void refreshViableNetworkInterfaces() {
         networkInterfaces.clear();
-        NetworkUtilities.getViableNetworkInterfaces(networkInterfaces);
+        NetworkUtilities.getViableNetworkInterfaces(NetworkType.WIFI);
     }
 
 }

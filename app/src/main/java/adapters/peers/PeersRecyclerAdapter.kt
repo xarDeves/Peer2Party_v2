@@ -29,6 +29,10 @@ class PeersRecyclerAdapter internal constructor(
         val currentPeer = peers[position]
         (holder as PeerViewHolder).checkBox.isChecked = currentPeer.isEnabled
         holder.peerName.text = currentPeer.user.username
+
+        holder.checkBox.setOnClickListener {
+            currentPeer.isEnabled = true
+        }
     }
 
     override fun getItemCount(): Int {
