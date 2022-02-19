@@ -1,14 +1,22 @@
 package activities
 
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Build.ID
 import android.os.Bundle
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.lifecycleScope
 import com.example.peer2party.databinding.ActivityStartupBinding
+import kotlinx.coroutines.launch
 
 
 class StartupActivity : AppCompatActivity() {
@@ -17,7 +25,7 @@ class StartupActivity : AppCompatActivity() {
     private lateinit var sharedPrefs: SharedPreferences
     private var alias: String = ""
 
-    /*private val networkCallback = getNetworkCallBack()
+    private val networkCallback = getNetworkCallBack()
     private val networkRequest = getNetworkRequest()
 
     private fun getConnectivityManager() =
@@ -62,7 +70,7 @@ class StartupActivity : AppCompatActivity() {
                 }
             }
         }
-    }*/
+    }
 
     private fun idIsEligible(): Boolean {
         if (alias.isNotEmpty() || alias.isNotBlank()) return true
