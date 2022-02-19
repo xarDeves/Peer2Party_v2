@@ -22,7 +22,6 @@ import networker.discovery.receivers.MulticastGroupReceiver
 import networker.discovery.receivers.MulticastGroupSender
 import networker.discovery.servers.InboundConnectionServer
 import networker.helpers.NetworkInformation
-import networker.helpers.NetworkType
 import networker.helpers.NetworkUtilities
 import networker.peers.Peer
 import networker.peers.Status
@@ -32,7 +31,6 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.MulticastSocket
 import java.net.NetworkInterface
-import java.util.*
 import kotlin.collections.ArrayList
 
 //TODO implement livedata or peers -> (RoomKnowledge)
@@ -73,8 +71,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val lock = wifi.createMulticastLock("myLock")
             lock.acquire()
 
-            //FIXME get network interface address
-            netIface = NetworkUtilities.getViableNetworkInterfaces(NetworkType.WIFI)[0]
+            val netIfaces = NetworkUtilities.getViableNetworkInterfaces()
+            //TODO THIS GETS THE NETWORK IFACES. PLEASE, FOR THE LOVE OF GOD, GET THE INTERFACE REQUIRED, SOMEHOW, FROM THE USER
             networkInetAddress = netIface.inetAddresses.nextElement()
             val serverPort = 7788
 

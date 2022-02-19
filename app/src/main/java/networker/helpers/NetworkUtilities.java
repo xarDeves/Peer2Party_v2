@@ -13,6 +13,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -154,9 +155,9 @@ public class NetworkUtilities {
         return s.getInetAddress() == u.getLogicalAddress();
     }
 
-    public static LinkedList<NetworkInterface> getViableNetworkInterfaces(NetworkType netType) {
+    public static HashMap<String, NetworkInterface> getViableNetworkInterfaces() {
 
-        LinkedList<NetworkInterface> networkInterfaces = new LinkedList<>();
+        HashMap<String, NetworkInterface> networkInterfaces = new HashMap<>();
 
         // https://stackoverflow.com/a/6238459/10007109
         try {
@@ -168,20 +169,20 @@ public class NetworkUtilities {
                 Log.e("networker", "network_interface displayName " + i.getDisplayName());
                 Log.e("networker", "network_interface Name " + i.getName());
                 Log.e("networker", "network_interface InetAddresses ");
-                Enumeration<InetAddress> l = i.getInetAddresses();
+                Enumeration<InetAddress> il = i.getInetAddresses();
 
                 int j = 0;
-                while(l.hasMoreElements()) {
-                    InetAddress ia = l.nextElement();
+                while(il.hasMoreElements()) {
+                    InetAddress ia = il.nextElement();
                     Log.e("networker", "network_interface address toString" + ia.toString());
                     Log.e("networker", "network_interface address getHostAddress " + ia.getHostAddress());
                     ++j;
                 }
 
                 // no inet addresses specified, or only one of ipv4/ipv6 is enabled. regardless, a normal interface should support both
-                if (j == 1) continue;
+                if (j == 3) continue;
 
-                networkInterfaces.add(i);
+                networkInterfaces.put(i.getDisplayName(), i);
             }
         } catch (SocketException e) {
             Log.d("networker", "NetworkInterface.getNetworkInterfaces()", e);
