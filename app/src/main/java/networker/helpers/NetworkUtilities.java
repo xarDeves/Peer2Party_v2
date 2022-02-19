@@ -180,7 +180,7 @@ public class NetworkUtilities {
                 }
 
                 // no inet addresses specified, or only one of ipv4/ipv6 is enabled. regardless, a normal interface should support both
-                if (j == 3) continue;
+                if (j <= 3) continue;
 
                 networkInterfaces.put(i.getDisplayName(), i);
             }
