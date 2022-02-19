@@ -3,6 +3,7 @@ package viewmodels
 import android.app.Application
 import android.content.Context.WIFI_SERVICE
 import android.net.wifi.WifiManager
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -21,20 +22,26 @@ import networker.discovery.receivers.MulticastGroupReceiver
 import networker.discovery.receivers.MulticastGroupSender
 import networker.discovery.servers.InboundConnectionServer
 import networker.helpers.NetworkInformation
+import networker.helpers.NetworkType
+import networker.helpers.NetworkUtilities
 import networker.peers.Peer
+import networker.peers.Status
 import networker.peers.User
 import networker.sockets.ServerSocketAdapter
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.MulticastSocket
 import java.net.NetworkInterface
+import java.util.*
+import kotlin.collections.ArrayList
 
 //TODO implement livedata or peers -> (RoomKnowledge)
 //TODO determine hotspot active https://stackoverflow.com/questions/12401108/how-to-check-programmatically-if-hotspot-is-enabled-or-disabled
 //TODO get hotspot ip if active https://stackoverflow.com/questions/9573196/how-to-get-the-ip-of-the-wifi-hotspot-in-androidhttps://stackoverflow.com/questions/9573196/how-to-get-the-ip-of-the-wifi-hotspot-in-android
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    private lateinit var localInet: InetAddress
+    private lateinit var netIface: NetworkInterface
+    private lateinit var networkInetAddress: InetAddress
     private lateinit var username: String
 
     val fragments: Array<Fragment> = arrayOf(ChatFragment(), PeerListFragment())
@@ -67,24 +74,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             lock.acquire()
 
             //FIXME get network interface address
-            localInet = InetAddress.getLocalHost()
+            netIface = NetworkUtilities.getViableNetworkInterfaces(NetworkType.WIFI)[0]
+            networkInetAddress = netIface.inetAddresses.nextElement()
             val serverPort = 7788
 
-            //Log.d("fuck", "${InetAddress.getLocalHost()}")
-            //Log.d("fuck", getInetAddress())
+            Log.d("fuck", netIface.displayName)
+            Log.d("fuck", networkInetAddress.toString())
+
+            val ourself = User(networkInetAddress, username, serverPort, Status.AVAILABLE)
 
             //for peer discovery
-            val networkInformation = NetworkInformation("k")
-            val inetSocketAddress = InetSocketAddress(localInet, 7778)
+            val networkInformation = NetworkInformation(netIface.toString(), ourself)
+            val inetSocketAddress = InetSocketAddress(networkInetAddress, 7778)
             val multicastSocket = MulticastSocket(inetSocketAddress)
             //FIXME specify network interface
             multicastSocket.joinGroup(networkInformation.multicastDiscoverGroup)
 
-            val thisUser = User(localInet, username, serverPort)
             roomWrapper = RoomWrapper()
-            val serverSocketAdapter = ServerSocketAdapter(localInet, serverPort, 50)
+            val serverSocketAdapter = ServerSocketAdapter(networkInetAddress, serverPort, 50)
             val inboundConnectionServer = InboundConnectionServer()
-            val multicastGroupSender = MulticastGroupSender(thisUser)
+            val multicastGroupSender = MulticastGroupSender(ourself)
             val multicastGroupReceiver = MulticastGroupReceiver()
 
             val discoverer = Discoverer(

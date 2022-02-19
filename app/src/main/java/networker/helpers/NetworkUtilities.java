@@ -154,8 +154,7 @@ public class NetworkUtilities {
         return s.getInetAddress() == u.getLogicalAddress();
     }
 
-    //TODO MIGRATE THIS SOMEWHERE ELSE
-    public static void getViableNetworkInterfaces(NetworkType netType) {
+    public static LinkedList<NetworkInterface> getViableNetworkInterfaces(NetworkType netType) {
 
         LinkedList<NetworkInterface> networkInterfaces = new LinkedList<>();
 
@@ -163,13 +162,8 @@ public class NetworkUtilities {
         try {
             for (Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces(); list.hasMoreElements(); ) {
                 NetworkInterface i = list.nextElement();
-
-                /*String[] hexadecimal = new String[i.getHardwareAddress().length];
-                for (int j = 0; j < i.getHardwareAddress().length; j++) {
-                    hexadecimal[j] = String.format("%02X", i.getHardwareAddress()[j]);
-                }
-                String macAddress = String.join("-", hexadecimal);
-                Log.e("networker", "network_interface mac" + macAddress);*/
+                if (i.isLoopback()) continue;
+                if (i.getDisplayName().contains("rmnet")) continue;
 
                 Log.e("networker", "network_interface displayName " + i.getDisplayName());
                 Log.e("networker", "network_interface Name " + i.getName());
@@ -177,7 +171,6 @@ public class NetworkUtilities {
                 for (Enumeration<InetAddress> l = i.getInetAddresses(); l.hasMoreElements(); ) {
                     InetAddress ia = l.nextElement();
                     Log.e("networker", "network_interface address toString" + ia.toString());
-                    //Log.e("networker", "network_interface address getHostName " + ia.getHostName()); // this throws an exception if it's run on the main thread
                     Log.e("networker", "network_interface address getHostAddress " + ia.getHostAddress());
                 }
                 networkInterfaces.add(i);
@@ -185,6 +178,8 @@ public class NetworkUtilities {
         } catch (SocketException e) {
             Log.d("networker", "NetworkInterface.getNetworkInterfaces()", e);
         }
+
+        return networkInterfaces;
 
     }
 

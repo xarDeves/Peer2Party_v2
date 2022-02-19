@@ -5,6 +5,8 @@ import android.util.Log;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import networker.peers.User;
+
 // placeholder name, must find something more specific...
 public class NetworkInformation {
     public static final String multicastMessagesAddressv6 = "FF7E:230::1235";
@@ -15,9 +17,12 @@ public class NetworkInformation {
     public static final String multicastDiscoveryAddressv4 = "230.0.0.1";
     private final InetAddress multicastDiscoverGroup;
 
+    private final User ourselves;
+
     private final String friendlyName;
 
-    public NetworkInformation(String friendlyName) throws UnknownHostException {
+    public NetworkInformation(String friendlyName, User ourselves) throws UnknownHostException {
+        this.ourselves = ourselves;
         InetAddress multicastMessagesGroupTemp;
         InetAddress multicastDiscoverGroupTemp;
         try {
@@ -51,5 +56,9 @@ public class NetworkInformation {
 
     public String getFriendlyName() {
         return friendlyName;
+    }
+
+    public User getOurselves() {
+        return ourselves;
     }
 }

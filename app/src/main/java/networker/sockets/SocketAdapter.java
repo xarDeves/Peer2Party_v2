@@ -16,10 +16,6 @@ public class SocketAdapter {
         socket = s;
     }
 
-    public SocketAdapter() {
-
-    }
-
     public SocketAdapter(InetAddress address, int port) throws IOException {
         socket = StaticSocketFactory.createSocket(address, port);
     }

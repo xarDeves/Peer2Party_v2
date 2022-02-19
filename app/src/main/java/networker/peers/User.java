@@ -7,6 +7,7 @@ import org.json.JSONException;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Objects;
 import java.util.concurrent.Semaphore;
 
 import networker.exceptions.InvalidPortValueException;
@@ -144,6 +145,9 @@ public class User {
 
     public InetAddress getLogicalAddress() {
         return address;
+    }    public boolean trueEquals(User u) {
+        //noinspection ConstantConditions
+        return Objects.equals(uniqueIndentifier, u.uniqueIndentifier);
     }
 
     private void instantiateID() {
@@ -177,7 +181,14 @@ public class User {
         User user = (User) o;
 
         // the unique identifier comparison is not needed right now, but is here later on for completeness sake
-        return getIDENTIFIER().equals(user.getIDENTIFIER()) && getAddress().equals(user.getAddress());
+        return getAddress().equals(user.getAddress());
+    }
+
+    public boolean hardEquals(User u) {
+        if (this == u) return true;
+        if (u == null || getClass() != u.getClass()) return false;
+
+        return getIDENTIFIER().equals(u.getIDENTIFIER()) && getAddress().equals(u.getAddress());
     }
 
 }

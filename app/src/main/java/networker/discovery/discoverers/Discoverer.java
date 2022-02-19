@@ -95,6 +95,9 @@ public class Discoverer implements PeerDiscoverer {
     }
 
     private void processFoundUser(User u) throws IOException {
+        // corner case: ourself
+        if (netInfo.getOurselves().equals(u)) return;
+
         // if this is a completely new peer...
         if (!room.hasPeer(u)) {
             processNewPeer(u);
