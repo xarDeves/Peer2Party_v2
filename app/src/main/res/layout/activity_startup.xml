@@ -51,9 +51,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="65dp"
                 android:layout_weight='1.0'
-                android:enabled="false"
                 android:text="@string/connect" />
         </TableRow>
+                <!--android:enabled="false"-->
 
         <TableRow
             android:layout_width="match_parent"

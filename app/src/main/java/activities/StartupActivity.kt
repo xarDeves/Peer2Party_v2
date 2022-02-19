@@ -1,22 +1,14 @@
 package activities
 
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
 import android.os.Build.ID
 import android.os.Bundle
-import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.lifecycleScope
 import com.example.peer2party.databinding.ActivityStartupBinding
-import kotlinx.coroutines.launch
 
 
 class StartupActivity : AppCompatActivity() {
@@ -25,9 +17,52 @@ class StartupActivity : AppCompatActivity() {
     private lateinit var sharedPrefs: SharedPreferences
     private var alias: String = ""
 
-    private val networkCallback = getNetworkCallBack()
+    /*private val networkCallback = getNetworkCallBack()
     private val networkRequest = getNetworkRequest()
 
+    private fun getConnectivityManager() =
+        this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    private fun getNetworkRequest(): NetworkRequest {
+        return NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .build()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        getConnectivityManager().registerNetworkCallback(networkRequest, networkCallback)
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        getConnectivityManager().unregisterNetworkCallback(networkCallback)
+    }
+
+    //FIXME does not work for hotspot ?
+    private fun getNetworkCallBack(): ConnectivityManager.NetworkCallback {
+        return object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                super.onAvailable(network)
+
+                lifecycleScope.launch {
+                    binding.connect.isEnabled = true
+                    binding.noWifiTextView.visibility = View.INVISIBLE
+                }
+            }
+
+            override fun onLost(network: Network) {
+                super.onLost(network)
+
+                lifecycleScope.launch {
+                    binding.connect.isEnabled = false
+                    binding.noWifiTextView.visibility = View.VISIBLE
+                }
+            }
+        }
+    }*/
 
     private fun idIsEligible(): Boolean {
         if (alias.isNotEmpty() || alias.isNotBlank()) return true
@@ -62,50 +97,6 @@ class StartupActivity : AppCompatActivity() {
         binding.connect.setOnClickListener {
             initChat()
 
-        }
-    }
-
-    private fun getConnectivityManager() =
-        this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    private fun getNetworkRequest(): NetworkRequest {
-        return NetworkRequest.Builder()
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .build()
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        getConnectivityManager().registerNetworkCallback(networkRequest, networkCallback)
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        getConnectivityManager().unregisterNetworkCallback(networkCallback)
-    }
-
-    //TODO does it work for hotspot as well ?
-    private fun getNetworkCallBack(): ConnectivityManager.NetworkCallback {
-        return object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                super.onAvailable(network)
-
-                lifecycleScope.launch {
-                    binding.connect.isEnabled = true
-                    binding.noWifiTextView.visibility = View.INVISIBLE
-                }
-            }
-
-            override fun onLost(network: Network) {
-                super.onLost(network)
-
-                lifecycleScope.launch {
-                    binding.connect.isEnabled = false
-                    binding.noWifiTextView.visibility = View.VISIBLE
-                }
-            }
         }
     }
 

@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         supportActionBar!!.hide()
 
-
         val viewPager: ViewPager2 = findViewById(R.id.viewpager)
         val adapter = MainViewPagerAdapter(viewModel.fragments, this)
         viewPager.adapter = adapter

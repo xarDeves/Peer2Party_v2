@@ -4,7 +4,7 @@
     <!--startup activity-->
     <string name="usernameHint">Enter Username:</string>
     <string name="connect">Connect</string>
-    <string name="noWifiAlert">No wifi connection detected. Connect to a network to Proceed</string>
+    <string name="noWifiAlert">No wifi connection detected. Connect to a network to proceed</string>
 
     <!--main activity-->
 

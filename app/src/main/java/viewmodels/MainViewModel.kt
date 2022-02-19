@@ -31,7 +31,6 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.MulticastSocket
 import java.net.NetworkInterface
-import kotlin.collections.ArrayList
 
 //TODO implement livedata or peers -> (RoomKnowledge)
 //TODO determine hotspot active https://stackoverflow.com/questions/12401108/how-to-check-programmatically-if-hotspot-is-enabled-or-disabled
@@ -73,6 +72,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             val netIfaces = NetworkUtilities.getViableNetworkInterfaces()
             //TODO THIS GETS THE NETWORK IFACES. PLEASE, FOR THE LOVE OF GOD, GET THE INTERFACE REQUIRED, SOMEHOW, FROM THE USER
+            netIface = netIfaces["wlan0"]!!
             networkInetAddress = netIface.inetAddresses.nextElement()
             val serverPort = 7788
 
