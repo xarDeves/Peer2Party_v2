@@ -168,14 +168,18 @@ public class NetworkUtilities {
                 Log.e("networker", "network_interface displayName " + i.getDisplayName());
                 Log.e("networker", "network_interface Name " + i.getName());
                 Log.e("networker", "network_interface InetAddresses ");
-                InetAddress ia = null;
-                for (Enumeration<InetAddress> l = i.getInetAddresses(); l.hasMoreElements(); ) {
-                    ia = l.nextElement();
+                Enumeration<InetAddress> l = i.getInetAddresses();
+
+                int j = 0;
+                while(l.hasMoreElements()) {
+                    InetAddress ia = l.nextElement();
                     Log.e("networker", "network_interface address toString" + ia.toString());
                     Log.e("networker", "network_interface address getHostAddress " + ia.getHostAddress());
+                    ++j;
                 }
-                // no inet addresses specified
-                if (ia == null) continue;
+
+                // no inet addresses specified, or only one of ipv4/ipv6 is enabled. regardless, a normal interface should support both
+                if (j == 1) continue;
 
                 networkInterfaces.add(i);
             }

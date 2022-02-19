@@ -2,26 +2,18 @@ package networker;
 
 import android.util.Log;
 
-import java.net.NetworkInterface;
-import java.util.LinkedList;
-
 import data.Message;
 import data.MessageType;
 import helpers.DateTimeHelper;
-import networker.helpers.NetworkType;
-import networker.helpers.NetworkUtilities;
 import viewmodels.MainViewModel;
 
 public class Model {
 
     private final MainViewModel viewModel;
-    private final LinkedList<NetworkInterface> networkInterfaces = new LinkedList<>();
 
     public Model(MainViewModel viewModel) {
         this.viewModel = viewModel;
         attachSendObserver();
-
-        refreshViableNetworkInterfaces();
     }
 
     private void attachSendObserver() {
@@ -54,11 +46,6 @@ public class Model {
                 null,
                 "alias")
         );
-    }
-
-    public void refreshViableNetworkInterfaces() {
-        networkInterfaces.clear();
-        NetworkUtilities.getViableNetworkInterfaces(NetworkType.WIFI);
     }
 
 }
