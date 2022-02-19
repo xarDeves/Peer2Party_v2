@@ -3,18 +3,18 @@ package networker.messages;
 public enum MessageType {
     TEXT, IMAGE, GIF, VIDEO, AUDIO, MULTIMEDIA, INVALID;
 
-    public static int toInt(MessageType mdt) {
-        if (mdt.equals(TEXT))       return 0;
-        if (mdt.equals(IMAGE))      return 1;
-        if (mdt.equals(GIF))        return 2;
-        if (mdt.equals(VIDEO))      return 3;
-        if (mdt.equals(AUDIO))      return 4;
-        if (mdt.equals(MULTIMEDIA)) return 5;
+    public int toInt() {
+        if (this.equals(TEXT))       return 0;
+        if (this.equals(IMAGE))      return 1;
+        if (this.equals(GIF))        return 2;
+        if (this.equals(VIDEO))      return 3;
+        if (this.equals(AUDIO))      return 4;
+        if (this.equals(MULTIMEDIA)) return 5;
 
         return -1; // wtf?
     }
 
-    public static MessageType toDeclarationType(int mdl) {
+    public static MessageType intToMessageType(int mdl) {
         if (mdl == 0) return TEXT;
         if (mdl == 1) return IMAGE;
         if (mdl == 2) return GIF;
@@ -24,5 +24,9 @@ public enum MessageType {
 
         // mdl == -1
         return INVALID;
+    }
+
+    public boolean isFile() {
+        return this.equals(IMAGE) || this.equals(GIF) || this.equals(VIDEO) || this.equals(AUDIO) || this.equals(MULTIMEDIA);
     }
 }

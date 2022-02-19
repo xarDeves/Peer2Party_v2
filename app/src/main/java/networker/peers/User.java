@@ -7,13 +7,15 @@ import org.json.JSONException;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Objects;
+import java.util.concurrent.Semaphore;
 
 import networker.exceptions.InvalidPortValueException;
 import networker.helpers.NetworkUtilities;
 import networker.sockets.SocketAdapter;
 
 public class User {
+    private static final int TOTAL_LOCKS = 2;
+
     // holds essential data for each user in the group (IPV6 only)
     /* -------------------------- NETWORK STUFF -------------------------------- */
     private String IDENTIFIER;
@@ -22,12 +24,14 @@ public class User {
     private int port; // this is the SSL receive/send port of the user, and CAN change
     private SocketAdapter currentUserSocket = null;
 
+    private final Semaphore ioLock = new Semaphore(TOTAL_LOCKS);
+
     /* ------------------------- AUTHENTICATION STUFF ------------------------- */
     // this is unused, and will remain so, until decentralized auth is added
-    private final String uniqueIndentifier = null;
+    private final String uniqueIndentifier = "";
 
     /* ------------------------- MISCELLANEOUS STUFF ------------------------- */
-    private String username;
+    private final String username;
     private Status status = Status.UNKNOWN;
 
     public User(InetAddress adr, String name, int p) throws InvalidPortValueException {
@@ -65,9 +69,21 @@ public class User {
         return false;
     }
 
-    public SocketAdapter createUserSocket() throws IOException, InvalidPortValueException {
+    public boolean isActive() {
+        return ioLock.availablePermits() < TOTAL_LOCKS;
+    }
+
+    public void lock() throws InterruptedException {
+        ioLock.acquire();
+    }
+
+    public void unlock() {
+        ioLock.release();
+    }
+
+    public void createUserSocket() throws IOException, InvalidPortValueException {
         if (!isUsable()) throw new InvalidPortValueException();
-        shutdownUser();
+        shutdown();
 
         currentUserSocket = new SocketAdapter(address, port);
 
@@ -77,12 +93,23 @@ public class User {
             Log.d("networker.peers.User", "sendSalutation() ", e);
         }
 
-        return currentUserSocket;
     }
 
-    public void shutdownUser() throws IOException {
-        if (currentUserSocket != null) {
-            if (!currentUserSocket.isClosed()) currentUserSocket.close();
+    private void shutdown() throws IOException {
+        while (true) {
+            try {
+                ioLock.acquire();
+                if (currentUserSocket != null) {
+                    if (!currentUserSocket.isClosed()) currentUserSocket.close();
+                }
+                ioLock.release();
+                // if everything goes well, we'll be out of here in no time
+                //  if something goes bad... well, we might be stuck here a few times
+                break;
+
+            } catch (InterruptedException e) {
+                Log.d("networker.peers.User", "interrupted", e);
+            }
         }
     }
 
@@ -91,16 +118,12 @@ public class User {
     }
 
     public void replaceSocket(SocketAdapter newSocket) throws IOException {
-        shutdownUser();
+        shutdown();
         currentUserSocket = newSocket;
     }
 
     public String getUsername() {
         return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public Status getStatus() {
@@ -131,14 +154,12 @@ public class User {
         return IDENTIFIER;
     }
 
-    //this returns true if port changed
-    public boolean updateSelf(User u) {
+    public boolean updateNetworkData(User u) {
         if (!NetworkUtilities.portIsValid(u.getPort())) return false; //change nothing, invalid port
 
         boolean changed = u.getPort() != port;
 
         port = u.getPort();
-        status = u.getStatus();
 
         return changed;
     }
@@ -156,12 +177,7 @@ public class User {
         User user = (User) o;
 
         // the unique identifier comparison is not needed right now, but is here later on for completeness sake
-        return getPort() == user.getPort() && getIDENTIFIER().equals(user.getIDENTIFIER()) && getAddress().equals(user.getAddress()) &&
-                Objects.equals(uniqueIndentifier, user.uniqueIndentifier) && getUsername().equals(user.getUsername()) && getStatus() == user.getStatus();
+        return getIDENTIFIER().equals(user.getIDENTIFIER()) && getAddress().equals(user.getAddress());
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getIDENTIFIER(), getAddress(), getPort(), uniqueIndentifier, getUsername(), getStatus());
-    }
 }

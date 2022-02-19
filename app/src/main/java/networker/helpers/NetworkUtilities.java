@@ -38,6 +38,7 @@ public class NetworkUtilities {
 
     public static final String JSON_USER_DECLARATION = "declr";
     public static final String JSON_MESSAGE_COUNT = "count";
+    public static final String JSON_MTITLE_SIZE = "mtsize";
     public static final String JSON_MCONTENT_SIZE = "msize";
     public static final String JSON_MCONTENT_TYPE = "mtype";
     public static final String JSON_RECIPIENT_ARRAY = "recvs";
@@ -105,7 +106,10 @@ public class NetworkUtilities {
         JSONObject declaration = new JSONObject();
 
         declaration.put(JSON_MCONTENT_SIZE, messageDeclaration.getContentSize());
-        declaration.put(JSON_MCONTENT_TYPE, MessageType.toInt(messageDeclaration.getContentType()));
+        declaration.put(JSON_MCONTENT_TYPE, messageDeclaration.getContentType().toInt());
+
+        if (messageDeclaration.getContentType().isFile())
+            declaration.put(JSON_MTITLE_SIZE, messageDeclaration.getHeaderSize());
 
         return declaration;
     }
@@ -137,7 +141,10 @@ public class NetworkUtilities {
 
     private static MessageDeclaration processSingularMessageDeclaration(JSONObject jObj) throws JSONException {
         int contentSize = jObj.getInt(JSON_MCONTENT_SIZE);
-        MessageType messageType = MessageType.toDeclarationType(jObj.getInt(JSON_MCONTENT_TYPE));
+        MessageType messageType = MessageType.intToMessageType(jObj.getInt(JSON_MCONTENT_TYPE));
+
+        if (messageType.isFile())
+            return new MessageDeclaration(contentSize, messageType, jObj.getInt(JSON_MTITLE_SIZE));
 
         return new MessageDeclaration(contentSize, messageType);
     }

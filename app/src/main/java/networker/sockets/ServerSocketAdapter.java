@@ -1,7 +1,7 @@
 package networker.sockets;
 
 import java.io.IOException;
-import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
 
@@ -12,11 +12,7 @@ public class ServerSocketAdapter {
         socket = s;
     }
 
-    public ServerSocketAdapter() {
-
-    }
-
-    public ServerSocketAdapter(Inet6Address address, int port, int backlog) throws IOException {
+    public ServerSocketAdapter(InetAddress address, int port, int backlog) throws IOException {
         socket = StaticSocketFactory.createServerSocket(address, port, backlog);
     }
 

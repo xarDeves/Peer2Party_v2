@@ -1,4 +1,4 @@
-package networker.discovery.implementations;
+package networker.discovery.servers;
 
 import android.util.Log;
 
@@ -65,12 +65,10 @@ public class InboundConnectionServer implements PeerServer {
             User knownUser = room.getPeer(u.getIDENTIFIER()).getUser();
 
             //for some reason, an already known peer tries to refresh the connection with us, perhaps his side of comms died
-            if (knownUser.connectionIsUsable()) {
-                knownUser.shutdownUser(); // refresh the connection even if the connection's fine
-            }
+            // refresh the connection even if the connection's fine on our end
 
+            knownUser.updateNetworkData(u);
             knownUser.replaceSocket(client);
-            knownUser.updateSelf(u);
         }
 
         if (!room.hasPeer(u)) room.addPeer(new Peer(u));

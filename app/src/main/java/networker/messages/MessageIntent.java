@@ -10,10 +10,8 @@ public class MessageIntent {
     private final User source;
 
     private int count = 0;
-
     private final List<MessageDeclaration> messageDeclarations = new LinkedList<>();
-
-    private final LinkedList<String> receivers;
+    private final LinkedList<String> receivers; // list of IDs
 
     public MessageIntent(User source, LinkedList<String> receivers) {
         this.source = source;

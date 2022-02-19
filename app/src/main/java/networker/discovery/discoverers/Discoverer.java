@@ -1,4 +1,4 @@
-package networker.discovery.implementations;
+package networker.discovery.discoverers;
 
 import android.util.Log;
 
@@ -118,8 +118,10 @@ public class Discoverer implements PeerDiscoverer {
         User uExisting = room.getPeer(u.getIDENTIFIER()).getUser();
         if (uExisting.equals(u)) return; //ignore if it's completely the same and nothing changed
 
+        uExisting.setStatus(u.getStatus()); // set the status to the new one
+
         //update existing information if anything changed
-        if (uExisting.updateSelf(u)) {
+        if (uExisting.updateNetworkData(u)) {
             try {
                 //update socket if port changed
                 uExisting.createUserSocket();

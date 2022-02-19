@@ -1,4 +1,4 @@
-package networker.discovery.implementations;
+package networker.discovery.receivers;
 
 import android.util.Log;
 

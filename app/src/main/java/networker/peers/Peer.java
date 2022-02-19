@@ -8,11 +8,6 @@ public class Peer {
         this.user = user;
     }
 
-    public Peer(User user, boolean b) {
-        this.user = user;
-        enabled = b;
-    }
-
     public void enable() {
         enabled = true;
     }

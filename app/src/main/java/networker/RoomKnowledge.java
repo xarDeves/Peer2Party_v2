@@ -13,6 +13,9 @@ public class RoomKnowledge {
     private final AtomicInteger totalMessagesSent = new AtomicInteger();
     private final AtomicLong totalContentSizeSent = new AtomicLong();
 
+    private final AtomicInteger totalMessagesReceived = new AtomicInteger();
+    private final AtomicLong totalContentSizeReceived = new AtomicLong();
+
     public void addPeer(Peer p) {
         map.put(p.getUser().getIDENTIFIER(), p);
     }
@@ -33,20 +36,30 @@ public class RoomKnowledge {
         return map.get(k);
     }
 
-    void incrementMessageCount() {
+    void incrementMessageSent() {
         totalMessagesSent.incrementAndGet();
     }
-
-    void increaseContentSizeCount(int byteCount) {
+    void increaseContentSizeSent(int byteCount) {
         totalContentSizeSent.getAndAdd(byteCount);
     }
-
-    int getMessageCount() {
+    int getMessageSentCount() {
         return totalMessagesSent.get();
     }
-
-    long getContentSizeSent() {
+    long getContentSentSize() {
         return totalContentSizeSent.get();
+    }
+
+    void incrementMessageReceived() {
+        totalMessagesReceived.incrementAndGet();
+    }
+    void increaseContentSizeReceived(int byteCount) {
+        totalContentSizeReceived.getAndAdd(byteCount);
+    }
+    int getMessageReceivedCount() {
+        return totalMessagesReceived.get();
+    }
+    long getContentReceivedSize() {
+        return totalContentSizeReceived.get();
     }
 
 }
