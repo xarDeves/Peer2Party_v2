@@ -47,7 +47,6 @@ public class MulticastGroupReceiver implements PeerReceiver {
             timeSpent = end - start;
 
             Log.d("networker", "current time spent " + timeSpent + " found data " + s);
-
         }
 
         return dataFound;

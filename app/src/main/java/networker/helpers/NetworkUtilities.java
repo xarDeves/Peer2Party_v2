@@ -168,11 +168,15 @@ public class NetworkUtilities {
                 Log.e("networker", "network_interface displayName " + i.getDisplayName());
                 Log.e("networker", "network_interface Name " + i.getName());
                 Log.e("networker", "network_interface InetAddresses ");
+                InetAddress ia = null;
                 for (Enumeration<InetAddress> l = i.getInetAddresses(); l.hasMoreElements(); ) {
-                    InetAddress ia = l.nextElement();
+                    ia = l.nextElement();
                     Log.e("networker", "network_interface address toString" + ia.toString());
                     Log.e("networker", "network_interface address getHostAddress " + ia.getHostAddress());
                 }
+                // no inet addresses specified
+                if (ia == null) continue;
+
                 networkInterfaces.add(i);
             }
         } catch (SocketException e) {

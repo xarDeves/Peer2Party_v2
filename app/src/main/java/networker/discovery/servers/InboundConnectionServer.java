@@ -23,28 +23,29 @@ public class InboundConnectionServer implements PeerServer {
     public void listen(ServerSocketAdapter ss, final int timeToReceiveMillis, RoomKnowledge room) throws IOException {
 
         long timeSpent = 0;
-        long startTime = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
 
         while (timeSpent < timeToReceiveMillis) {
             try {
-                timeSpent = handleIndividualClient(ss, room, timeToReceiveMillis, startTime);
+                handleIndividualClient(ss, room, timeToReceiveMillis);
             } catch (SocketTimeoutException e) {
-                Log.d("networker", "SocketTimeoutException", e);
+                Log.d("networker", "SocketTimeoutException" , e);
             }
+
+            long end = System.currentTimeMillis();
+            timeSpent = end - start;
 
             Log.d("networker", "current time spent server " + timeSpent);
         }
     }
 
-    private long handleIndividualClient(ServerSocketAdapter ss, RoomKnowledge room,
-                                        final int timeToReceiveMillis, final long start) throws IOException {
+    private void handleIndividualClient(ServerSocketAdapter ss, RoomKnowledge room,
+                                        final int timeToReceiveMillis) throws IOException {
         SocketAdapter client = ss.accept();
         client.setTimeout(timeToReceiveMillis);
 
         String salutation = getSalutation(client);
 
-        long end = System.currentTimeMillis();
-        long timeSpent = end - start;
 
         try {
             User u = NetworkUtilities.processUserSalutationJson(salutation);
@@ -53,8 +54,6 @@ public class InboundConnectionServer implements PeerServer {
             Log.d("networker", salutation, e);
             client.close(); // forfeit the connection if client sent invalid data, there's clearly an issue
         }
-
-        return timeSpent;
     }
 
     private void handleUser(User u, SocketAdapter client, RoomKnowledge room) throws IOException {

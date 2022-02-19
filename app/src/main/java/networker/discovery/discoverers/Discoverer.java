@@ -42,8 +42,9 @@ import networker.sockets.ServerSocketAdapter;
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
 public class Discoverer implements PeerDiscoverer {
-    private static final int SO_TIMEOUT_MILLIS = 5_000;
+    private static final int BO_TIMEOUT_MILLIS = 5_000;
     private static final int SS_TIMEOUT_MILLIS = 5_000;
+    private static final int SS_SO_TIMEOUT_MILLIS = 1_000;
 
     private final PeerReceiver receiver;
     private final PeerSender sender;
@@ -68,12 +69,12 @@ public class Discoverer implements PeerDiscoverer {
 
         netInfo = info;
         // FOR COMPLETENESS SAKE
-        udpSocket.setSoTimeout(SO_TIMEOUT_MILLIS);
+        udpSocket.setSoTimeout(BO_TIMEOUT_MILLIS);
         serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
     }
 
     public void processOnce() throws IOException {
-        Queue<String> groupBroadcasts = receiver.discoverPeers(udpSocket, SO_TIMEOUT_MILLIS);
+        Queue<String> groupBroadcasts = receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS);
 
         LinkedList<User> usersFound = new LinkedList<>();
         for (String bCast : groupBroadcasts) {
@@ -91,7 +92,7 @@ public class Discoverer implements PeerDiscoverer {
 
         sender.announce(udpSocket, netInfo);
 
-        inboundServer.listen(serverSocket, SS_TIMEOUT_MILLIS, room);
+        inboundServer.listen(serverSocket, SS_SO_TIMEOUT_MILLIS, room);
     }
 
     private void processFoundUser(User u) throws IOException {
