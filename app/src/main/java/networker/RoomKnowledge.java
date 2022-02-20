@@ -36,29 +36,33 @@ public class RoomKnowledge {
         return map.get(k);
     }
 
-    void incrementMessageSent() {
+    public Peer getPeer(User u) {
+        return map.get(u.getIDENTIFIER());
+    }
+
+    public void incrementMessagesSent() {
         totalMessagesSent.incrementAndGet();
     }
-    void increaseContentSizeSent(int byteCount) {
+    public void increaseContentSizeSent(long byteCount) {
         totalContentSizeSent.getAndAdd(byteCount);
     }
-    int getMessageSentCount() {
+    public int getMessagesSentCount() {
         return totalMessagesSent.get();
     }
-    long getContentSentSize() {
+    public long getContentSentSize() {
         return totalContentSizeSent.get();
     }
 
-    void incrementMessageReceived() {
+    public void incrementMessageReceived() {
         totalMessagesReceived.incrementAndGet();
     }
-    void increaseContentSizeReceived(int byteCount) {
+    public void increaseContentSizeReceived(int byteCount) {
         totalContentSizeReceived.getAndAdd(byteCount);
     }
-    int getMessageReceivedCount() {
+    public int getMessageReceivedCount() {
         return totalMessagesReceived.get();
     }
-    long getContentReceivedSize() {
+    public long getContentReceivedSize() {
         return totalContentSizeReceived.get();
     }
 

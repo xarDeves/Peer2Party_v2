@@ -14,6 +14,7 @@ import networker.messages.MessageIntent;
 import networker.messages.io.discoverers.MessageDiscoverer;
 import networker.messages.io.processors.InboundMessageProcessor;
 import networker.messages.io.processors.OutboundMessageProcessor;
+import networker.peers.Peer;
 
 public class IOManager implements MessageManager {
     public static final int MULTIMEDIA_BLOCK_SIZE = 500_000; // 500 KB
@@ -50,8 +51,9 @@ public class IOManager implements MessageManager {
             Log.d("networker" , "NetworkUtilities.processMessageIntent(intentJson);", e);
         }
 
-        if (mi != null) {
-            if (rk.hasPeer(mi.getSource())) receive(mi);
+        if (mi != null && rk.hasPeer(mi.getSource())) {
+            Peer p = rk.getPeer(mi.getSource());
+            if (p.isEnabled()) receive(mi);
         }
     }
 

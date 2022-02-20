@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 
+import helpers.DatabaseBridge;
 import networker.RoomKnowledge;
 import networker.messages.io.handlers.OutboundHandler;
 import networker.messages.MessageDeclaration;
@@ -19,20 +20,31 @@ import networker.peers.User;
 
 public class OutboundProcessor implements OutboundMessageProcessor {
     private final ExecutorService executor;
-    private final RoomKnowledge roomKnowledge;
+    private final RoomKnowledge rk;
+    private final DatabaseBridge dbb;
 
-    public OutboundProcessor(@NonNull ExecutorService executorService, RoomKnowledge rk) {
+    public OutboundProcessor(@NonNull ExecutorService executorService,
+                             @NonNull RoomKnowledge roomKnowledge,
+                             @NonNull DatabaseBridge databaseBridge) {
         executor = executorService;
-        roomKnowledge = rk;
+        rk = roomKnowledge;
+        dbb = databaseBridge;
     }
 
     @Override
     public void send(@NonNull MessageIntent intent) {
         for (String r : intent.getReceivers()) {
-            Peer p = roomKnowledge.getPeer(r);
-            if (p != null) dispatchThread(p.getUser(), intent.getMessageDeclarations());
+            Peer p = rk.getPeer(r);
+            //if the peer exists, and is enabled
+            if (p != null) {
+                dispatchThread(p.getUser(), intent.getMessageDeclarations());
+            }
         }
-        //TODO sum data sent to rk
+        Iterator<MessageDeclaration> mdls = intent.getMessageDeclarations();
+        for (MessageDeclaration mdl = mdls.next(); mdls.hasNext(); mdl = mdls.next()) {
+            if (mdl.getContentType().isFile()) { dbb.onMultimediaSend(mdl); break; }
+            else { dbb.onTextSend(mdl); }
+        }
     }
 
     private void dispatchThread(final User u, final Iterator<MessageDeclaration> mdls) {
@@ -40,7 +52,7 @@ public class OutboundProcessor implements OutboundMessageProcessor {
             for (MessageDeclaration mdl = mdls.next(); mdls.hasNext(); mdl = mdls.next()) {
                 try {
                     ContentProcurer cpr = ContentProcurerFactory.createProcurer(mdl);
-                    (new OutboundHandler(u, cpr)).handle();
+                    (new OutboundHandler(u, cpr, rk)).handle();
                 } catch (IOException e) {
                     Log.d("outboundProcessor.dispatchThread", e.getMessage(), e);
                 }

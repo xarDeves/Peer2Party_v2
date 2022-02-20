@@ -2,10 +2,10 @@ package networker.messages.content.providers;
 
 import networker.messages.content.ContentProvider;
 
-public class MultimediaProvider implements ContentProvider<String, Object> {
+public class MultimediaProvider implements ContentProvider<Object, String> {
     //TODO
 
-    public void insertHeader(String h) {
+    public void insertHeader(Object o) {
 
     }
 
@@ -18,8 +18,9 @@ public class MultimediaProvider implements ContentProvider<String, Object> {
         return null;
     }
 
+    //TODO return URI
     @Override
-    public Object getData() {
+    public String getData() {
         return null;
     }
 

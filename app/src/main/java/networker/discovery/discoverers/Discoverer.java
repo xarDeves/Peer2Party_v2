@@ -6,7 +6,6 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -60,7 +59,7 @@ public class Discoverer implements PeerDiscoverer {
 
     public Discoverer(PeerReceiver recv, PeerSender sendr, PeerServer peerServer,
                       ServerSocketAdapter ss, DatagramSocket ms, NetworkInformation info,
-                      RoomKnowledge roomKnowledge, int HIGH_SPEED_MILLIS) throws SocketException {
+                      RoomKnowledge roomKnowledge, int HIGH_SPEED_MILLIS) {
         receiver = recv;
         sender = sendr;
         inboundServer = peerServer;
@@ -71,7 +70,6 @@ public class Discoverer implements PeerDiscoverer {
 
         netInfo = info;
         // FOR COMPLETENESS SAKE
-
 
         BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION = HIGH_SPEED_MILLIS;
     }

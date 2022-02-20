@@ -4,12 +4,22 @@ import androidx.annotation.NonNull;
 
 import java.util.concurrent.ExecutorService;
 
+import helpers.DatabaseBridge;
 import networker.RoomKnowledge;
 import networker.messages.MessageIntent;
 
 public class InboundProcessor implements InboundMessageProcessor {
-    public InboundProcessor(@NonNull ExecutorService executorService, RoomKnowledge rk) {
+    private final ExecutorService executor;
+    private final RoomKnowledge rk;
+    private final DatabaseBridge dbb;
 
+    public InboundProcessor(@NonNull ExecutorService executorService,
+                            @NonNull RoomKnowledge roomKnowledge,
+                            @NonNull DatabaseBridge databaseBridge) {
+
+        executor = executorService;
+        rk = roomKnowledge;
+        dbb = databaseBridge;
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.util.Log;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import networker.RoomKnowledge;
 import networker.exceptions.InvalidPortValueException;
 import networker.messages.content.ContentProcurer;
 import networker.peers.User;
@@ -12,10 +13,12 @@ import networker.peers.User;
 public class OutboundHandler {
     private final User user;
     private final ContentProcurer procurer;
+    private final RoomKnowledge rk;
 
-    public OutboundHandler(User u, ContentProcurer cpr) {
+    public OutboundHandler(User u, ContentProcurer cpr, RoomKnowledge rk) {
         user = u;
         procurer = cpr;
+        this.rk = rk;
     }
 
     public void handle() {
@@ -31,8 +34,14 @@ public class OutboundHandler {
             sendHeader(dos);
             sendBody(dos);
             user.unlock();
+
+            procurer.close();
+
+            rk.increaseContentSizeSent(procurer.getTotalSize());
+            rk.incrementMessagesSent();
+            Log.d("networker", "Successfully sent to " + user.getIDENTIFIER());
         } catch (InterruptedException | IOException e) {
-            Log.d("networker", "OutboundHandler failed to send to " + user.getIDENTIFIER(), e);
+            Log.d("networker", "OutboundHandler failed uid " + user.getIDENTIFIER(), e);
         }
     }
 
@@ -45,14 +54,17 @@ public class OutboundHandler {
     private void sendHeader(DataOutputStream dos) throws IOException {
         while (procurer.hasNextHeader()) {
             byte[] piece = procurer.getHeaderPiece();
-            dos.write(piece);
+            dos.write(piece, 0, piece.length);
+            dos.flush();
         }
     }
 
     private void sendBody(DataOutputStream dos) throws IOException {
         while (procurer.hasNextContent()) {
+            int bRead = procurer.consume();
             byte[] piece = procurer.getContentPiece();
-            dos.write(piece);
+            dos.write(piece, 0, bRead);
+            dos.flush();
         }
     }
 }
