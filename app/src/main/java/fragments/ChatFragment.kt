@@ -22,6 +22,9 @@ import com.example.peer2party.databinding.FragmentChatBinding
 import data.Message
 import data.MessageType
 import helpers.DateTimeHelper.fetchDateTime
+import networker.helpers.NetworkUtilities
+import networker.messages.MessageDeclaration
+import networker.messages.MessageIntent
 import viewmodels.MainViewModel
 
 
@@ -160,9 +163,22 @@ class ChatFragment : Fragment() {
         val textToSend = binding.textInput.text.toString()
 
         if (textToSend.isNotBlank() && textToSend.isNotEmpty()) {
-            viewModel.insertEntity(
-                Message(MessageType.TEXT_SEND, textToSend, fetchDateTime())
+            val size = NetworkUtilities.convertUTF8StringToBytes(textToSend).size
+
+            val messageIntent = MessageIntent(
+                viewModel.ourself,
+                viewModel.roomWrapper.getEnabledUsers()
             )
+
+            messageIntent.addMessageDeclaration(
+                MessageDeclaration(
+                    "", textToSend, null, 0, size, networker.messages.MessageType.TEXT
+                )
+            )
+
+
+            viewModel.send(messageIntent)
+
             binding.textInput.setText("")
         }
     }

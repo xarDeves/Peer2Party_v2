@@ -63,7 +63,11 @@ public class User {
     }
 
     public boolean isUsable() {
-        return NetworkUtilities.portIsValid(port) && !currentUserSocket.isClosed();
+        return NetworkUtilities.portIsValid(port);
+    }
+
+    public boolean socketIsClosed() {
+        return currentUserSocket.isClosed();
     }
 
     public void lock() throws InterruptedException {
@@ -91,9 +95,12 @@ public class User {
     }
 
     public void createUserSocket() throws IOException, InvalidPortValueException, InterruptedException {
+        Log.d("networker", "shutdown123123123123123 " + this.getUsername());
         if (!isUsable()) throw new InvalidPortValueException();
+        Log.d("networker", "shutdown123123123123123 " + this.getUsername());
         shutdown();
 
+        Log.d("networker", "shutdown & changing socketadatper " + this.getUsername());
         currentUserSocket = new SocketAdapter(address, port);
 
         try {
@@ -105,11 +112,13 @@ public class User {
     }
 
     private void shutdown() throws IOException, InterruptedException {
-        ioLock.acquire(TOTAL_LOCKS);
+        Log.d("networker", "shutting down socketadatper " + this.getUsername());
+
+        lock();
         if (currentUserSocket != null) {
             if (!currentUserSocket.isClosed()) currentUserSocket.close();
         }
-        ioLock.release(TOTAL_LOCKS);
+        unlock();
         // if everything goes well, we'll be out of here in no time
         //  if something goes bad... well, we might be stuck here a few times
     }

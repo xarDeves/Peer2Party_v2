@@ -83,9 +83,11 @@ public class IOManager implements MessageManager {
     }
 
     @Override
-    synchronized public void send(MessageIntent mi) throws IOException {
-        announcer.announce(udpSocket, mi, netInfo);
-        outboundProcessor.send(mi);
+    public void send(MessageIntent mi) throws IOException {
+        synchronized (this) {
+            announcer.announce(udpSocket, mi, netInfo);
+            outboundProcessor.send(mi);
+        }
     }
 
 }

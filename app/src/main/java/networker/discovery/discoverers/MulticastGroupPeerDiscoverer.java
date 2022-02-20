@@ -41,10 +41,10 @@ import networker.sockets.ServerSocketAdapter;
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
 public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
-    private static final int BO_TIMEOUT_MILLIS_HIGH_SPEED = 50;
-    private static final int BO_TIMEOUT_MILLIS = 2000;
-    private static final int SS_TIMEOUT_MILLIS = 1000;
-    private static final int SS_SO_TIMEOUT_MILLIS = 100;
+    private static final int BO_TIMEOUT_MILLIS_HIGH_SPEED = 10;
+    private static final int BO_TIMEOUT_MILLIS = 500;
+    private static final int SS_TIMEOUT_MILLIS = 100;
+    private static final int SS_SO_TIMEOUT_MILLIS = 50;
     private final int BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION;
 
     private final PeerReceiver receiver;
@@ -139,8 +139,10 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
 
         // if this is a completely new peer...
         if (!room.hasPeer(u)) {
+            Log.d("networker", "FOUND AND PROCESSING COMPLETELY NEW PEER " + u.getUsername());
             processNewPeer(u);
         } else {
+            Log.d("networker", "FOUND AND PROCESSING EXISTING PEER " + u.getUsername());
             // if this peer already exists...
             processExistingPeer(u);
         }
