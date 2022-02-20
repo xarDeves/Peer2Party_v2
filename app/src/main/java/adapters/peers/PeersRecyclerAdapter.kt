@@ -2,7 +2,6 @@ package adapters.peers
 
 import adapters.peers.viewholders.PeerViewHolder
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +17,6 @@ class PeersRecyclerAdapter internal constructor(
 
     fun setPeers(peers: ArrayList<Peer>) {
         this.peers = peers
-        Log.d("xristos", "recycler: " + peers.size.toString())
         notifyDataSetChanged()
     }
 

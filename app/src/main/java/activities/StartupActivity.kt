@@ -10,7 +10,6 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
@@ -108,7 +107,6 @@ class StartupActivity : AppCompatActivity() {
     private fun attachListeners() {
         binding.usernameText.doAfterTextChanged {
             alias = binding.usernameText.text.toString()
-            Log.d("fuckingdies3", "User: $alias")
             if (idIsEligible()) sharedPrefs.edit().putString("ID", alias).apply()
         }
 
