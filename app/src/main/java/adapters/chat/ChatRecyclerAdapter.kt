@@ -1,8 +1,6 @@
 package adapters.chat
 
-import adapters.chat.viewholders.BaseViewHolder
-import adapters.chat.viewholders.ImageSendViewHolder
-import adapters.chat.viewholders.TextSendViewHolder
+import adapters.chat.viewholders.*
 import android.content.Context
 import android.net.Uri
 import android.view.LayoutInflater
@@ -51,6 +49,14 @@ class ChatRecyclerAdapter internal constructor(
                 view = inflater.inflate(viewType, parent, false)
                 viewHolder = TextSendViewHolder(view)
             }
+            R.layout.chat_head_recieve -> {
+                view = inflater.inflate(viewType, parent, false)
+                viewHolder = TextReceivedViewHolder(view)
+            }
+            R.layout.image_receive -> {
+                view = inflater.inflate(viewType, parent, false)
+                viewHolder = ImageReceivedViewHolder(view)
+            }
             R.layout.image_send -> {
                 view = inflater.inflate(viewType, parent, false)
                 viewHolder = ImageSendViewHolder(view)
@@ -58,26 +64,6 @@ class ChatRecyclerAdapter internal constructor(
         }
 
         return viewHolder
-    }
-
-    private fun toggleOn(holder: BaseViewHolder) {
-        holder.delete.visibility = View.VISIBLE
-        holder.info.visibility = View.VISIBLE
-    }
-
-    private fun toggleOff(holder: BaseViewHolder) {
-        holder.delete.visibility = View.GONE
-        holder.info.visibility = View.GONE
-    }
-
-    private fun toggleFromListener(holder: BaseViewHolder, key: Int) {
-        if (toggled == key) {
-            toggled = -1
-            toggleOff(holder)
-        } else {
-            toggled = key
-            toggleOn(holder)
-        }
     }
 
     //FIXME can toggle multiple views, if view gets recycled, only the last toggled state persists
@@ -90,9 +76,30 @@ class ChatRecyclerAdapter internal constructor(
 
         when (holder.itemViewType) {
 
-            R.layout.chat_head_send -> {
+            R.layout.chat_head_recieve -> {
+                (holder as TextReceivedViewHolder)
 
-                (holder as TextSendViewHolder).textView.text = allMessages[position].payload
+                holder.textView.text = allMessages[position].payload
+                holder.date.text = allMessages[position].date
+                holder.alias.text = allMessages[position].alias
+
+                holder.delete.setOnClickListener {
+                    deleteFromDb(key, position)
+                }
+
+                holder.itemView.setOnClickListener {
+                    /*clipboard = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                    clip = ClipData.newPlainText("copied", holder.textView.text)
+                    clipboard.primaryClip = clip*/
+
+                    toggleFromListener(holder, key)
+                }
+            }
+
+            R.layout.chat_head_send -> {
+                (holder as TextSendViewHolder)
+
+                holder.textView.text = allMessages[position].payload
                 holder.date.text = allMessages[position].date
 
                 holder.delete.setOnClickListener {
@@ -104,6 +111,33 @@ class ChatRecyclerAdapter internal constructor(
                     clip = ClipData.newPlainText("copied", holder.textView.text)
                     clipboard.primaryClip = clip*/
 
+                    toggleFromListener(holder, key)
+                }
+            }
+
+            R.layout.image_receive -> {
+                (holder as ImageReceivedViewHolder)
+
+                val parsedUri = Uri.parse(allMessages[position].payload!!)
+                val sourceFile = DocumentFile.fromSingleUri(context, parsedUri)
+
+                if (sourceFile!!.exists()) {
+                    holder.imageView.setImageURI(parsedUri)
+                } else {
+                    holder.imageView.setImageResource(
+                        R.drawable.not_found
+                    )
+                }
+
+                holder.date.text = allMessages[position].date
+                holder.size.text = allMessages[position].size
+                holder.alias.text = allMessages[position].alias
+
+                holder.delete.setOnClickListener {
+                    deleteFromDb(key, position)
+                }
+
+                holder.itemView.setOnClickListener {
                     toggleFromListener(holder, key)
                 }
             }
@@ -134,6 +168,26 @@ class ChatRecyclerAdapter internal constructor(
                 }
             }
 
+        }
+    }
+
+    private fun toggleOn(holder: BaseViewHolder) {
+        holder.delete.visibility = View.VISIBLE
+        holder.info.visibility = View.VISIBLE
+    }
+
+    private fun toggleOff(holder: BaseViewHolder) {
+        holder.delete.visibility = View.GONE
+        holder.info.visibility = View.GONE
+    }
+
+    private fun toggleFromListener(holder: BaseViewHolder, key: Int) {
+        if (toggled == key) {
+            toggled = -1
+            toggleOff(holder)
+        } else {
+            toggled = key
+            toggleOn(holder)
         }
     }
 

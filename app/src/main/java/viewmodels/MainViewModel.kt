@@ -14,7 +14,9 @@ import data.DbDao
 import data.Message
 import fragments.ChatFragment
 import fragments.PeerListFragment
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import networker.Model
 import networker.RoomKnowledge
 import networker.discovery.discoverers.Discoverer
@@ -114,9 +116,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
-        Thread {
+        //FIXME could be done using coroutines(?)
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                initPeerDiscovery()
+            }
+        }
+        /*Thread {
             initPeerDiscovery()
-        }.start()
+        }.start()*/
     }
 
     fun insertEntity(entity: Message) {

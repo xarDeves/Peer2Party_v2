@@ -26,6 +26,7 @@ public class Model {
                         onTextSend(message);
                         break;
                     case IMAGE_SEND:
+                        onImageSend(message);
                         break;
                 }
             }
@@ -37,11 +38,23 @@ public class Model {
         Log.d("fuck", message.getPayload());
     }
 
+    public void onImageSend(Message message) {
+        Log.d("fuck", message.getPayload());
+    }
+
     //any database (and consequently UI) updates are already multithreaded
     public void onTextReceived() {
-
         viewModel.insertEntity(new Message(MessageType.TEXT_RECEIVE,
-                "text to receive(?)",
+                "text to receive",
+                DateTimeHelper.fetchDateTime(),
+                null,
+                "alias")
+        );
+    }
+
+    public void onImageReceived() {
+        viewModel.insertEntity(new Message(MessageType.IMAGE_RECEIVE,
+                "image uri from mediastore",
                 DateTimeHelper.fetchDateTime(),
                 null,
                 "alias")

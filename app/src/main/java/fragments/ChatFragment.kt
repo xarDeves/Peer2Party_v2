@@ -33,8 +33,9 @@ class ChatFragment : Fragment() {
     private lateinit var binding: FragmentChatBinding
 
     private lateinit var fileSelectorLauncher: ActivityResultLauncher<Intent>
-    private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
-    private var cameraImageUri: Uri = Uri.EMPTY
+    private lateinit var camPhotoLauncher: ActivityResultLauncher<Intent>
+    private lateinit var camVideoLauncher: ActivityResultLauncher<Intent>
+    private var cameraMediaUri: Uri = Uri.EMPTY
 
     private fun setupRecycler() {
         layoutManager = LinearLayoutManager(requireActivity())
@@ -92,16 +93,29 @@ class ChatFragment : Fragment() {
             binding.operationsLayout.visibility = View.GONE
         }
 
-        binding.openCamera.setOnClickListener {
+        binding.openCamPhoto.setOnClickListener {
 
-            cameraImageUri = requireContext().contentResolver.insert(
+            cameraMediaUri = requireContext().contentResolver.insert(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 ContentValues()
             )!!
 
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
-            cameraLauncher.launch(intent)
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraMediaUri)
+            camPhotoLauncher.launch(intent)
+            binding.operationsLayout.visibility = View.GONE
+        }
+
+        binding.openCamVideo.setOnClickListener {
+
+            cameraMediaUri = requireContext().contentResolver.insert(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                ContentValues()
+            )!!
+
+            val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraMediaUri)
+            camVideoLauncher.launch(intent)
             binding.operationsLayout.visibility = View.GONE
         }
     }
@@ -127,10 +141,17 @@ class ChatFragment : Fragment() {
             }
 
         //TODO save images ? (fetch state from settings activity)
-        cameraLauncher =
+        camPhotoLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                    sendImage(cameraImageUri)
+                    sendImage(cameraMediaUri)
+                }
+            }
+
+        camVideoLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    //sendVideo(cameraMediaUri)
                 }
             }
     }
