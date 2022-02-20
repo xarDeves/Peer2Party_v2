@@ -112,11 +112,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         discoverer.highSpeedDiscovery()
         while (true) discoverer.processOnce()
-
     }
 
     init {
-        //FIXME could be done using coroutines(?)
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 initPeerDiscovery()
