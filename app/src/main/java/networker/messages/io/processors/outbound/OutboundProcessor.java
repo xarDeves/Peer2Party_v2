@@ -60,7 +60,7 @@ public class OutboundProcessor implements OutboundMessageProcessor {
                     ContentProcurer cpr = ContentProcurerFactory.createProcurer(md);
                     (new OutboundHandler(u, cpr, rk)).handle();
                 } catch (IOException e) {
-                    Log.d("outboundProcessor.dispatchThread", e.getMessage(), e);
+                    Log.d("networker.messages.io.processors.outbound.dispatchThread", e.getMessage(), e);
                 }
             }
         });

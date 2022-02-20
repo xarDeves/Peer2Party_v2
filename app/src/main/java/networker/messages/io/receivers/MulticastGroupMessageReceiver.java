@@ -28,13 +28,13 @@ public class MulticastGroupMessageReceiver implements MessageReceiver {
             try {
                 return receivePeerMulticast(socket);
             } catch (SocketTimeoutException e) {
-                Log.d("networker", "SocketTimeoutException", e);
+                Log.d("MulticastGroupMessageReceiver.discoverAnnouncement", "SocketTimeoutException", e);
             }
 
             long end = System.currentTimeMillis();
             timeSpent = end - start;
 
-            Log.d("networker", "current time spent " + timeSpent + " found data " + s);
+            Log.d("MulticastGroupMessageReceiver.discoverAnnouncement", "current time spent " + timeSpent + " found data " + s);
         }
 
         return "";
@@ -44,7 +44,7 @@ public class MulticastGroupMessageReceiver implements MessageReceiver {
         byte[] buffer = new byte[NetworkUtilities.MAX_MESSAGE_DECLARATION_BUFFER_SIZE];
         DatagramPacket recv = new DatagramPacket(buffer, buffer.length);
         socket.receive(recv);
-        Log.d("networker", "recv.getLength() " + recv.getLength());
+        Log.d("MulticastGroupMessageReceiver.receivePeerMulticast", "recv.getLength() " + recv.getLength());
         return NetworkUtilities.convertBytesToUTF8String(buffer);
     }
 }

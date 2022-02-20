@@ -43,15 +43,15 @@ public class InboundHandler {
 
             rk.increaseContentSizeReceived(mdl.getBodySize());
             rk.incrementMessageReceived();
-            Log.d("networker", "Receival successful! bodyize: " + mdl.getBodySize());
+            Log.d("networker.messages.io.handlers.handle", "Receival successful! bodyize: " + mdl.getBodySize());
         } catch (OversizedTextMessage otm) {
-            Log.d("networker", "Oversized text message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), otm);
+            Log.d("networker.messages.io.handlers.handle", "Oversized text message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), otm);
         } catch (OversizedMultimediaMessage omm) {
-            Log.d("networker", "Oversized multimedia message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), omm);
+            Log.d("networker.messages.io.handlers.handle", "Oversized multimedia message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), omm);
         } catch (IOException e) {
-            Log.d("networker" , "IOException w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), e);
+            Log.d("networker.messages.io.handlers.handle" , "IOException w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), e);
         } catch (InterruptedException e) {
-            Log.d("networker", "InboundHandler interrupted uid " + user.getIDENTIFIER(), e);
+            Log.d("networker.messages.io.handlers.handle", "InboundHandler interrupted uid " + user.getIDENTIFIER(), e);
         }
 
 

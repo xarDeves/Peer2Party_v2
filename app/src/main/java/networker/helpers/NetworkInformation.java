@@ -33,13 +33,13 @@ public class NetworkInformation {
             multicastMessagesGroupTemp = InetAddress.getByName(multicastMessagesAddressv4);
 
         } catch (UnknownHostException e) {
-            Log.d("networker", "v4 failed", e);
+            Log.d("networker.helpers", "constructor v4 failed", e);
 
             try {
                 multicastDiscoverGroupTemp = InetAddress.getByName(multicastDiscoveryAddressv6);
                 multicastMessagesGroupTemp = InetAddress.getByName(multicastMessagesAddressv6);
             } catch (UnknownHostException ex) {
-                Log.d("networker", "v6 failed", ex);
+                Log.d("networker.helpers", "constructor v6 failed", ex);
 
                 throw ex;
             }

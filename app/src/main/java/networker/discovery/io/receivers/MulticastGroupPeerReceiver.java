@@ -41,15 +41,15 @@ public class MulticastGroupPeerReceiver implements PeerReceiver {
             try {
                 String recvd = receivePeerMulticast(socket);
                 dataFound.add(recvd);
-                Log.d("networker", recvd);
+                Log.d("networker.discovery.io.receivers.discoverPeers", recvd);
             } catch (SocketTimeoutException e) {
-                Log.d("networker", "SocketTimeoutException", e);
+                Log.d("networker.discovery.io.receivers.discoverPeers", "SocketTimeoutException", e);
             }
 
             long end = System.currentTimeMillis();
             timeSpent = end - start;
 
-            Log.d("networker", "current time spent " + timeSpent + " found data " + s);
+            Log.d("networker.discovery.io.receivers.discoverPeers", "current time spent " + timeSpent + " found data " + s);
         }
 
         return dataFound;
@@ -59,7 +59,7 @@ public class MulticastGroupPeerReceiver implements PeerReceiver {
         byte[] buffer = new byte[NetworkUtilities.DISCOVERY_BUFFER_SIZE];
         DatagramPacket recv = new DatagramPacket(buffer, buffer.length);
         socket.receive(recv);
-        Log.d("fuck", "recv.getLength() " + recv.getLength());
+        Log.d("networker.discovery.io.receivers.receivePeerMulticast", "recv.getLength() " + recv.getLength());
         return NetworkUtilities.convertBytesToUTF8String(buffer);
     }
 }

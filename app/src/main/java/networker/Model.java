@@ -14,6 +14,7 @@ public class Model {
         attachSendObserver();
     }
 
+    //FIXME not here
     private void attachSendObserver() {
         viewModel.getAllMessages().observeForever(messageList -> {
             if (!messageList.isEmpty()) {
@@ -33,11 +34,11 @@ public class Model {
     }
 
     public void onTextSend(Message message) {
-        Log.d("fuck", message.getPayload());
+        Log.d("networker.model.onTextSend", message.getPayload());
     }
 
     public void onImageSend(Message message) {
-        Log.d("fuck", message.getPayload());
+        Log.d("networker.model.onImageSend", message.getPayload());
     }
 
 }

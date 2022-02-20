@@ -21,9 +21,9 @@ public class MulticastGroupMessageAnnouncer implements MessageAnnouncer {
             byte[] decl = NetworkUtilities.convertUTF8StringToBytes(js);
             DatagramPacket msg = NetworkUtilities.createDatagramPacket(decl, info.getMulticastMessagesGroup(), info.getMessagePort());
             socket.send(msg);
-            Log.d("networker", "Sent, bLength " + decl.length + " " + js);
+            Log.d("networker.messages.io.announcers.announce", "Sent, bLength " + decl.length + " " + js);
         } catch (JSONException e) {
-            Log.d("networker", "NetworkUtilities.getDeclarationBroadcast(mi);", e);
+            Log.d("networker.messages.io.announcers.announce", "NetworkUtilities.getDeclarationBroadcast(mi);", e);
         }
     }
 }

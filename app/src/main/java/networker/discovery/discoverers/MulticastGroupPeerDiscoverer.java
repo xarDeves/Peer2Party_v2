@@ -113,10 +113,10 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
         LinkedList<User> usersFound = new LinkedList<>();
         for (String bCast : groupBroadcasts) {
             try {
-                Log.d("networker", "processOnce: " + bCast);
+                Log.d("networker.discovery.discoverers.filterValidJSON", "processOnce: " + bCast);
                 usersFound.add(NetworkUtilities.processUserSalutationJson(bCast));
             } catch (JSONException | UnknownHostException | InvalidPortValueException e) {
-                Log.d("networker", bCast, e);
+                Log.d("networker.discovery.discoverers.filterValidJSON", bCast, e);
             }
         }
         return usersFound;
@@ -125,10 +125,10 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
     private void processUsers(LinkedList<User> usersFound) {
         for (User u : usersFound) {
             try {
-                Log.d("networker", "FOUND AND PROCESSING " + u.getUsername());
+                Log.d("networker.discovery.discoverers.processUsers", "FOUND AND PROCESSING " + u.getUsername());
                 processFoundUser(u);
             } catch (IOException e) {
-                Log.e("networker", e.getMessage(), e);
+                Log.e("networker.discovery.discoverers.processUsers", e.getMessage(), e);
             }
         }
     }
@@ -139,10 +139,10 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
 
         // if this is a completely new peer...
         if (!room.hasPeer(u)) {
-            Log.d("networker", "FOUND AND PROCESSING COMPLETELY NEW PEER " + u.getUsername());
+            Log.d("networker.discovery.discoverers.processFoundUser", "FOUND AND PROCESSING COMPLETELY NEW PEER " + u.getUsername());
             processNewPeer(u);
         } else {
-            Log.d("networker", "FOUND AND PROCESSING EXISTING PEER " + u.getUsername());
+            Log.d("networker.discovery.discoverers.processFoundUser", "FOUND AND PROCESSING EXISTING PEER " + u.getUsername());
             // if this peer already exists...
             processExistingPeer(u);
         }
@@ -153,7 +153,7 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
             u.createUserSocket();
             room.addPeer(new Peer(u));
         } catch (InvalidPortValueException | InterruptedException e) {
-            Log.d("networker", "u.createUserSocket()", e);
+            Log.d("networker.discovery.discoverers.processNewPeer", "u.createUserSocket()", e);
         }
     }
 

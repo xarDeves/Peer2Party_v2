@@ -38,11 +38,11 @@ public class MulticastGroupPeerAnnouncer implements PeerAnnouncer {
             DatagramPacket msg = NetworkUtilities.createDatagramPacket(salutations, info.getMulticastDiscoverGroup(), info.getDiscoverPort());
             // double send
             socket.send(msg);
-            Log.d("networker", "Sent first, bLength " + salutations.length + " " + s);
+            Log.d("networker.discovery.io.announcers.announce", "Sent first, bLength " + salutations.length + " " + s);
             socket.send(msg);
-            Log.d("networker", "Sent second, bLength " + salutations.length + " " + s);
+            Log.d("networker.discovery.io.announcers.announce", "Sent second, bLength " + salutations.length + " " + s);
         } catch (JSONException e) {
-            Log.d("networker", "NetworkUtilities.getUserSalutation(ourself)", e);
+            Log.d("networker.discovery.io.announcers.announce", "NetworkUtilities.getUserSalutation(ourself)", e);
         }
     }
 

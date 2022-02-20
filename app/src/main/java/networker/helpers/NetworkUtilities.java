@@ -178,16 +178,16 @@ public class NetworkUtilities {
                 if (i.isLoopback()) continue;
                 if (i.getDisplayName().contains("rmnet")) continue;
 
-                Log.e("networker", "network_interface displayName " + i.getDisplayName());
-                Log.e("networker", "network_interface Name " + i.getName());
-                Log.e("networker", "network_interface InetAddresses ");
+                Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface displayName " + i.getDisplayName());
+                Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface Name " + i.getName());
+                Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface InetAddresses ");
                 Enumeration<InetAddress> il = i.getInetAddresses();
 
                 int j = 0;
                 while(il.hasMoreElements()) {
                     InetAddress ia = il.nextElement();
-                    Log.e("networker", "network_interface address toString" + ia.toString());
-                    Log.e("networker", "network_interface address getHostAddress " + ia.getHostAddress());
+                    Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface address toString" + ia.toString());
+                    Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface address getHostAddress " + ia.getHostAddress());
                     ++j;
                 }
 
@@ -197,7 +197,7 @@ public class NetworkUtilities {
                 networkInterfaces.put(i.getDisplayName(), i);
             }
         } catch (SocketException e) {
-            Log.d("networker", "NetworkInterface.getNetworkInterfaces()", e);
+            Log.d("networker.helpers.getViableNetworkInterfaces", "NetworkInterface.getNetworkInterfaces()", e);
         }
 
         return networkInterfaces;

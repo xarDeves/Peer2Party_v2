@@ -22,7 +22,7 @@ import networker.peers.User;
 public class IOManager implements MessageManager {
     public static final int MULTIMEDIA_BLOCK_SIZE = 500_000; // 500 KB
     public static final int TEXT_BLOCK_SIZE = 10_000; // 10 KB
-    public static final int MAXIMUM_TEXT_SIZE = 100_000_000; // 10 MB
+    public static final int MAXIMUM_TEXT_SIZE = 100_000_000; // 100 MB
     public static final long MAXIMUM_MULTIMEDIA_SIZE = 1_000_000_000; // 1 GB
 
     public static final int BO_TIMEOUT_MILLIS = 5000;
@@ -39,8 +39,6 @@ public class IOManager implements MessageManager {
     public IOManager(MessageReceiver mr, MessageAnnouncer ma, DatagramSocket ds,
                      OutboundMessageProcessor omp, InboundMessageProcessor imp,
                      RoomKnowledge room, NetworkInformation info, User ourself) {
-        // private final ExecutorService inboundExecutor = Executors.newFixedThreadPool(executorTCount); FOR IMP
-        // private final ExecutorService outboundExecutor = Executors.newFixedThreadPool(executorTCount); FOR OMP
 
         discoverer = mr;
         announcer = ma;
@@ -73,7 +71,7 @@ public class IOManager implements MessageManager {
                 }
             }
         } catch (JSONException | InvalidPortValueException | UnknownHostException e) {
-            Log.d("networker" , "NetworkUtilities.processMessageIntent(intentJson);", e);
+            Log.d("networker.messages.io.discover" , "NetworkUtilities.processMessageIntent(intentJson);", e);
         }
     }
 

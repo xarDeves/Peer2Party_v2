@@ -28,13 +28,13 @@ public class InboundConnectionServer implements PeerServer {
             try {
                 handleIndividualClient(ss, room, timeToReceiveMillis);
             } catch (SocketTimeoutException e) {
-                Log.d("networker", "SocketTimeoutException" , e);
+                Log.d("networker.discovery.servers.listen", "SocketTimeoutException" , e);
             }
 
             long end = System.currentTimeMillis();
             timeSpent = end - start;
 
-            Log.d("networker", "current time spent server " + timeSpent);
+            Log.d("networker.discovery.servers.listen", "current time spent server " + timeSpent);
         }
     }
 
@@ -50,7 +50,7 @@ public class InboundConnectionServer implements PeerServer {
             User u = NetworkUtilities.processUserSalutationJson(salutation);
             handleUser(u, client, room);
         } catch (JSONException | InvalidPortValueException e) {
-            Log.d("networker", salutation, e);
+            Log.d("networker.discovery.servers.handleIndividualClient", salutation, e);
             client.close(); // forfeit the connection if client sent invalid data, there's clearly an issue
         }
     }
@@ -67,7 +67,7 @@ public class InboundConnectionServer implements PeerServer {
             try {
                 knownUser.replaceSocket(client);
             } catch (InterruptedException e) {
-                Log.d("networker", "InboundConnectionServer.handleUser", e);
+                Log.d("networker.discovery.servers.handleUser", "InboundConnectionServer.handleUser", e);
             }
         }
 

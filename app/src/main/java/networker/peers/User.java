@@ -44,9 +44,9 @@ public class User {
 
         address = adr;
         username = name;
-        Log.d("fuckingdies", "User: " + name);
         port = p;
 
+        Log.d("networker.peers", "Constructor: " + name);
         instantiateID();
     }
 
@@ -55,10 +55,10 @@ public class User {
 
         address = adr;
         username = name;
-        Log.d("fuckingdies", "User: " + name);
         port = p;
         status = st;
 
+        Log.d("networker.peers", "Constructor: " + name);
         instantiateID();
     }
 
@@ -95,12 +95,9 @@ public class User {
     }
 
     public void createUserSocket() throws IOException, InvalidPortValueException, InterruptedException {
-        Log.d("networker", "shutdown123123123123123 " + this.getUsername());
         if (!isUsable()) throw new InvalidPortValueException();
-        Log.d("networker", "shutdown123123123123123 " + this.getUsername());
         shutdown();
 
-        Log.d("networker", "shutdown & changing socketadatper " + this.getUsername());
         currentUserSocket = new SocketAdapter(address, port);
 
         try {
@@ -112,15 +109,11 @@ public class User {
     }
 
     private void shutdown() throws IOException, InterruptedException {
-        Log.d("networker", "shutting down socketadatper " + this.getUsername());
-
         lock();
         if (currentUserSocket != null) {
             if (!currentUserSocket.isClosed()) currentUserSocket.close();
         }
         unlock();
-        // if everything goes well, we'll be out of here in no time
-        //  if something goes bad... well, we might be stuck here a few times
     }
 
     public boolean connectionIsUsable() {

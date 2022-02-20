@@ -26,7 +26,7 @@ public class OutboundHandler {
         try {
             NetworkUtilities.createConnectionIfThereIsNone(user);
         } catch (IOException | InterruptedException | InvalidPortValueException e) {
-            Log.d("networker", "couldn't createConnectionIfThereIsNone", e);
+            Log.d("networker.messages.io.handlers.handle", "couldn't createConnectionIfThereIsNone", e);
         }
 
         try {
@@ -40,11 +40,11 @@ public class OutboundHandler {
 
             rk.increaseContentSizeSent(procurer.getTotalSize());
             rk.incrementMessagesSent();
-            Log.d("networker", "Successfully sent to " + user.getIDENTIFIER());
+            Log.d("networker.messages.io.handlers.handle", "Successfully sent to " + user.getIDENTIFIER());
         } catch (InterruptedException e) {
-            Log.d("networker", "OutboundHandler interrupted uid " + user.getIDENTIFIER(), e);
+            Log.d("networker.messages.io.handlers.handle", "OutboundHandler interrupted uid " + user.getIDENTIFIER(), e);
         } catch (IOException e) {
-            Log.d("networker", "OutboundHandler failed uid " + user.getIDENTIFIER(), e);
+            Log.d("networker.messages.io.handlers.handle", "OutboundHandler failed uid " + user.getIDENTIFIER(), e);
         }
     }
 
