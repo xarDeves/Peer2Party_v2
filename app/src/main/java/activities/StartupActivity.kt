@@ -32,6 +32,21 @@ class StartupActivity : AppCompatActivity() {
     private val networkCallback = getNetworkCallBack()
     private val networkRequest = getNetworkRequest()
 
+
+    private fun acquireStoragePermissions() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                0
+            )
+        }
+    }
+
     private fun getConnectivityManager() =
         this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -125,18 +140,8 @@ class StartupActivity : AppCompatActivity() {
         binding.usernameText.setText(alias)
 
         attachListeners()
-
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                0
-            )
-        }
+        acquireStoragePermissions()
 
     }
+
 }
