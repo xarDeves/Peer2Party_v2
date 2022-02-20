@@ -3,8 +3,6 @@ package networker;
 import android.util.Log;
 
 import data.Message;
-import data.MessageType;
-import helpers.DateTimeHelper;
 import viewmodels.MainViewModel;
 
 public class Model {
@@ -40,25 +38,6 @@ public class Model {
 
     public void onImageSend(Message message) {
         Log.d("fuck", message.getPayload());
-    }
-
-    //any database (and consequently UI) updates are already multithreaded
-    public void onTextReceived() {
-        viewModel.insertEntity(new Message(MessageType.TEXT_RECEIVE,
-                "text to receive",
-                DateTimeHelper.fetchDateTime(),
-                null,
-                "alias")
-        );
-    }
-
-    public void onImageReceived() {
-        viewModel.insertEntity(new Message(MessageType.IMAGE_RECEIVE,
-                "image uri from mediastore",
-                DateTimeHelper.fetchDateTime(),
-                null,
-                "alias")
-        );
     }
 
 }
