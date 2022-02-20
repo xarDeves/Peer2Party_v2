@@ -11,8 +11,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import networker.RoomKnowledge;
-import networker.discovery.io.PeerReceiver;
-import networker.discovery.io.PeerSender;
+import networker.discovery.io.announcers.PeerAnnouncer;
+import networker.discovery.io.receivers.PeerReceiver;
 import networker.discovery.servers.PeerServer;
 import networker.exceptions.InvalidPortValueException;
 import networker.helpers.NetworkInformation;
@@ -40,7 +40,7 @@ import networker.sockets.ServerSocketAdapter;
  *
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
-public class Discoverer implements PeerDiscoverer {
+public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
     private static final int BO_TIMEOUT_MILLIS_HIGH_SPEED = 50;
     private static final int BO_TIMEOUT_MILLIS = 2000;
     private static final int SS_TIMEOUT_MILLIS = 1000;
@@ -48,7 +48,7 @@ public class Discoverer implements PeerDiscoverer {
     private final int BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION;
 
     private final PeerReceiver receiver;
-    private final PeerSender sender;
+    private final PeerAnnouncer sender;
     private final PeerServer inboundServer;
 
     private final DatagramSocket udpSocket;
@@ -57,14 +57,14 @@ public class Discoverer implements PeerDiscoverer {
 
     private final RoomKnowledge room;
 
-    public Discoverer(PeerReceiver recv, PeerSender sendr, PeerServer peerServer,
-                      ServerSocketAdapter ss, DatagramSocket ms, NetworkInformation info,
-                      RoomKnowledge roomKnowledge, int HIGH_SPEED_MILLIS) {
+    public MulticastGroupPeerDiscoverer(PeerReceiver recv, PeerAnnouncer sendr, PeerServer peerServer,
+                                        ServerSocketAdapter ss, DatagramSocket ds, NetworkInformation info,
+                                        RoomKnowledge roomKnowledge, int HIGH_SPEED_MILLIS) {
         receiver = recv;
         sender = sendr;
         inboundServer = peerServer;
 
-        udpSocket = ms;
+        udpSocket = ds;
         serverSocket = ss;
         room = roomKnowledge;
 

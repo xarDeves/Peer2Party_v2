@@ -1,21 +1,40 @@
 package networker.messages.content.providers;
 
+import java.io.IOException;
+
+import networker.helpers.NetworkUtilities;
 import networker.messages.content.ContentProvider;
 
-public class MultimediaProvider implements ContentProvider<Object, String> {
-    //TODO
+public class MultimediaProvider implements ContentProvider<String, String> {
 
-    public void insertHeader(Object o) {
+    private final byte[] bNameArray;
+    private int startingNameIndex = 0;
 
+    public MultimediaProvider(int headerSize, long bodySize) {
+        bNameArray = new byte[headerSize];
     }
 
-    public void insertFile(byte[] buffer) {
-
+    public void pre(String fname) throws IOException {
+        //TODO create file in disk
     }
 
+    public void insertHeader(byte[] buffer, int count) {
+        System.arraycopy(buffer, 0, bNameArray, startingNameIndex, count);
+        startingNameIndex += count;
+    }
+
+    public void insertBody(byte[] buffer, int count) {
+        //TODO write to disk
+    }
+
+    public void post() throws IOException {
+        //TODO complete whatever, close file etc.
+    }
+
+    //TODO return bare filename
     @Override
     public String getHeader() {
-        return null;
+        return NetworkUtilities.convertBytesToUTF8String(bNameArray);
     }
 
     //TODO return URI
@@ -25,7 +44,7 @@ public class MultimediaProvider implements ContentProvider<Object, String> {
     }
 
     @Override
-    public int getTotalSize() {
+    public long getTotalSize() {
         return 0;
     }
 }

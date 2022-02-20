@@ -13,7 +13,7 @@ import networker.messages.content.procurers.TextProcurer;
 public class ContentProcurerFactory {
     public static ContentProcurer createProcurer(MessageDeclaration mdl) throws FileNotFoundException {
         if (mdl.getContentType().isFile())
-            return new MultimediaProcurer(mdl.getF().getName(), mdl.getF(), MULTIMEDIA_BLOCK_SIZE);
+            return new MultimediaProcurer(mdl.getFile().getName(), mdl.getFile(), MULTIMEDIA_BLOCK_SIZE);
 
         return new TextProcurer(mdl.getBody(), TEXT_BLOCK_SIZE);
     }

@@ -4,7 +4,7 @@ import java.io.File;
 
 public class MessageDeclaration {
     private final int headerSize;
-    private final int contentSize;
+    private final int bodySize;
     private final MessageType contentType;
     
     private final String header;
@@ -12,8 +12,8 @@ public class MessageDeclaration {
     private final File f;
     
     public MessageDeclaration(String header, String body, File f,
-                              int contentSize, MessageType contentType, int headerSize) {
-        this.contentSize = contentSize;
+                              int headerSize, int bodySize, MessageType contentType) {
+        this.bodySize = bodySize;
         this.contentType = contentType;
         this.headerSize = headerSize;
 
@@ -22,8 +22,8 @@ public class MessageDeclaration {
         this.f = f;
     }
 
-    public MessageDeclaration(int contentSize, MessageType contentType, int headerSize) {
-        this.contentSize = contentSize;
+    public MessageDeclaration(int headerSize, int bodySize, MessageType contentType) {
+        this.bodySize = bodySize;
         this.contentType = contentType;
         this.headerSize = headerSize;
 
@@ -32,8 +32,8 @@ public class MessageDeclaration {
         this.f = null;
     }
 
-    public MessageDeclaration(int contentSize, MessageType contentType) {
-        this.contentSize = contentSize;
+    public MessageDeclaration(int bodySize, MessageType contentType) {
+        this.bodySize = bodySize;
         this.contentType = contentType;
 
         this.headerSize = 0;
@@ -48,8 +48,8 @@ public class MessageDeclaration {
         throw new NullPointerException("No filenameSize exists");
     }
 
-    public int getContentSize() {
-        return contentSize;
+    public long getBodySize() {
+        return bodySize;
     }
 
     public MessageType getContentType() {
@@ -64,7 +64,7 @@ public class MessageDeclaration {
         return body;
     }
 
-    public File getF() {
+    public File getFile() {
         return f;
     }
 }

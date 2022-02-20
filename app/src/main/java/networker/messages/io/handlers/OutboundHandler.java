@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import networker.RoomKnowledge;
 import networker.exceptions.InvalidPortValueException;
+import networker.helpers.NetworkUtilities;
 import networker.messages.content.ContentProcurer;
 import networker.peers.User;
 
@@ -23,17 +24,17 @@ public class OutboundHandler {
 
     public void handle() {
         try {
-            createConnectionIfThereIsNone();
+            NetworkUtilities.createConnectionIfThereIsNone(user);
         } catch (IOException | InterruptedException | InvalidPortValueException e) {
             Log.d("networker", "couldn't createConnectionIfThereIsNone", e);
         }
 
         try {
-            user.lock();
+            user.sendLock();
             DataOutputStream dos = user.getCurrentUserSocket().getDataOutputStream();
             sendHeader(dos);
             sendBody(dos);
-            user.unlock();
+            user.sendUnlock();
 
             procurer.close();
 
@@ -43,12 +44,6 @@ public class OutboundHandler {
         } catch (InterruptedException | IOException e) {
             Log.d("networker", "OutboundHandler failed uid " + user.getIDENTIFIER(), e);
         }
-    }
-
-    private void createConnectionIfThereIsNone() throws IOException, InterruptedException, InvalidPortValueException {
-        if (user.isUsable()) return;
-
-        user.createUserSocket();
     }
 
     private void sendHeader(DataOutputStream dos) throws IOException {

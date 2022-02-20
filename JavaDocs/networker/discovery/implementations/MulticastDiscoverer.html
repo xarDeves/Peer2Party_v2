@@ -97,7 +97,7 @@ var activeTableTab = "activeTableTab";
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>networker.discovery.discoverers.Discoverer</li>
+<li>networker.discovery.discoverers.MulticastGroupPeerDiscoverer</li>
 </ul>
 </li>
 </ul>
@@ -140,7 +140,7 @@ implements networker.discovery.discoverers.PeerDiscoverer</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#netInfo">netInfo</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>private networker.discovery.io.PeerReceiver</code></td>
+<td class="colFirst"><code>private networker.discovery.io.receivers.PeerReceiver</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#receiver">receiver</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
@@ -148,7 +148,7 @@ implements networker.discovery.discoverers.PeerDiscoverer</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#room">room</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>private networker.discovery.io.PeerSender</code></td>
+<td class="colFirst"><code>private networker.discovery.io.announcers.PeerAnnouncer</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#sender">sender</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
@@ -267,7 +267,7 @@ implements networker.discovery.discoverers.PeerDiscoverer</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>receiver</h4>
-<pre>private final&nbsp;networker.discovery.io.PeerReceiver receiver</pre>
+<pre>private final&nbsp;networker.discovery.io.receivers.PeerReceiver receiver</pre>
 </li>
 </ul>
 <a name="room">
@@ -285,7 +285,7 @@ implements networker.discovery.discoverers.PeerDiscoverer</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>sender</h4>
-<pre>private final&nbsp;networker.discovery.io.PeerSender sender</pre>
+<pre>private final&nbsp;networker.discovery.io.announcers.PeerAnnouncer sender</pre>
 </li>
 </ul>
 <a name="serverSocket">
@@ -306,7 +306,7 @@ implements networker.discovery.discoverers.PeerDiscoverer</pre>
 <pre>private static final&nbsp;int SO_TIMEOUT_MILLIS</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../../constant-values.html#networker.discovery.discoverers.Discoverer.SO_TIMEOUT_MILLIS">Constant Field Values</a></dd>
+<dd><a href="../../../constant-values.html#networker.discovery.discoverers.MulticastGroupPeerDiscoverer.SO_TIMEOUT_MILLIS">Constant Field Values</a></dd>
 </dl>
 </li>
 </ul>
@@ -328,7 +328,7 @@ implements networker.discovery.discoverers.PeerDiscoverer</pre>
 <pre>private static final&nbsp;int SS_TIMEOUT_MILLIS</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../../constant-values.html#networker.discovery.discoverers.Discoverer.SS_TIMEOUT_MILLIS">Constant Field Values</a></dd>
+<dd><a href="../../../constant-values.html#networker.discovery.discoverers.MulticastGroupPeerDiscoverer.SS_TIMEOUT_MILLIS">Constant Field Values</a></dd>
 </dl>
 </li>
 </ul>
@@ -340,14 +340,14 @@ implements networker.discovery.discoverers.PeerDiscoverer</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="MulticastDiscoverer-networker.discovery.io.PeerReceiver-networker.discovery.io.PeerSender-networker.discovery.servers.PeerServer-networker.sockets.ServerSocketAdapter-java.net.MulticastSocket-networker.helpers.NetworkInformation-networker.RoomKnowledge-">
+<a name="MulticastDiscoverer-networker.discovery.io.receivers.PeerReceiver-networker.discovery.io.announcers.PeerAnnouncer-networker.discovery.servers.PeerServer-networker.sockets.ServerSocketAdapter-java.net.MulticastSocket-networker.helpers.NetworkInformation-networker.RoomKnowledge-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>MulticastDiscoverer</h4>
-<pre>public&nbsp;MulticastDiscoverer(networker.discovery.io.PeerReceiver&nbsp;recv,
-                           networker.discovery.io.PeerSender&nbsp;sendr,
+<pre>public&nbsp;MulticastDiscoverer(networker.discovery.io.receivers.PeerReceiver&nbsp;recv,
+                           networker.discovery.io.announcers.PeerAnnouncer&nbsp;sendr,
                            networker.discovery.servers.PeerServer&nbsp;peerServer,
                            networker.sockets.ServerSocketAdapter&nbsp;ss,
                            java.net.MulticastSocket&nbsp;ms,

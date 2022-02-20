@@ -1,4 +1,4 @@
-package networker.messages.io.processors;
+package networker.messages.io.processors.outbound;
 
 import networker.messages.MessageIntent;
 

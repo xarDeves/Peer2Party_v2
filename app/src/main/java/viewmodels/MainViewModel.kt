@@ -19,9 +19,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import networker.Model
 import networker.RoomKnowledge
-import networker.discovery.discoverers.Discoverer
-import networker.discovery.io.MulticastGroupReceiver
-import networker.discovery.io.MulticastGroupSender
+import networker.discovery.discoverers.MulticastGroupPeerDiscoverer
+import networker.discovery.io.receivers.MulticastGroupPeerReceiver
+import networker.discovery.io.announcers.MulticastGroupPeerAnnouncer
 import networker.discovery.servers.InboundConnectionServer
 import networker.helpers.NetworkInformation
 import networker.helpers.NetworkUtilities
@@ -96,19 +96,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         roomWrapper = RoomWrapper()
         val serverSocketAdapter = ServerSocketAdapter(networkInetAddress, serverPort, 50)
         val inboundConnectionServer = InboundConnectionServer()
-        val multicastGroupSender = MulticastGroupSender(ourself)
-        val multicastGroupReceiver = MulticastGroupReceiver()
+        val multicastGroupSender =
+            MulticastGroupPeerAnnouncer(ourself)
+        val multicastGroupReceiver =
+            MulticastGroupPeerReceiver()
 
-        val discoverer = Discoverer(
-            multicastGroupReceiver,
-            multicastGroupSender,
-            inboundConnectionServer,
-            serverSocketAdapter,
-            multicastSocket,
-            networkInformation,
-            roomWrapper,
-            5_000
-        )
+        val discoverer =
+            MulticastGroupPeerDiscoverer(
+                multicastGroupReceiver,
+                multicastGroupSender,
+                inboundConnectionServer,
+                serverSocketAdapter,
+                multicastSocket,
+                networkInformation,
+                roomWrapper,
+                5_000
+            )
 
         discoverer.highSpeedDiscovery()
         while (true) discoverer.processOnce()

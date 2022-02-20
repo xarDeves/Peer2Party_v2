@@ -66,7 +66,7 @@ public class NetworkInformation {
         return ourselves;
     }
 
-    public static int getMessagePort() {
+    public int getMessagePort() {
         return messagePort;
     }
 

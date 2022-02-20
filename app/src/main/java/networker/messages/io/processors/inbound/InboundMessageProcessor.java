@@ -1,6 +1,4 @@
-package networker.messages.io.processors;
-
-import java.io.IOException;
+package networker.messages.io.processors.inbound;
 
 import networker.messages.MessageIntent;
 

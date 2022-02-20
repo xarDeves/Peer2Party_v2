@@ -1,4 +1,4 @@
-package networker.messages.io.processors;
+package networker.messages.io.processors.outbound;
 
 import android.util.Log;
 
@@ -42,8 +42,12 @@ public class OutboundProcessor implements OutboundMessageProcessor {
         }
         Iterator<MessageDeclaration> mdls = intent.getMessageDeclarations();
         for (MessageDeclaration mdl = mdls.next(); mdls.hasNext(); mdl = mdls.next()) {
-            if (mdl.getContentType().isFile()) { dbb.onMultimediaSend(mdl); break; }
-            else { dbb.onTextSend(mdl); }
+            if (mdl.getContentType().isFile()) {
+                dbb.onMultimediaSend(mdl);
+                break;
+            } else {
+                dbb.onTextSend(mdl);
+            }
         }
     }
 

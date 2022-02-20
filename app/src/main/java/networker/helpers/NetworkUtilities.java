@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -106,7 +107,7 @@ public class NetworkUtilities {
     private static JSONObject getSingularMessageDeclaration(MessageDeclaration messageDeclaration) throws JSONException {
         JSONObject declaration = new JSONObject();
 
-        declaration.put(JSON_MCONTENT_SIZE, messageDeclaration.getContentSize());
+        declaration.put(JSON_MCONTENT_SIZE, messageDeclaration.getBodySize());
         declaration.put(JSON_MCONTENT_TYPE, messageDeclaration.getContentType().toInt());
 
         if (messageDeclaration.getContentType().isFile())
@@ -145,7 +146,7 @@ public class NetworkUtilities {
         MessageType messageType = MessageType.intToMessageType(jObj.getInt(JSON_MCONTENT_TYPE));
 
         if (messageType.isFile())
-            return new MessageDeclaration(contentSize, messageType, jObj.getInt(JSON_MTITLE_SIZE));
+            return new MessageDeclaration(jObj.getInt(JSON_MTITLE_SIZE), contentSize, messageType);
 
         return new MessageDeclaration(contentSize, messageType);
     }
@@ -155,8 +156,17 @@ public class NetworkUtilities {
         return s.getInetAddress() == u.getLogicalAddress();
     }
 
-    public static HashMap<String, NetworkInterface> getViableNetworkInterfaces() {
+    public static boolean portIsValid(int p) {
+        return p > 0 && p < 65535;
+    }
 
+    public static void createConnectionIfThereIsNone(User u) throws IOException, InterruptedException, InvalidPortValueException {
+        if (u.isUsable()) return;
+
+        u.createUserSocket();
+    }
+
+    public static HashMap<String, NetworkInterface> getViableNetworkInterfaces() {
         HashMap<String, NetworkInterface> networkInterfaces = new HashMap<>();
 
         // https://stackoverflow.com/a/6238459/10007109
@@ -189,10 +199,5 @@ public class NetworkUtilities {
         }
 
         return networkInterfaces;
-
-    }
-
-    public static boolean portIsValid(int p) {
-        return p > 0 && p < 65535;
     }
 }

@@ -18,7 +18,9 @@ public class User {
     // because currently the class is ginormous
 
     /* -------------------------- SYNCHRONIZATION STUFF ------------------------ */
-    private static final int TOTAL_LOCKS = 2;
+    private static final int TOTAL_LOCKS = 3;
+    private static final int RECEIVE_LOCKS = 2;
+    private static final int SEND_LOCKS = 1;
     private final Semaphore ioLock = new Semaphore(TOTAL_LOCKS);
 
     // holds essential data for each user in the group (IPV6 only)
@@ -65,11 +67,27 @@ public class User {
     }
 
     public void lock() throws InterruptedException {
-        ioLock.acquire();
+        ioLock.acquire(TOTAL_LOCKS);
+    }
+
+    public void receiveLock() throws InterruptedException {
+        ioLock.acquire(RECEIVE_LOCKS);
+    }
+
+    public void sendLock() throws InterruptedException {
+        ioLock.acquire(SEND_LOCKS);
+    }
+
+    public void receiveUnlock() throws InterruptedException {
+        ioLock.release(RECEIVE_LOCKS);
+    }
+
+    public void sendUnlock() throws InterruptedException {
+        ioLock.release(SEND_LOCKS);
     }
 
     public void unlock() {
-        ioLock.release();
+        ioLock.release(TOTAL_LOCKS);
     }
 
     public void createUserSocket() throws IOException, InvalidPortValueException, InterruptedException {

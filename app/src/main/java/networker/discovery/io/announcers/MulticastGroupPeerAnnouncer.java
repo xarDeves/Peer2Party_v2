@@ -1,4 +1,4 @@
-package networker.discovery.io;
+package networker.discovery.io.announcers;
 
 import android.util.Log;
 
@@ -19,12 +19,12 @@ import networker.peers.User;
  * source:
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
-public class MulticastGroupSender implements PeerSender {
+public class MulticastGroupPeerAnnouncer implements PeerAnnouncer {
     // this must later run as a client (send only when prompted)
     // this must have the input of ourself (the current user)
     private final User ourself;
 
-    public MulticastGroupSender(User user) {
+    public MulticastGroupPeerAnnouncer(User user) {
         ourself = user;
     }
 

@@ -56,7 +56,7 @@ public class RoomKnowledge {
     public void incrementMessageReceived() {
         totalMessagesReceived.incrementAndGet();
     }
-    public void increaseContentSizeReceived(int byteCount) {
+    public void increaseContentSizeReceived(long byteCount) {
         totalContentSizeReceived.getAndAdd(byteCount);
     }
     public int getMessageReceivedCount() {

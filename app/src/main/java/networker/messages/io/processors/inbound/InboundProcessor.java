@@ -1,12 +1,15 @@
-package networker.messages.io.processors;
+package networker.messages.io.processors.inbound;
 
 import androidx.annotation.NonNull;
 
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 
 import helpers.DatabaseBridge;
 import networker.RoomKnowledge;
+import networker.messages.MessageDeclaration;
 import networker.messages.MessageIntent;
+import networker.messages.io.handlers.InboundHandler;
 
 public class InboundProcessor implements InboundMessageProcessor {
     private final ExecutorService executor;
@@ -23,8 +26,12 @@ public class InboundProcessor implements InboundMessageProcessor {
     }
 
     @Override
-    public void receive(MessageIntent mi) {
-
-        //TODO sum data received to rk
+    public void receive(@NonNull MessageIntent mi) {
+        executor.execute(() -> {
+            Iterator<MessageDeclaration> mdls = mi.getMessageDeclarations();
+            for (MessageDeclaration mdl = mdls.next(); mdls.hasNext(); mdl = mdls.next()) {
+                (new InboundHandler(mdl, rk.getPeer(mi.getSource()).getUser(), rk, dbb)).handle();
+            }
+        });
     }
 }

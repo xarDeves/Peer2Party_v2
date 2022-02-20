@@ -8,5 +8,5 @@ import networker.messages.MessageIntent;
 public interface MessageManager {
     void discover() throws IOException;
     void receive(MessageIntent mi);
-    void send(MessageIntent mi);
+    void send(MessageIntent mi) throws IOException;
 }

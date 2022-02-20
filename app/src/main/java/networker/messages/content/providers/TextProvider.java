@@ -11,7 +11,7 @@ public class TextProvider implements ContentProvider<Object, String> {
     private int startingIndex = 0;
 
     public TextProvider(int bodyCount) {
-        bArray = new byte[bodyCount];
+            bArray = new byte[bodyCount];
     }
 
     public void insertData(byte[] buffer, int count) {
@@ -32,7 +32,7 @@ public class TextProvider implements ContentProvider<Object, String> {
     }
 
     @Override
-    public int getTotalSize() {
-        return 0;
+    public long getTotalSize() {
+        return NetworkUtilities.convertBytesToUTF8String(bArray).length();
     }
 }
