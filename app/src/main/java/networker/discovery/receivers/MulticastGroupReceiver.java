@@ -5,6 +5,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -24,10 +25,11 @@ import networker.helpers.NetworkUtilities;
 public class MulticastGroupReceiver implements PeerReceiver {
     // this must run as a server with a timed delay (15s receive, with a random +/- of 1s, then send twice)
 
-    public Queue<String> discoverPeers(DatagramSocket socket, final int timeToReceiveMillis) throws IOException {
+    public Queue<String> discoverPeers(DatagramSocket so, final int timeToReceiveMillis) throws IOException {
         // https://developer.android.com/reference/java/net/MulticastSocket
         // we must have joined the group (with the current socket) in order to receive messages
         // timeout must also be set BEFORE receiving...
+        MulticastSocket socket = (MulticastSocket) so;
 
         Queue<String> dataFound = new LinkedList<>();
 
@@ -38,7 +40,9 @@ public class MulticastGroupReceiver implements PeerReceiver {
             String s = "";
 
             try {
-                dataFound.add(receivePeerMulticast(socket));
+                String recvd = receivePeerMulticast(socket);
+                dataFound.add(recvd);
+                Log.d("networker", recvd);
             } catch (SocketTimeoutException e) {
                 Log.d("networker", "SocketTimeoutException", e);
             }
@@ -52,10 +56,11 @@ public class MulticastGroupReceiver implements PeerReceiver {
         return dataFound;
     }
 
-    private String receivePeerMulticast(DatagramSocket socket) throws IOException {
+    private String receivePeerMulticast(MulticastSocket socket) throws IOException {
         byte[] buffer = new byte[NetworkUtilities.DISCOVERY_BUFFER_SIZE];
         DatagramPacket recv = new DatagramPacket(buffer, buffer.length);
         socket.receive(recv);
+        Log.d("fuck", "recv.getLength() " + recv.getLength());
         return NetworkUtilities.convertBytesToUTF8String(buffer);
     }
 }

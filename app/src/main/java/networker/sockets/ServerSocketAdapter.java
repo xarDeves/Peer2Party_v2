@@ -28,6 +28,10 @@ public class ServerSocketAdapter {
         return socket.isClosed();
     }
 
+    public InetAddress getInetAddress() {
+        return socket.getInetAddress();
+    }
+
     public void close() throws IOException {
         socket.close();
     }

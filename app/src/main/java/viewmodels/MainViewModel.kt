@@ -63,53 +63,60 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     //you have achieved...L O K
     private fun initPeerDiscovery() {
-        Thread {
 
-            val wifi = getApplication<Application>().getSystemService(WIFI_SERVICE) as WifiManager
+        val wifi = getApplication<Application>().getSystemService(WIFI_SERVICE) as WifiManager
 
-            val lock = wifi.createMulticastLock("myLock")
-            lock.acquire()
+        val lock = wifi.createMulticastLock("myLock")
+        lock.acquire() // ACQUIRED
 
-            val netIfaces = NetworkUtilities.getViableNetworkInterfaces()
-            //TODO THIS GETS THE NETWORK IFACES. PLEASE, FOR THE LOVE OF GOD, GET THE INTERFACE REQUIRED, SOMEHOW, FROM THE USER
-            netIface = netIfaces["wlan0"]!!
-            networkInetAddress = netIface.inetAddresses.nextElement()
-            val serverPort = 7788
+        val netIfaces = NetworkUtilities.getViableNetworkInterfaces()
+        //TODO THIS GETS THE NETWORK IFACES. PLEASE, FOR THE LOVE OF GOD, GET THE INTERFACE REQUIRED, SOMEHOW, FROM THE USER
+        netIface = netIfaces["wlan0"]!!
+        networkInetAddress = netIface.inetAddresses.nextElement()
+        val serverPort = 7788
 
-            Log.d("fuck", netIface.displayName)
-            Log.d("fuck", networkInetAddress.toString())
+        Log.d("fuck", netIface.displayName)
+        Log.d("fuck", networkInetAddress.hostName)
+        Log.d("fuckingdiesKOTLINEDITION", "User: $username")
+        val ourself = User(networkInetAddress, username, serverPort, Status.AVAILABLE)
+        //for peer discovery
+        val networkInformation = NetworkInformation(netIface.toString(), ourself)
+        val discoverInetSocketAddress = InetSocketAddress(
+            networkInformation.multicastDiscoverGroup,
+            networkInformation.discoverPort
+        )
+        val multicastSocket = MulticastSocket(networkInformation.discoverPort)
+        multicastSocket.joinGroup(discoverInetSocketAddress, netIface)
+        multicastSocket.timeToLive = 255 // sidagi giatrou
+        multicastSocket.loopbackMode = false
+        multicastSocket.broadcast = true
 
-            val ourself = User(networkInetAddress, username, serverPort, Status.AVAILABLE)
+        roomWrapper = RoomWrapper()
+        val serverSocketAdapter = ServerSocketAdapter(networkInetAddress, serverPort, 50)
+        val inboundConnectionServer = InboundConnectionServer()
+        val multicastGroupSender = MulticastGroupSender(ourself)
+        val multicastGroupReceiver = MulticastGroupReceiver()
 
-            //for peer discovery
-            val networkInformation = NetworkInformation(netIface.toString(), ourself)
-            val inetSocketAddress = InetSocketAddress(networkInetAddress, 7778)
-            val multicastSocket = MulticastSocket(inetSocketAddress)
-            //FIXME specify network interface
-            multicastSocket.joinGroup(networkInformation.multicastDiscoverGroup)
+        val discoverer = Discoverer(
+            multicastGroupReceiver,
+            multicastGroupSender,
+            inboundConnectionServer,
+            serverSocketAdapter,
+            multicastSocket,
+            networkInformation,
+            roomWrapper,
+            5_000
+        )
 
-            roomWrapper = RoomWrapper()
-            val serverSocketAdapter = ServerSocketAdapter(networkInetAddress, serverPort, 50)
-            val inboundConnectionServer = InboundConnectionServer()
-            val multicastGroupSender = MulticastGroupSender(ourself)
-            val multicastGroupReceiver = MulticastGroupReceiver()
+        discoverer.highSpeedDiscovery()
+        while (true) discoverer.processOnce()
 
-            val discoverer = Discoverer(
-                multicastGroupReceiver,
-                multicastGroupSender,
-                inboundConnectionServer,
-                serverSocketAdapter,
-                multicastSocket,
-                networkInformation,
-                roomWrapper
-            )
-
-            while (true) discoverer.processOnce()
-        }.start()
     }
 
     init {
-        initPeerDiscovery()
+        Thread {
+            initPeerDiscovery()
+        }.start()
     }
 
     fun insertEntity(entity: Message) {
@@ -128,6 +135,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         override fun addPeer(p: Peer) {
             super.addPeer(p)
+            Log.d("xristos", "addViewModel: " + p.user.toString())
             peerList.add(p)
             peers.postValue(peerList)
         }

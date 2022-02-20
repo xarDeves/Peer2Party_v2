@@ -18,7 +18,6 @@ public class RoomKnowledge {
 
     public void addPeer(Peer p) {
         map.put(p.getUser().getIDENTIFIER(), p);
-        //call livedata post()
     }
 
     public void removePeer(Peer p) {

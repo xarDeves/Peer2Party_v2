@@ -36,7 +36,7 @@ public class MulticastGroupSender implements PeerSender {
         try {
             String s = NetworkUtilities.getUserSalutationJson(ourself);
             byte[] salutations = NetworkUtilities.convertUTF8StringToBytes(s);
-            DatagramPacket msg = NetworkUtilities.createDatagramPacket(salutations, info.getMulticastDiscoverGroup(), ourself.getPort());
+            DatagramPacket msg = NetworkUtilities.createDatagramPacket(salutations, info.getMulticastDiscoverGroup(), info.getDiscoverPort());
             // double send
             socket.send(msg);
             Log.d("networker", "Sent first, bLength " + salutations.length + " " + s);

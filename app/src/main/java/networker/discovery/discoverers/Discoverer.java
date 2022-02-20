@@ -26,25 +26,28 @@ import networker.sockets.ServerSocketAdapter;
 /**
  * ---------------------------- For multicast sender/receiver ----------------------------
  * Requires multicast permissions.
- *
+ * <p>
  * Requires acquiring WifiManager.MulticastLock.
  * Even then, depending on the device this might not work (it will either fail silently,
  * or with a bang depending on the device, we cannot know).
- *
+ * <p>
  * Requires the MulticastSocket to have joined the multicastDiscoverGroup of NetworkInformation
  * before passing it (with .joinGroup (SocketAddress mcastaddr, NetworkInterface netIf)
- *
+ * <p>
  * ---------------------------- For broadcast sender/receiver ----------------------------
- *
+ * <p>
  * N/A, currently doesn't require anything (there is no such impl yet)
- *
+ * <p>
  * source:
+ *
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
 public class Discoverer implements PeerDiscoverer {
-    private static final int BO_TIMEOUT_MILLIS = 5_000;
-    private static final int SS_TIMEOUT_MILLIS = 5_000;
-    private static final int SS_SO_TIMEOUT_MILLIS = 1_000;
+    private static final int BO_TIMEOUT_MILLIS_HIGH_SPEED = 50;
+    private static final int BO_TIMEOUT_MILLIS = 1000;
+    private static final int SS_TIMEOUT_MILLIS = 500;
+    private static final int SS_SO_TIMEOUT_MILLIS = 50;
+    private final int BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION;
 
     private final PeerReceiver receiver;
     private final PeerSender sender;
@@ -58,7 +61,7 @@ public class Discoverer implements PeerDiscoverer {
 
     public Discoverer(PeerReceiver recv, PeerSender sendr, PeerServer peerServer,
                       ServerSocketAdapter ss, DatagramSocket ms, NetworkInformation info,
-                      RoomKnowledge roomKnowledge) throws SocketException {
+                      RoomKnowledge roomKnowledge, int HIGH_SPEED_MILLIS) throws SocketException {
         receiver = recv;
         sender = sendr;
         inboundServer = peerServer;
@@ -71,28 +74,59 @@ public class Discoverer implements PeerDiscoverer {
         // FOR COMPLETENESS SAKE
         udpSocket.setSoTimeout(BO_TIMEOUT_MILLIS);
         serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
+
+        BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION = HIGH_SPEED_MILLIS;
+    }
+
+    public void highSpeedDiscovery() throws IOException {
+        long timeSpent = 0;
+        final long start = System.currentTimeMillis();
+        Queue<String> groupBroadcasts = new LinkedList<>();
+
+        while (timeSpent < BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION) {
+            sender.announce(udpSocket, netInfo);
+
+            groupBroadcasts.addAll(receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION));
+
+            long end = System.currentTimeMillis();
+            timeSpent = end - start;
+        }
+
+        LinkedList<User> usersFound = filterValidJSON(groupBroadcasts);
+        processUsers(usersFound);
     }
 
     public void processOnce() throws IOException {
+        sender.announce(udpSocket, netInfo);
+        inboundServer.listen(serverSocket, SS_SO_TIMEOUT_MILLIS, room);
         Queue<String> groupBroadcasts = receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS);
 
+        LinkedList<User> usersFound = filterValidJSON(groupBroadcasts);
+        processUsers(usersFound);
+    }
+
+    private LinkedList<User> filterValidJSON(Queue<String> groupBroadcasts) {
         LinkedList<User> usersFound = new LinkedList<>();
         for (String bCast : groupBroadcasts) {
-
             try {
+                Log.d("networker", "processOnce: " + bCast);
                 usersFound.add(NetworkUtilities.processUserSalutationJson(bCast));
             } catch (JSONException | UnknownHostException | InvalidPortValueException e) {
                 Log.d("networker", bCast, e);
             }
         }
+        return usersFound;
+    }
 
+    private void processUsers(LinkedList<User> usersFound) {
         for (User u : usersFound) {
-            processFoundUser(u);
+            try {
+                Log.d("networker", "FOUND AND PROCESSING " + u.getUsername());
+                processFoundUser(u);
+            } catch (IOException e) {
+                Log.e("networker", e.getMessage(), e);
+            }
         }
-
-        sender.announce(udpSocket, netInfo);
-
-        inboundServer.listen(serverSocket, SS_SO_TIMEOUT_MILLIS, room);
     }
 
     private void processFoundUser(User u) throws IOException {
@@ -109,10 +143,9 @@ public class Discoverer implements PeerDiscoverer {
     }
 
     private void processNewPeer(User u) throws IOException {
-        room.addPeer(new Peer(u));
-
         try {
             u.createUserSocket();
+            room.addPeer(new Peer(u));
         } catch (InvalidPortValueException e) {
             Log.d("networker", "u.createUserSocket()", e);
         }

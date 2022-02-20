@@ -7,7 +7,6 @@ import org.json.JSONException;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Objects;
 import java.util.concurrent.Semaphore;
 
 import networker.exceptions.InvalidPortValueException;
@@ -40,6 +39,7 @@ public class User {
 
         address = adr;
         username = name;
+        Log.d("fuckingdies", "User: " + name);
         port = p;
 
         instantiateID();
@@ -51,6 +51,7 @@ public class User {
 
         address = adr;
         username = name;
+        Log.d("fuckingdies", "User: " + name);
         port = p;
         status = st;
 
@@ -140,14 +141,11 @@ public class User {
     }
 
     public String getAddress() {
-        return address.toString();
+        return address.getHostName();
     }
 
     public InetAddress getLogicalAddress() {
         return address;
-    }    public boolean trueEquals(User u) {
-        //noinspection ConstantConditions
-        return Objects.equals(uniqueIndentifier, u.uniqueIndentifier);
     }
 
     private void instantiateID() {
@@ -172,6 +170,7 @@ public class User {
         DataOutputStream os = currentUserSocket.getDataOutputStream();
         os.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.getUserSalutationJson(this)));
         os.flush();
+        os.close();
     }
 
     @Override

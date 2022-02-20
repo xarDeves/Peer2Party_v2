@@ -2,9 +2,11 @@ package adapters.peers
 
 import adapters.peers.viewholders.PeerViewHolder
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.peer2party.R
 import networker.peers.Peer
 
 class PeersRecyclerAdapter internal constructor(
@@ -14,13 +16,15 @@ class PeersRecyclerAdapter internal constructor(
 
     private var peers = emptyList<Peer>()
 
-    fun setPeers(peers: List<Peer>) {
+    fun setPeers(peers: ArrayList<Peer>) {
         this.peers = peers
+        Log.d("xristos", "recycler: " + peers.size.toString())
         notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val view = inflater.inflate(viewType, parent, false)
+        val view = inflater.inflate(R.layout.peer_inflatable, parent, false)
+        //return PeerViewHolder(inflater.inflate(R.layout.peer_inflatable, parent, false))
         return PeerViewHolder(view)
     }
 
@@ -31,7 +35,7 @@ class PeersRecyclerAdapter internal constructor(
         holder.peerName.text = currentPeer.user.username
 
         holder.checkBox.setOnClickListener {
-            currentPeer.isEnabled = true
+            currentPeer.isEnabled = !currentPeer.isEnabled
         }
     }
 

@@ -9,6 +9,7 @@ class MainViewPagerAdapter(
     private val fragments: Array<Fragment>,
     activity: AppCompatActivity
 ) : FragmentStateAdapter(activity) {
+
     override fun getItemCount(): Int {
         return fragments.size
     }

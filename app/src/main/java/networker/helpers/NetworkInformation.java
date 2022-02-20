@@ -9,6 +9,9 @@ import networker.peers.User;
 
 // placeholder name, must find something more specific...
 public class NetworkInformation {
+    private static final int discoverPort = 7778;
+    private static final int messagePort = 7798;
+
     public static final String multicastMessagesAddressv6 = "FF7E:230::1235";
     public static final String multicastMessagesAddressv4 = "230.0.0.2";
     private final InetAddress multicastMessagesGroup;
@@ -26,16 +29,17 @@ public class NetworkInformation {
         InetAddress multicastMessagesGroupTemp;
         InetAddress multicastDiscoverGroupTemp;
         try {
-            multicastDiscoverGroupTemp = InetAddress.getByName(multicastDiscoveryAddressv6);
-            multicastMessagesGroupTemp = InetAddress.getByName(multicastMessagesAddressv6);
+            multicastDiscoverGroupTemp = InetAddress.getByName(multicastDiscoveryAddressv4);
+            multicastMessagesGroupTemp = InetAddress.getByName(multicastMessagesAddressv4);
+
         } catch (UnknownHostException e) {
-            Log.d("networker", "v6 failed", e);
+            Log.d("networker", "v4 failed", e);
 
             try {
-                multicastDiscoverGroupTemp = InetAddress.getByName(multicastDiscoveryAddressv4);
-                multicastMessagesGroupTemp = InetAddress.getByName(multicastMessagesAddressv4);
+                multicastDiscoverGroupTemp = InetAddress.getByName(multicastDiscoveryAddressv6);
+                multicastMessagesGroupTemp = InetAddress.getByName(multicastMessagesAddressv6);
             } catch (UnknownHostException ex) {
-                Log.d("networker", "v4 failed", ex);
+                Log.d("networker", "v6 failed", ex);
 
                 throw ex;
             }
@@ -60,5 +64,13 @@ public class NetworkInformation {
 
     public User getOurselves() {
         return ourselves;
+    }
+
+    public static int getMessagePort() {
+        return messagePort;
+    }
+
+    public int getDiscoverPort() {
+        return discoverPort;
     }
 }

@@ -2,6 +2,7 @@ package fragments
 
 import adapters.peers.PeersRecyclerAdapter
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +29,7 @@ class PeerListFragment : Fragment() {
 
     private fun attachListeners() {
         viewModel.peers.observe(requireActivity()) {
+            Log.d("xristos", "observer: " + it.size.toString())
             peersAdapter.setPeers(it)
         }
     }
