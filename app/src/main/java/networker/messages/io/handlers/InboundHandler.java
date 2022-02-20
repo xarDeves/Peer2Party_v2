@@ -17,7 +17,7 @@ import networker.peers.User;
 
 public class InboundHandler {
     private final MessageDeclaration mdl;
-    private final User u;
+    private final User user;
     private final RoomKnowledge rk;
     private final DatabaseBridge dbb;
 
@@ -26,27 +26,32 @@ public class InboundHandler {
                           RoomKnowledge roomKnowledge, DatabaseBridge databaseBridge) {
 
         mdl = messageDeclaration;
-        u = user;
+        this.user = user;
         rk = roomKnowledge;
         dbb = databaseBridge;
     }
 
     public void handle() {
         try {
-            DataInputStream dis = u.getCurrentUserSocket().getDataInputStream();
+            user.receiveLock();
+            DataInputStream dis = user.getCurrentUserSocket().getDataInputStream();
 
             if (!mdl.getContentType().isFile()) readText(dis);
             if (mdl.getContentType().isFile()) readFile(dis);
+
+            user.receiveUnlock();
 
             rk.increaseContentSizeReceived(mdl.getBodySize());
             rk.incrementMessageReceived();
             Log.d("networker", "Receival successful! bodyize: " + mdl.getBodySize());
         } catch (OversizedTextMessage otm) {
-            Log.d("networker", "Oversized text message w/ bodysize " + mdl.getBodySize() + " from " + u.getIDENTIFIER(), otm);
+            Log.d("networker", "Oversized text message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), otm);
         } catch (OversizedMultimediaMessage omm) {
-            Log.d("networker", "Oversized multimedia message w/ bodysize " + mdl.getBodySize() + " from " + u.getIDENTIFIER(), omm);
+            Log.d("networker", "Oversized multimedia message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), omm);
         } catch (IOException e) {
-            Log.d("networker" , "IOException w/ bodysize " + mdl.getBodySize() + " from " + u.getIDENTIFIER(), e);
+            Log.d("networker" , "IOException w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), e);
+        } catch (InterruptedException e) {
+            Log.d("networker", "InboundHandler interrupted uid " + user.getIDENTIFIER(), e);
         }
 
 
@@ -66,7 +71,7 @@ public class InboundHandler {
             provider.insertData(buffer, count);
         }
 
-        dbb.onTextReceived(provider, u);
+        dbb.onTextReceived(provider, user);
     }
 
     private void readFile(DataInputStream dis) throws OversizedMultimediaMessage, IOException {
@@ -101,7 +106,7 @@ public class InboundHandler {
 
         provider.post();
 
-        dbb.onMultimediaReceived(provider, u);
+        dbb.onMultimediaReceived(provider, user);
     }
 
 }

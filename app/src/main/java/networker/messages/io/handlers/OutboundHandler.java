@@ -41,7 +41,9 @@ public class OutboundHandler {
             rk.increaseContentSizeSent(procurer.getTotalSize());
             rk.incrementMessagesSent();
             Log.d("networker", "Successfully sent to " + user.getIDENTIFIER());
-        } catch (InterruptedException | IOException e) {
+        } catch (InterruptedException e) {
+            Log.d("networker", "OutboundHandler interrupted uid " + user.getIDENTIFIER(), e);
+        } catch (IOException e) {
             Log.d("networker", "OutboundHandler failed uid " + user.getIDENTIFIER(), e);
         }
     }
