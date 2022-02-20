@@ -44,8 +44,8 @@ import networker.sockets.ServerSocketAdapter;
  */
 public class Discoverer implements PeerDiscoverer {
     private static final int BO_TIMEOUT_MILLIS_HIGH_SPEED = 50;
-    private static final int BO_TIMEOUT_MILLIS = 1000;
-    private static final int SS_TIMEOUT_MILLIS = 500;
+    private static final int BO_TIMEOUT_MILLIS = 2000;
+    private static final int SS_TIMEOUT_MILLIS = 1000;
     private static final int SS_SO_TIMEOUT_MILLIS = 50;
     private final int BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION;
 
@@ -72,21 +72,22 @@ public class Discoverer implements PeerDiscoverer {
 
         netInfo = info;
         // FOR COMPLETENESS SAKE
-        udpSocket.setSoTimeout(BO_TIMEOUT_MILLIS);
-        serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
+
 
         BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION = HIGH_SPEED_MILLIS;
     }
 
+    @Override
     public void highSpeedDiscovery() throws IOException {
         long timeSpent = 0;
         final long start = System.currentTimeMillis();
         Queue<String> groupBroadcasts = new LinkedList<>();
+        udpSocket.setSoTimeout(BO_TIMEOUT_MILLIS_HIGH_SPEED);
 
         while (timeSpent < BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION) {
             sender.announce(udpSocket, netInfo);
 
-            groupBroadcasts.addAll(receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION));
+            groupBroadcasts.addAll(receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS_HIGH_SPEED));
 
             long end = System.currentTimeMillis();
             timeSpent = end - start;
@@ -96,7 +97,11 @@ public class Discoverer implements PeerDiscoverer {
         processUsers(usersFound);
     }
 
+    @Override
     public void processOnce() throws IOException {
+        udpSocket.setSoTimeout(BO_TIMEOUT_MILLIS);
+        serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
+
         sender.announce(udpSocket, netInfo);
         inboundServer.listen(serverSocket, SS_SO_TIMEOUT_MILLIS, room);
         Queue<String> groupBroadcasts = receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS);
@@ -151,21 +156,12 @@ public class Discoverer implements PeerDiscoverer {
         }
     }
 
-    private void processExistingPeer(User u) throws IOException {
+    private void processExistingPeer(User u) {
         User uExisting = room.getPeer(u.getIDENTIFIER()).getUser();
         if (uExisting.equals(u)) return; //ignore if it's completely the same and nothing changed
 
         uExisting.setStatus(u.getStatus()); // set the status to the new one
 
-        //update existing information if anything changed
-        if (uExisting.updateNetworkData(u)) {
-            try {
-                //update socket if port changed
-                uExisting.createUserSocket();
-            } catch (InvalidPortValueException e) {
-                Log.d("networker", "u.createUserSocket() 2", e);
-            }
-        }
     }
 
 }

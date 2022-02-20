@@ -21,7 +21,7 @@ public class User {
     private String IDENTIFIER;
 
     private final InetAddress address;
-    private int port; // this is the SSL receive/send port of the user, and CAN change
+    private final int port;
     private SocketAdapter currentUserSocket = null;
 
     private final Semaphore ioLock = new Semaphore(TOTAL_LOCKS);
@@ -56,10 +56,6 @@ public class User {
         status = st;
 
         instantiateID();
-    }
-
-    public void setPort(int port) {
-        this.port = port;
     }
 
     public boolean isUsable() {
@@ -154,16 +150,6 @@ public class User {
 
     public String getIDENTIFIER() {
         return IDENTIFIER;
-    }
-
-    public boolean updateNetworkData(User u) {
-        if (!NetworkUtilities.portIsValid(u.getPort())) return false; //change nothing, invalid port
-
-        boolean changed = u.getPort() != port;
-
-        port = u.getPort();
-
-        return changed;
     }
 
     public void sendSalutation() throws IOException, JSONException {
