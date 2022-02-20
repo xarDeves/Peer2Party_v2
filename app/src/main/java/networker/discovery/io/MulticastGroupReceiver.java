@@ -1,4 +1,4 @@
-package networker.discovery.receivers;
+package networker.discovery.io;
 
 import android.util.Log;
 
@@ -10,7 +10,6 @@ import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import networker.discovery.PeerReceiver;
 import networker.helpers.NetworkUtilities;
 
 /**

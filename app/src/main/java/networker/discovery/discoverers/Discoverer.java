@@ -12,10 +12,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import networker.RoomKnowledge;
-import networker.discovery.PeerDiscoverer;
-import networker.discovery.PeerReceiver;
-import networker.discovery.PeerSender;
-import networker.discovery.PeerServer;
+import networker.discovery.io.PeerReceiver;
+import networker.discovery.io.PeerSender;
+import networker.discovery.servers.PeerServer;
 import networker.exceptions.InvalidPortValueException;
 import networker.helpers.NetworkInformation;
 import networker.helpers.NetworkUtilities;
@@ -46,7 +45,7 @@ public class Discoverer implements PeerDiscoverer {
     private static final int BO_TIMEOUT_MILLIS_HIGH_SPEED = 50;
     private static final int BO_TIMEOUT_MILLIS = 2000;
     private static final int SS_TIMEOUT_MILLIS = 1000;
-    private static final int SS_SO_TIMEOUT_MILLIS = 50;
+    private static final int SS_SO_TIMEOUT_MILLIS = 100;
     private final int BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION;
 
     private final PeerReceiver receiver;
@@ -97,6 +96,8 @@ public class Discoverer implements PeerDiscoverer {
         processUsers(usersFound);
     }
 
+    //TODO: rework this, so we're constantly listening the mcast in a new thread,
+    // and set the announce and inbound server listen on a different thread
     @Override
     public void processOnce() throws IOException {
         udpSocket.setSoTimeout(BO_TIMEOUT_MILLIS);
@@ -151,7 +152,7 @@ public class Discoverer implements PeerDiscoverer {
         try {
             u.createUserSocket();
             room.addPeer(new Peer(u));
-        } catch (InvalidPortValueException e) {
+        } catch (InvalidPortValueException | InterruptedException e) {
             Log.d("networker", "u.createUserSocket()", e);
         }
     }

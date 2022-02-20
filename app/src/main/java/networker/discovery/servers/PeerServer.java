@@ -1,4 +1,4 @@
-package networker.discovery;
+package networker.discovery.servers;
 
 import java.io.IOException;
 

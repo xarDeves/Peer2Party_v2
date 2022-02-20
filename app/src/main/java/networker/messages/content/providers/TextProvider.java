@@ -30,4 +30,9 @@ public class TextProvider implements ContentProvider<Object, String> {
     public String getData() {
         return NetworkUtilities.convertBytesToUTF8String(bArray);
     }
+
+    @Override
+    public int getTotalSize() {
+        return 0;
+    }
 }

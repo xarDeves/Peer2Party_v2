@@ -1,4 +1,4 @@
-package networker.io.discoverers;
+package networker.messages.io.discoverers;
 
 public class DeclarationDiscoverer {
     //TODO

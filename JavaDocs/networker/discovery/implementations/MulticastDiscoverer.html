@@ -106,13 +106,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>networker.discovery.PeerDiscoverer</dd>
+<dd>networker.discovery.discoverers.PeerDiscoverer</dd>
 </dl>
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">MulticastDiscoverer</span>
 extends java.lang.Object
-implements networker.discovery.PeerDiscoverer</pre>
+implements networker.discovery.discoverers.PeerDiscoverer</pre>
 </li>
 </ul>
 </div>
@@ -132,7 +132,7 @@ implements networker.discovery.PeerDiscoverer</pre>
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>private networker.discovery.PeerServer</code></td>
+<td class="colFirst"><code>private networker.discovery.servers.PeerServer</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#inboundServer">inboundServer</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
@@ -140,7 +140,7 @@ implements networker.discovery.PeerDiscoverer</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#netInfo">netInfo</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>private networker.discovery.PeerReceiver</code></td>
+<td class="colFirst"><code>private networker.discovery.io.PeerReceiver</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#receiver">receiver</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
@@ -148,7 +148,7 @@ implements networker.discovery.PeerDiscoverer</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#room">room</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>private networker.discovery.PeerSender</code></td>
+<td class="colFirst"><code>private networker.discovery.io.PeerSender</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#sender">sender</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
@@ -182,9 +182,9 @@ implements networker.discovery.PeerDiscoverer</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#MulticastDiscoverer-networker.discovery.PeerReceiver-networker.discovery.PeerSender-networker.discovery.PeerServer-networker.sockets.ServerSocketAdapter-java.net.MulticastSocket-networker.helpers.NetworkInformation-networker.RoomKnowledge-">MulticastDiscoverer</a></span>(networker.discovery.PeerReceiver&nbsp;recv,
-                   networker.discovery.PeerSender&nbsp;sendr,
-                   networker.discovery.PeerServer&nbsp;peerServer,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../networker/discovery/implementations/MulticastDiscoverer.html#MulticastDiscoverer-networker.discovery.receivers.PeerReceiver-networker.discovery.receivers.PeerSender-networker.discovery.servers.PeerServer-networker.sockets.ServerSocketAdapter-java.net.MulticastSocket-networker.helpers.NetworkInformation-networker.RoomKnowledge-">MulticastDiscoverer</a></span>(networker.discovery.receivers.PeerReceiver&nbsp;recv,
+                   networker.discovery.receivers.PeerSender&nbsp;sendr,
+                   networker.discovery.servers.PeerServer&nbsp;peerServer,
                    networker.sockets.ServerSocketAdapter&nbsp;ss,
                    java.net.MulticastSocket&nbsp;ms,
                    networker.helpers.NetworkInformation&nbsp;info,
@@ -249,7 +249,7 @@ implements networker.discovery.PeerDiscoverer</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>inboundServer</h4>
-<pre>private final&nbsp;networker.discovery.PeerServer inboundServer</pre>
+<pre>private final&nbsp;networker.discovery.servers.PeerServer inboundServer</pre>
 </li>
 </ul>
 <a name="netInfo">
@@ -267,7 +267,7 @@ implements networker.discovery.PeerDiscoverer</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>receiver</h4>
-<pre>private final&nbsp;networker.discovery.PeerReceiver receiver</pre>
+<pre>private final&nbsp;networker.discovery.io.PeerReceiver receiver</pre>
 </li>
 </ul>
 <a name="room">
@@ -285,7 +285,7 @@ implements networker.discovery.PeerDiscoverer</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>sender</h4>
-<pre>private final&nbsp;networker.discovery.PeerSender sender</pre>
+<pre>private final&nbsp;networker.discovery.io.PeerSender sender</pre>
 </li>
 </ul>
 <a name="serverSocket">
@@ -340,15 +340,15 @@ implements networker.discovery.PeerDiscoverer</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="MulticastDiscoverer-networker.discovery.PeerReceiver-networker.discovery.PeerSender-networker.discovery.PeerServer-networker.sockets.ServerSocketAdapter-java.net.MulticastSocket-networker.helpers.NetworkInformation-networker.RoomKnowledge-">
+<a name="MulticastDiscoverer-networker.discovery.io.PeerReceiver-networker.discovery.io.PeerSender-networker.discovery.servers.PeerServer-networker.sockets.ServerSocketAdapter-java.net.MulticastSocket-networker.helpers.NetworkInformation-networker.RoomKnowledge-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>MulticastDiscoverer</h4>
-<pre>public&nbsp;MulticastDiscoverer(networker.discovery.PeerReceiver&nbsp;recv,
-                           networker.discovery.PeerSender&nbsp;sendr,
-                           networker.discovery.PeerServer&nbsp;peerServer,
+<pre>public&nbsp;MulticastDiscoverer(networker.discovery.io.PeerReceiver&nbsp;recv,
+                           networker.discovery.io.PeerSender&nbsp;sendr,
+                           networker.discovery.servers.PeerServer&nbsp;peerServer,
                            networker.sockets.ServerSocketAdapter&nbsp;ss,
                            java.net.MulticastSocket&nbsp;ms,
                            networker.helpers.NetworkInformation&nbsp;info,
@@ -420,7 +420,7 @@ implements networker.discovery.PeerDiscoverer</pre>
                                                  throws java.io.IOException</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>processOnce</code>&nbsp;in interface&nbsp;<code>networker.discovery.PeerDiscoverer</code></dd>
+<dd><code>processOnce</code>&nbsp;in interface&nbsp;<code>networker.discovery.discoverers.PeerDiscoverer</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.io.IOException</code></dd>
 </dl>

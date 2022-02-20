@@ -1,7 +1,7 @@
 package networker.messages.content.factories;
 
-import static networker.io.IOManager.MULTIMEDIA_BLOCK_SIZE;
-import static networker.io.IOManager.TEXT_BLOCK_SIZE;
+import static networker.messages.io.IOManager.MULTIMEDIA_BLOCK_SIZE;
+import static networker.messages.io.IOManager.TEXT_BLOCK_SIZE;
 
 import java.io.FileNotFoundException;
 

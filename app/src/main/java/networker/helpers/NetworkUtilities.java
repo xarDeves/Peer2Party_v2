@@ -115,7 +115,7 @@ public class NetworkUtilities {
         return declaration;
     }
 
-    public static MessageIntent processMessageDeclaration(String message) throws JSONException, InvalidPortValueException, UnknownHostException {
+    public static MessageIntent processMessageIntent(String message) throws JSONException, InvalidPortValueException, UnknownHostException {
         JSONObject jObj = new JSONObject(message);
         /* --------------- GET USER DECLARATION AND MESSAGE COUNT --------------- */
         User src = processUserSalutationJson(jObj.getJSONObject(JSON_USER_DECLARATION).toString());

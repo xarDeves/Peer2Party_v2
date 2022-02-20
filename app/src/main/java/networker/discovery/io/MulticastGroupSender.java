@@ -1,4 +1,4 @@
-package networker.discovery.receivers;
+package networker.discovery.io;
 
 import android.util.Log;
 
@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-import networker.discovery.PeerSender;
 import networker.helpers.NetworkInformation;
 import networker.helpers.NetworkUtilities;
 import networker.peers.User;

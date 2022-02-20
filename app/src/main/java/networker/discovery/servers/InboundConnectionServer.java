@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 
 import networker.RoomKnowledge;
-import networker.discovery.PeerServer;
 import networker.exceptions.InvalidPortValueException;
 import networker.helpers.NetworkUtilities;
 import networker.peers.Peer;
@@ -65,7 +64,11 @@ public class InboundConnectionServer implements PeerServer {
 
             //for some reason, an already known peer tries to refresh the connection with us, perhaps his side of comms died
             // refresh the connection even if the connection's fine on our end
-            knownUser.replaceSocket(client);
+            try {
+                knownUser.replaceSocket(client);
+            } catch (InterruptedException e) {
+                Log.d("networker", "InboundConnectionServer.handleUser", e);
+            }
         }
 
         if (!room.hasPeer(u)) room.addPeer(new Peer(u));

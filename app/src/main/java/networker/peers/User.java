@@ -14,7 +14,12 @@ import networker.helpers.NetworkUtilities;
 import networker.sockets.SocketAdapter;
 
 public class User {
+    //TODO split this class into interfaces, such as User Network Interface or something,
+    // because currently the class is ginormous
+
+    /* -------------------------- SYNCHRONIZATION STUFF ------------------------ */
     private static final int TOTAL_LOCKS = 2;
+    private final Semaphore ioLock = new Semaphore(TOTAL_LOCKS);
 
     // holds essential data for each user in the group (IPV6 only)
     /* -------------------------- NETWORK STUFF -------------------------------- */
@@ -23,8 +28,6 @@ public class User {
     private final InetAddress address;
     private final int port;
     private SocketAdapter currentUserSocket = null;
-
-    private final Semaphore ioLock = new Semaphore(TOTAL_LOCKS);
 
     /* ------------------------- AUTHENTICATION STUFF ------------------------- */
     // this is unused, and will remain so, until decentralized auth is added
@@ -48,7 +51,6 @@ public class User {
     public User(InetAddress adr, String name, int p, Status st) throws InvalidPortValueException {
         if (!NetworkUtilities.portIsValid(p)) throw new InvalidPortValueException();
 
-
         address = adr;
         username = name;
         Log.d("fuckingdies", "User: " + name);
@@ -59,16 +61,7 @@ public class User {
     }
 
     public boolean isUsable() {
-        return NetworkUtilities.portIsValid(port);
-    }
-
-    public boolean isOnline(SocketAdapter socket) {
-        // use created socket to test if the user's online
-        return false;
-    }
-
-    public boolean isActive() {
-        return ioLock.availablePermits() < TOTAL_LOCKS;
+        return NetworkUtilities.portIsValid(port) && !currentUserSocket.isClosed();
     }
 
     public void lock() throws InterruptedException {
@@ -79,7 +72,7 @@ public class User {
         ioLock.release();
     }
 
-    public void createUserSocket() throws IOException, InvalidPortValueException {
+    public void createUserSocket() throws IOException, InvalidPortValueException, InterruptedException {
         if (!isUsable()) throw new InvalidPortValueException();
         shutdown();
 
@@ -93,29 +86,21 @@ public class User {
 
     }
 
-    private void shutdown() throws IOException {
-        while (true) {
-            try {
-                ioLock.acquire();
-                if (currentUserSocket != null) {
-                    if (!currentUserSocket.isClosed()) currentUserSocket.close();
-                }
-                ioLock.release();
-                // if everything goes well, we'll be out of here in no time
-                //  if something goes bad... well, we might be stuck here a few times
-                break;
-
-            } catch (InterruptedException e) {
-                Log.d("networker.peers.User", "interrupted", e);
-            }
+    private void shutdown() throws IOException, InterruptedException {
+        ioLock.acquire(TOTAL_LOCKS);
+        if (currentUserSocket != null) {
+            if (!currentUserSocket.isClosed()) currentUserSocket.close();
         }
+        ioLock.release(TOTAL_LOCKS);
+        // if everything goes well, we'll be out of here in no time
+        //  if something goes bad... well, we might be stuck here a few times
     }
 
     public boolean connectionIsUsable() {
         return currentUserSocket != null && !currentUserSocket.isClosed();
     }
 
-    public void replaceSocket(SocketAdapter newSocket) throws IOException {
+    public void replaceSocket(SocketAdapter newSocket) throws IOException, InterruptedException {
         shutdown();
         currentUserSocket = newSocket;
     }
@@ -152,11 +137,14 @@ public class User {
         return IDENTIFIER;
     }
 
+    public SocketAdapter getCurrentUserSocket() {
+        return currentUserSocket;
+    }
+
     public void sendSalutation() throws IOException, JSONException {
-        DataOutputStream os = currentUserSocket.getDataOutputStream();
-        os.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.getUserSalutationJson(this)));
-        os.flush();
-        os.close();
+        DataOutputStream dos = currentUserSocket.getDataOutputStream();
+        dos.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.getUserSalutationJson(this)));
+        dos.flush();
     }
 
     @Override

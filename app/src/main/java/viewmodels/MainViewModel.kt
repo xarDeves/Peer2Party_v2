@@ -20,8 +20,8 @@ import kotlinx.coroutines.withContext
 import networker.Model
 import networker.RoomKnowledge
 import networker.discovery.discoverers.Discoverer
-import networker.discovery.receivers.MulticastGroupReceiver
-import networker.discovery.receivers.MulticastGroupSender
+import networker.discovery.io.MulticastGroupReceiver
+import networker.discovery.io.MulticastGroupSender
 import networker.discovery.servers.InboundConnectionServer
 import networker.helpers.NetworkInformation
 import networker.helpers.NetworkUtilities
