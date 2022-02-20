@@ -65,8 +65,6 @@ public class InboundConnectionServer implements PeerServer {
 
             //for some reason, an already known peer tries to refresh the connection with us, perhaps his side of comms died
             // refresh the connection even if the connection's fine on our end
-
-            knownUser.updateNetworkData(u);
             knownUser.replaceSocket(client);
         }
 

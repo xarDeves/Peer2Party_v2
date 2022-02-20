@@ -27,7 +27,7 @@ import networker.sockets.SocketAdapter;
 
 public class NetworkUtilities {
 
-    public static final int DISCOVERY_BUFFER_SIZE = 2048; // in bytes, 2048 == 2 kilobytes
+    public static final int DISCOVERY_BUFFER_SIZE = 256; // in bytes, 256 == 2 kilobytes
 
     public static final String JSON_ADDRESS_IP = "address";
     public static final String JSON_ADDRESS_PORT = "port";
@@ -35,7 +35,7 @@ public class NetworkUtilities {
     public static final String JSON_ADDRESS_STATUS = "status";
 
     // users should also declare themselves along with the message declaration(s)
-    public static final int MAX_MESSAGE_DECLARATION_BUFFER_SIZE = 8192 + DISCOVERY_BUFFER_SIZE;
+    public static final int MAX_MESSAGE_DECLARATION_BUFFER_SIZE = 2048 + DISCOVERY_BUFFER_SIZE;
 
     public static final String JSON_USER_DECLARATION = "declr";
     public static final String JSON_MESSAGE_COUNT = "count";
