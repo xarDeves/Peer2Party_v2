@@ -29,9 +29,7 @@ public class InboundProcessor implements InboundMessageProcessor {
     public void receive(@NonNull MessageIntent mi) {
         executor.execute(() -> {
             Iterator<MessageDeclaration> mdls = mi.getMessageDeclarations();
-            for (MessageDeclaration mdl = mdls.next(); mdls.hasNext(); mdl = mdls.next()) {
-                (new InboundHandler(mdl, rk.getPeer(mi.getSource()).getUser(), rk, dbb)).handle();
-            }
+            while(mdls.hasNext()) (new InboundHandler(mdls.next(), rk.getPeer(mi.getSource()).getUser(), rk, dbb)).handle();
         });
     }
 }

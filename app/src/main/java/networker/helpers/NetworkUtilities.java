@@ -95,7 +95,8 @@ public class NetworkUtilities {
 
         /* --------------- PUT MESSAGE DECLARATIONS --------------- */
         int count = 0;
-        for (Iterator<MessageDeclaration> it = msg.getMessageDeclarations(); it.hasNext(); ) {
+        Iterator<MessageDeclaration> it = msg.getMessageDeclarations();
+        while (it.hasNext()) {
             MessageDeclaration mdl = it.next();
             // json of jsons
             declaration.put(String.valueOf(count), getSingularMessageDeclaration(mdl));
