@@ -4,7 +4,8 @@ import data.Message
 import data.MessageType
 import helpers.DateTimeHelper.fetchDateTime
 import networker.messages.MessageDeclaration
-import networker.messages.content.ContentProvider
+import networker.messages.content.providers.MultimediaProvider
+import networker.messages.content.providers.TextProvider
 import networker.peers.User
 import viewmodels.MainViewModel
 
@@ -13,15 +14,7 @@ class DatabaseBridgeImpl(
     private val viewModel: MainViewModel
 ) : DatabaseBridge {
 
-    //multimedia :
-    //provider.header = payload
-    //provider.body = empty
-
-    //text:
-    //provider.header = empty
-    //provider.body = text
-
-    override fun onTextReceived(provider: ContentProvider<Any, String>, user: User) {
+    override fun onTextReceived(provider: TextProvider, user: User) {
         viewModel.insertEntity(
             Message(
                 MessageType.TEXT_RECEIVE,
@@ -34,14 +27,16 @@ class DatabaseBridgeImpl(
     }
 
     override fun onTextSend(msgDecl: MessageDeclaration) {
-        TODO("Not yet implemented")
+        viewModel.insertEntity(
+            Message(MessageType.TEXT_SEND, msgDecl.body, fetchDateTime())
+        )
     }
 
-    override fun onMultimediaReceived(provider: ContentProvider<String, Any>, user: User) {
+    override fun onMultimediaReceived(provider: MultimediaProvider, user: User) {
         viewModel.insertEntity(
             Message(
                 MessageType.IMAGE_RECEIVE,
-                provider.header,
+                provider.data,
                 fetchDateTime(),
                 provider.totalSize.toString(),
                 user.username
@@ -50,7 +45,14 @@ class DatabaseBridgeImpl(
     }
 
     override fun onMultimediaSend(msgDecl: MessageDeclaration) {
-        TODO("Not yet implemented")
+        viewModel.insertEntity(
+            Message(
+                MessageType.IMAGE_SEND,
+                msgDecl.body,
+                fetchDateTime(),
+                msgDecl.headerSize.toString()
+            )
+        )
     }
 
 }

@@ -1,15 +1,16 @@
 package helpers
 
 import networker.messages.MessageDeclaration
-import networker.messages.content.ContentProvider
+import networker.messages.content.providers.MultimediaProvider
+import networker.messages.content.providers.TextProvider
 import networker.peers.User
 
 //FIXME change name
 interface DatabaseBridge {
 
-    fun onTextReceived(provider: ContentProvider<Any, String>, user: User)
+    fun onTextReceived(provider: TextProvider, user: User)
     fun onTextSend(msgDecl: MessageDeclaration)
 
-    fun onMultimediaReceived(provider: ContentProvider<String, Any>, user: User)
+    fun onMultimediaReceived(provider: MultimediaProvider, user: User)
     fun onMultimediaSend(msgDecl: MessageDeclaration)
 }
