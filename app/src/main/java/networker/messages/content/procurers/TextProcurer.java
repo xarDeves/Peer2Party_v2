@@ -1,5 +1,7 @@
 package networker.messages.content.procurers;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
@@ -38,16 +40,19 @@ public class TextProcurer implements ContentProcurer {
     public int consume() {
         ++blockCount;
 
-        int start = blockCount*(contentBlockSize-1);
+        int start = (blockCount-1)*contentBlockSize;
         int end = contentBlockSize*blockCount;
 
         if (start > content.length) {
+            hasNext = false; //we're done
+            Log.d("networker.messages.content.procurers.TextProcurer", "consume start: " + start);
             return 0;
         }
 
         if (end > content.length ) {
             end = content.length; //trim
             hasNext = false; //we're done
+            Log.d("networker.messages.content.procurers.TextProcurer", "consume end: " + end);
         }
 
         buffer = Arrays.copyOfRange(content, start, end);

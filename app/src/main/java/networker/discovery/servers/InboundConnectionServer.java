@@ -47,7 +47,7 @@ public class InboundConnectionServer implements PeerServer {
 
 
         try {
-            User u = NetworkUtilities.processUserSalutationJson(salutation);
+            User u = NetworkUtilities.processUserSalutationJSON(salutation);
             handleUser(u, client, room);
         } catch (JSONException | InvalidPortValueException e) {
             Log.d("networker.discovery.servers.handleIndividualClient", salutation, e);

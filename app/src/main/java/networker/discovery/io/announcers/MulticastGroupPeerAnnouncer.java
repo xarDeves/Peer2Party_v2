@@ -33,7 +33,7 @@ public class MulticastGroupPeerAnnouncer implements PeerAnnouncer {
         // we don't need to be a member of the multicast group to send messages to it, so no real processing is required here
 
         try {
-            String s = NetworkUtilities.getUserSalutationJson(ourself);
+            String s = NetworkUtilities.getUserSalutationJSON(ourself).toString();
             byte[] salutations = NetworkUtilities.convertUTF8StringToBytes(s);
             DatagramPacket msg = NetworkUtilities.createDatagramPacket(salutations, info.getMulticastDiscoverGroup(), info.getDiscoverPort());
             // double send

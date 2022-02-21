@@ -163,7 +163,7 @@ public class User {
 
     public void sendSalutation() throws IOException, JSONException {
         DataOutputStream dos = currentUserSocket.getDataOutputStream();
-        dos.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.getUserSalutationJson(this)));
+        dos.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.getUserSalutationJSON(this).toString()));
         dos.flush();
     }
 

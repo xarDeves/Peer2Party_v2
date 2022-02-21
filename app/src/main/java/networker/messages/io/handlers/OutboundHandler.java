@@ -24,13 +24,16 @@ public class OutboundHandler {
 
     public void handle() {
         try {
-            NetworkUtilities.createConnectionIfThereIsNone(user);
-        } catch (IOException | InterruptedException | InvalidPortValueException e) {
-            Log.d("networker.messages.io.handlers.handle", "couldn't createConnectionIfThereIsNone", e);
-        }
-
-        try {
             user.sendLock();
+
+            try {
+                NetworkUtilities.createConnectionIfThereIsNone(user);
+            } catch (IOException | InterruptedException | InvalidPortValueException e) {
+                Log.d("networker.messages.io.handlers.handle", "couldn't createConnectionIfThereIsNone, returning", e);
+                user.sendUnlock();
+                return;
+            }
+
             DataOutputStream dos = user.getCurrentUserSocket().getDataOutputStream();
             sendHeader(dos);
             sendBody(dos);

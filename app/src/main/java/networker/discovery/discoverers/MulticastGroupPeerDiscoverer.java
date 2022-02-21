@@ -114,7 +114,7 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
         for (String bCast : groupBroadcasts) {
             try {
                 Log.d("networker.discovery.discoverers.filterValidJSON", "processOnce: " + bCast);
-                usersFound.add(NetworkUtilities.processUserSalutationJson(bCast));
+                usersFound.add(NetworkUtilities.processUserSalutationJSON(bCast));
             } catch (JSONException | UnknownHostException | InvalidPortValueException e) {
                 Log.d("networker.discovery.discoverers.filterValidJSON", bCast, e);
             }

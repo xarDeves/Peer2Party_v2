@@ -57,7 +57,7 @@ public class NetworkUtilities {
         return new DatagramPacket(buffer, buffer.length, group, port);
     }
 
-    public static String getUserSalutationJson(User u) throws JSONException {
+    public static JSONObject getUserSalutationJSON(User u) throws JSONException {
         // https://www.tutorialspoint.com/json/json_java_example.htm
 
         JSONObject salutation = new JSONObject();
@@ -66,12 +66,10 @@ public class NetworkUtilities {
         salutation.put(JSON_ADDRESS_USERNAME, u.getUsername());
         salutation.put(JSON_ADDRESS_STATUS, Status.toInt(u.getStatus()));
 
-        return salutation.toString();
+        return salutation;
     }
 
-    public static User processUserSalutationJson(String salutation) throws JSONException, UnknownHostException, InvalidPortValueException {
-        JSONObject jObj = new JSONObject(salutation);
-
+    public static User processUserSalutationJSON(JSONObject jObj) throws JSONException, UnknownHostException, InvalidPortValueException {
         Status status = Status.toStatus(jObj.getInt(JSON_ADDRESS_STATUS));
         String username = jObj.getString(JSON_ADDRESS_USERNAME);
         int port = jObj.getInt(JSON_ADDRESS_PORT);
@@ -80,10 +78,16 @@ public class NetworkUtilities {
         return new User(addr, username, port, status);
     }
 
-    public static String getDeclarationBroadcast(MessageIntent msg) throws JSONException {
+    public static User processUserSalutationJSON(String salutation) throws JSONException, UnknownHostException, InvalidPortValueException {
+        JSONObject jObj = new JSONObject(salutation);
+
+        return processUserSalutationJSON(jObj);
+    }
+
+    public static String createMessageIntentJSON(MessageIntent msg) throws JSONException {
         JSONObject declaration = new JSONObject();
         /* --------------- PUT USER DECLARATION AND MESSAGE COUNT --------------- */
-        declaration.put(JSON_USER_DECLARATION, getUserSalutationJson(msg.getSource()));
+        declaration.put(JSON_USER_DECLARATION, getUserSalutationJSON(msg.getSource()));
         declaration.put(JSON_MESSAGE_COUNT, msg.getCount());
 
         /* --------------- PUT RECEIVER IDs --------------- */
@@ -99,13 +103,13 @@ public class NetworkUtilities {
         while (it.hasNext()) {
             MessageDeclaration mdl = it.next();
             // json of jsons
-            declaration.put(String.valueOf(count), getSingularMessageDeclaration(mdl));
+            declaration.put(String.valueOf(count), createMessageDeclarationJSON(mdl));
         }
 
         return declaration.toString();
     }
 
-    private static JSONObject getSingularMessageDeclaration(MessageDeclaration messageDeclaration) throws JSONException {
+    private static JSONObject createMessageDeclarationJSON(MessageDeclaration messageDeclaration) throws JSONException {
         JSONObject declaration = new JSONObject();
 
         declaration.put(JSON_MCONTENT_SIZE, messageDeclaration.getBodySize());
@@ -120,7 +124,7 @@ public class NetworkUtilities {
     public static MessageIntent processMessageIntent(String message) throws JSONException, InvalidPortValueException, UnknownHostException {
         JSONObject jObj = new JSONObject(message);
         /* --------------- GET USER DECLARATION AND MESSAGE COUNT --------------- */
-        User src = processUserSalutationJson(jObj.getJSONObject(JSON_USER_DECLARATION).toString());
+        User src = processUserSalutationJSON(jObj.getJSONObject(JSON_USER_DECLARATION));
         int mdlSize = jObj.getInt(JSON_MESSAGE_COUNT);
 
         /* --------------- GET RECEIVER IDs --------------- */

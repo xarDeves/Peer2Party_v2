@@ -17,7 +17,7 @@ public class MulticastGroupMessageAnnouncer implements MessageAnnouncer {
     @Override
     public void announce(DatagramSocket socket, MessageIntent mi, NetworkInformation info) throws IOException {
         try {
-            String js = NetworkUtilities.getDeclarationBroadcast(mi);
+            String js = NetworkUtilities.createMessageIntentJSON(mi);
             byte[] decl = NetworkUtilities.convertUTF8StringToBytes(js);
             DatagramPacket msg = NetworkUtilities.createDatagramPacket(decl, info.getMulticastMessagesGroup(), info.getMessagePort());
             socket.send(msg);
