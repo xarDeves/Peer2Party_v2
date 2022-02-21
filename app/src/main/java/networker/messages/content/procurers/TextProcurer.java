@@ -4,7 +4,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import networker.helpers.NetworkUtilities;
@@ -43,15 +42,15 @@ public class TextProcurer implements ContentProcurer {
         int start = (blockCount-1)*contentBlockSize;
         int end = contentBlockSize*blockCount;
 
+        hasNext = start > content.length && end > content.length;
+
         if (start > content.length) {
-            hasNext = false; //we're done
             Log.d("networker.messages.content.procurers.TextProcurer", "consume start: " + start);
             return 0;
         }
 
-        if (end > content.length ) {
+        if (end > content.length) {
             end = content.length; //trim
-            hasNext = false; //we're done
             Log.d("networker.messages.content.procurers.TextProcurer", "consume end: " + end);
         }
 
@@ -75,8 +74,4 @@ public class TextProcurer implements ContentProcurer {
         return totalSize;
     }
 
-    @Override
-    public void close() throws IOException {
-
-    }
 }

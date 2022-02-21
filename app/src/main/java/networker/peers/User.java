@@ -8,6 +8,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import networker.exceptions.InvalidPortValueException;
 import networker.helpers.NetworkUtilities;
@@ -21,6 +22,9 @@ public class User {
     private static final int TOTAL_LOCKS = 3;
     private static final int RECEIVE_LOCKS = 2;
     private static final int SEND_LOCKS = 1;
+    private final AtomicInteger RECV_LOCK_COUNT = new AtomicInteger(0);
+    private final AtomicInteger SEND_LOCK_COUNT = new AtomicInteger(0);
+    private final AtomicInteger TOTAL_LOCK_COUNT = new AtomicInteger(0);
     private final Semaphore ioLock = new Semaphore(TOTAL_LOCKS);
 
     // holds essential data for each user in the group (IPV6 only)
@@ -37,7 +41,7 @@ public class User {
 
     /* ------------------------- MISCELLANEOUS STUFF ------------------------- */
     private final String username;
-    private Status status = Status.UNKNOWN;
+    private volatile Status status = Status.UNKNOWN;
 
     public User(InetAddress adr, String name, int p) throws InvalidPortValueException {
         if (!NetworkUtilities.portIsValid(p)) throw new InvalidPortValueException();
@@ -62,7 +66,7 @@ public class User {
         instantiateID();
     }
 
-    public boolean isUsable() {
+    public boolean portIsValid() {
         return NetworkUtilities.portIsValid(port);
     }
 
@@ -72,30 +76,42 @@ public class User {
 
     public void lock() throws InterruptedException {
         ioLock.acquire(TOTAL_LOCKS);
+        TOTAL_LOCK_COUNT.incrementAndGet();
     }
 
     public void receiveLock() throws InterruptedException {
         ioLock.acquire(RECEIVE_LOCKS);
+        RECV_LOCK_COUNT.incrementAndGet();
     }
 
     public void sendLock() throws InterruptedException {
         ioLock.acquire(SEND_LOCKS);
+        SEND_LOCK_COUNT.incrementAndGet();
     }
 
-    public void receiveUnlock() throws InterruptedException {
-        ioLock.release(RECEIVE_LOCKS);
+    public void receiveUnlock() {
+        if (RECV_LOCK_COUNT.get() == 1)  {
+            ioLock.release(RECEIVE_LOCKS);
+            RECV_LOCK_COUNT.decrementAndGet();
+        }
     }
 
-    public void sendUnlock() throws InterruptedException {
-        ioLock.release(SEND_LOCKS);
+    public void sendUnlock() {
+        if (SEND_LOCK_COUNT.get() == 1) {
+            ioLock.release(SEND_LOCKS);
+            SEND_LOCK_COUNT.decrementAndGet();
+        }
     }
 
     public void unlock() {
-        ioLock.release(TOTAL_LOCKS);
+        if (TOTAL_LOCK_COUNT.get() == 1) {
+            ioLock.release(TOTAL_LOCKS);
+            TOTAL_LOCK_COUNT.decrementAndGet();
+        }
     }
 
-    public void createUserSocket() throws IOException, InvalidPortValueException, InterruptedException {
-        if (!isUsable()) throw new InvalidPortValueException();
+    public void createUserSocket() throws IOException, InvalidPortValueException {
+        if (!portIsValid()) throw new InvalidPortValueException();
         shutdown();
 
         currentUserSocket = new SocketAdapter(address, port);
@@ -103,24 +119,21 @@ public class User {
         try {
             sendSalutation();
         } catch (JSONException e) {
-            Log.d("networker.peers.User", "sendSalutation() ", e);
+            Log.d("networker.peers.User.createUserSocket", "sendSalutation() ", e);
         }
-
     }
 
-    private void shutdown() throws IOException, InterruptedException {
-        lock();
+    private void shutdown() throws IOException {
         if (currentUserSocket != null) {
             if (!currentUserSocket.isClosed()) currentUserSocket.close();
         }
-        unlock();
     }
 
     public boolean connectionIsUsable() {
         return currentUserSocket != null && !currentUserSocket.isClosed();
     }
 
-    public void replaceSocket(SocketAdapter newSocket) throws IOException, InterruptedException {
+    public void replaceSocket(SocketAdapter newSocket) throws IOException {
         shutdown();
         currentUserSocket = newSocket;
     }

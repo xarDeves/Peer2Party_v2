@@ -1,11 +1,12 @@
 package networker.messages.content.providers;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import networker.helpers.NetworkUtilities;
 import networker.messages.content.ContentProvider;
 
-public class MultimediaProvider implements ContentProvider<String, String> {
+public class MultimediaProvider implements ContentProvider<String, String>, Closeable {
 
     private final byte[] bNameArray;
     private int startingNameIndex = 0;
@@ -27,10 +28,6 @@ public class MultimediaProvider implements ContentProvider<String, String> {
         //TODO write to disk
     }
 
-    public void post() throws IOException {
-        //TODO complete whatever, close file etc.
-    }
-
     //TODO return bare filename
     @Override
     public String getHeader() {
@@ -46,5 +43,10 @@ public class MultimediaProvider implements ContentProvider<String, String> {
     @Override
     public long getTotalSize() {
         return 0;
+    }
+
+    @Override
+    public void close() throws IOException {
+        //TODO close file etc.
     }
 }

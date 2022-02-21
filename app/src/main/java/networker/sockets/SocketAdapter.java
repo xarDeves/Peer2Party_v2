@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.net.SocketException;
 
 public class SocketAdapter {
-    private Socket socket = null;
+    private final Socket socket;
 
     public SocketAdapter(Socket s) {
         socket = s;

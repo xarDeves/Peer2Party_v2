@@ -41,10 +41,9 @@ import networker.sockets.ServerSocketAdapter;
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
 public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
-    private static final int BO_TIMEOUT_MILLIS_HIGH_SPEED = 10;
+    private static final int BO_TIMEOUT_MILLIS_HIGH_SPEED = 15;
     private static final int BO_TIMEOUT_MILLIS = 500;
-    private static final int SS_TIMEOUT_MILLIS = 100;
-    private static final int SS_SO_TIMEOUT_MILLIS = 50;
+    private static final int SS_TIMEOUT_MILLIS = 500;
     private final int BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION;
 
     private final PeerReceiver receiver;
@@ -102,7 +101,7 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
         serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
 
         sender.announce(udpSocket, netInfo);
-        inboundServer.listen(serverSocket, SS_SO_TIMEOUT_MILLIS, room);
+        inboundServer.listen(serverSocket, SS_TIMEOUT_MILLIS, room);
         Queue<String> groupBroadcasts = receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS);
 
         LinkedList<User> usersFound = filterValidJSON(groupBroadcasts);
@@ -126,9 +125,14 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
         for (User u : usersFound) {
             try {
                 Log.d("networker.discovery.discoverers.processUsers", "FOUND AND PROCESSING " + u.getUsername());
+                u.lock();
                 processFoundUser(u);
             } catch (IOException e) {
+                Log.d("networker.discovery.discoverers.processUsers", e.getMessage(), e);
+            } catch (InterruptedException e) {
                 Log.e("networker.discovery.discoverers.processUsers", e.getMessage(), e);
+            } finally {
+                u.unlock();
             }
         }
     }
@@ -152,17 +156,24 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
         try {
             u.createUserSocket();
             room.addPeer(new Peer(u));
-        } catch (InvalidPortValueException | InterruptedException e) {
+        } catch (InvalidPortValueException e) {
             Log.d("networker.discovery.discoverers.processNewPeer", "u.createUserSocket()", e);
         }
     }
 
     private void processExistingPeer(User u) {
         User uExisting = room.getPeer(u.getIDENTIFIER()).getUser();
-        if (uExisting.equals(u)) return; //ignore if it's completely the same and nothing changed
+        try {
+            uExisting.lock();
 
-        uExisting.setStatus(u.getStatus()); // set the status to the new one
+            if (uExisting.equals(u)) return; //ignore if it's completely the same and nothing changed
 
+            uExisting.setStatus(u.getStatus()); // set the status to the new one
+        } catch (InterruptedException e) {
+            Log.e("networker.discovery.discoverers.processExistingPeer", "uExisting.lock()", e);
+        } finally {
+            uExisting.unlock();
+        }
     }
 
 }

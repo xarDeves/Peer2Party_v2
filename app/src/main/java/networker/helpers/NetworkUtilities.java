@@ -166,10 +166,15 @@ public class NetworkUtilities {
     }
 
     public static void createConnectionIfThereIsNone(User u) throws IOException, InterruptedException, InvalidPortValueException {
-        if (u.isUsable()) return;
-        if (u.getCurrentUserSocket() != null && !u.getCurrentUserSocket().isClosed()) return;
+        try {
+            u.lock();
+            if (u.portIsValid()) return;
+            if (u.getCurrentUserSocket() != null && !u.getCurrentUserSocket().isClosed()) return;
 
-        u.createUserSocket();
+            u.createUserSocket();
+        } finally {
+            u.unlock();
+        }
     }
 
     public static HashMap<String, NetworkInterface> getViableNetworkInterfaces() {

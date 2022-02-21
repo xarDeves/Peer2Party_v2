@@ -45,13 +45,18 @@ public class InboundConnectionServer implements PeerServer {
 
         String salutation = getSalutation(client);
 
-
+        User u = null;
         try {
-            User u = NetworkUtilities.processUserSalutationJSON(salutation);
+            u = NetworkUtilities.processUserSalutationJSON(salutation);
+            u.lock();
             handleUser(u, client, room);
         } catch (JSONException | InvalidPortValueException e) {
             Log.d("networker.discovery.servers.handleIndividualClient", salutation, e);
             client.close(); // forfeit the connection if client sent invalid data, there's clearly an issue
+        } catch (InterruptedException e) {
+            Log.e("networker.discovery.servers.handleIndividualClient", salutation, e);
+        } finally {
+            if (u!=null) u.unlock();
         }
     }
 
@@ -59,19 +64,29 @@ public class InboundConnectionServer implements PeerServer {
         //for some reason the user sent data that is inconsistent with the socket he's contacting us from
         if (!NetworkUtilities.userDataIsConsistentToSocket(client, u)) return;
 
-        if (room.hasPeer(u) && room.getPeer(u.getIDENTIFIER()).getUser().connectionIsUsable()) {
-            User knownUser = room.getPeer(u.getIDENTIFIER()).getUser();
-
-            //for some reason, an already known peer tries to refresh the connection with us, perhaps his side of comms died
-            // refresh the connection even if the connection's fine on our end
-            try {
-                knownUser.replaceSocket(client);
-            } catch (InterruptedException e) {
-                Log.d("networker.discovery.servers.handleUser", "InboundConnectionServer.handleUser", e);
-            }
+        if (!room.hasPeer(u)) {
+            u.replaceSocket(client);
+            room.addPeer(new Peer(u));
+            Log.d("networker.discovery.servers.handleUser", "Added socket to new user " + u.getIDENTIFIER());
+            return;
         }
 
-        if (!room.hasPeer(u)) room.addPeer(new Peer(u));
+        if (room.getPeer(u.getIDENTIFIER()).getUser().connectionIsUsable()) {
+            User knownUser = room.getPeer(u.getIDENTIFIER()).getUser();
+            try {
+                knownUser.lock();
+                //for some reason, an already known peer tries to refresh the connection with us, perhaps his side of comms died
+                // refresh the connection even if the connection's fine on our end
+                Log.d("networker.discovery.servers.handleUser", "Replacing socket of user port is valid "
+                        + knownUser.portIsValid() + " and closed " + knownUser.socketIsClosed());
+                knownUser.replaceSocket(client);
+                Log.d("networker.discovery.servers.handleUser", "Replaced socket of user id " + knownUser.getIDENTIFIER());
+            } catch (InterruptedException e) {
+                Log.e("networker.discovery.servers.handleUser", e.getMessage(), e);
+            } finally {
+                knownUser.unlock();
+            }
+        }
     }
 
     private String getSalutation(SocketAdapter socket) throws IOException {

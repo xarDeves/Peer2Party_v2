@@ -37,9 +37,7 @@ public class InboundHandler {
             DataInputStream dis = user.getCurrentUserSocket().getDataInputStream();
 
             if (!mdl.getContentType().isFile()) readText(dis);
-            if (mdl.getContentType().isFile()) readFile(dis);
-
-            user.receiveUnlock();
+            if (mdl.getContentType().isFile())  readFile(dis);
 
             rk.increaseContentSizeReceived(mdl.getBodySize());
             rk.incrementMessageReceived();
@@ -52,6 +50,8 @@ public class InboundHandler {
             Log.d("networker.messages.io.handlers.handle" , "IOException w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), e);
         } catch (InterruptedException e) {
             Log.d("networker.messages.io.handlers.handle", "InboundHandler interrupted uid " + user.getIDENTIFIER(), e);
+        } finally {
+            user.receiveUnlock();
         }
 
 
@@ -64,14 +64,17 @@ public class InboundHandler {
         int count;
         int totalbytesread = 0;
         byte[] buffer = new byte[Math.toIntExact(mdl.getBodySize())];
-        TextProvider provider = new TextProvider(contentSize);
 
+        TextProvider provider = new TextProvider(contentSize);
+        Log.d("networker.messages.io.handlers.readText", "socket port is valid " + user.portIsValid() + " and closed " + user.socketIsClosed());
         while((count = dis.read(buffer)) > 0 && totalbytesread < mdl.getBodySize()) {
+            Log.d("networker.messages.io.handlers.readText", "count " + count);
             totalbytesread += count;
             provider.insertData(buffer, count);
         }
 
         dbb.onTextReceived(provider, user);
+        Log.d("networker.messages.io.handlers.readText", "added dbb text " + provider.getData());
     }
 
     private void readFile(DataInputStream dis) throws OversizedMultimediaMessage, IOException {
@@ -104,9 +107,10 @@ public class InboundHandler {
             }
         }
 
-        provider.post();
+        provider.close();
 
         dbb.onMultimediaReceived(provider, user);
+        Log.d("networker.messages.io.handlers.readText: ", "added dbb path " + provider.getData());
     }
 
 }

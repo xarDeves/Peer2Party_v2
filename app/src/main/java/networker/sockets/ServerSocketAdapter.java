@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.SocketException;
 
 public class ServerSocketAdapter {
-    private ServerSocket socket = null;
+    private final ServerSocket socket;
 
     public ServerSocketAdapter(ServerSocket s) {
         socket = s;

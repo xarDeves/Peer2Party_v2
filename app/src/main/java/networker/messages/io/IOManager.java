@@ -22,7 +22,7 @@ import networker.peers.User;
 public class IOManager implements MessageManager {
     public static final int MULTIMEDIA_BLOCK_SIZE = 500_000; // 500 KB
     public static final int TEXT_BLOCK_SIZE = 10_000; // 10 KB
-    public static final int MAXIMUM_TEXT_SIZE = 100_000_000; // 100 MB
+    public static final int MAXIMUM_TEXT_SIZE = 10_000_000; // 10 MB
     public static final long MAXIMUM_MULTIMEDIA_SIZE = 1_000_000_000; // 1 GB
 
     public static final int BO_TIMEOUT_MILLIS = 5000;
@@ -51,9 +51,7 @@ public class IOManager implements MessageManager {
         this.ourself = ourself;
     }
 
-    /**
-     * This method is blocking, and should be run in a thread in a loop.
-     */
+    /** This method is blocking, and should be run in a thread in a loop. */
     @Override
     public void discover() throws IOException {
         try {

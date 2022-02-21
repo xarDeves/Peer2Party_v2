@@ -1,9 +1,8 @@
 package networker.messages.content;
 
-import java.io.Closeable;
 import java.io.IOException;
 
-public interface ContentProcurer extends Closeable {
+public interface ContentProcurer {
     byte[] getHeaderPiece();
     byte[] getContentPiece();
 

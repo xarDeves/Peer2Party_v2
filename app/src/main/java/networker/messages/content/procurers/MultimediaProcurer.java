@@ -64,8 +64,4 @@ public class MultimediaProcurer implements ContentProcurer {
         return totalSize;
     }
 
-    @Override
-    public void close() throws IOException {
-        dis.close();
-    }
 }
