@@ -17,7 +17,6 @@ import helpers.DatabaseBridgeImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import networker.Model
 import networker.RoomKnowledge
 import networker.discovery.discoverers.MulticastGroupPeerDiscoverer
 import networker.discovery.io.announcers.MulticastGroupPeerAnnouncer
@@ -42,7 +41,6 @@ import java.net.NetworkInterface
 import java.util.*
 import java.util.concurrent.Executors
 
-//TODO implement livedata or peers -> (RoomKnowledge)
 //TODO determine hotspot active https://stackoverflow.com/questions/12401108/how-to-check-programmatically-if-hotspot-is-enabled-or-disabled
 //TODO get hotspot ip if active https://stackoverflow.com/questions/9573196/how-to-get-the-ip-of-the-wifi-hotspot-in-androidhttps://stackoverflow.com/questions/9573196/how-to-get-the-ip-of-the-wifi-hotspot-in-android
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -67,8 +65,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     lateinit var ourself: User
     lateinit var ioManager: IOManager
 
-    //always instantiate last
-    private val model: Model = Model(this)
     val dbBridge = DatabaseBridgeImpl(this)
 
     private fun getInetAddress(): String {
