@@ -28,7 +28,7 @@ public class MulticastGroupMessageReceiver implements MessageReceiver {
             try {
                 return receivePeerMulticast(socket);
             } catch (SocketTimeoutException e) {
-                Log.d("MulticastGroupMessageReceiver.discoverAnnouncement", "SocketTimeoutException", e);
+                Log.v("MulticastGroupMessageReceiver.discoverAnnouncement", "SocketTimeoutException", e);
             }
 
             long end = System.currentTimeMillis();

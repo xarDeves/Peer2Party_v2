@@ -2,7 +2,9 @@ package viewmodels
 
 import android.app.Application
 import android.content.Context.WIFI_SERVICE
+import android.net.Network
 import android.net.wifi.WifiManager
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -34,10 +36,7 @@ import networker.peers.Peer
 import networker.peers.Status
 import networker.peers.User
 import networker.sockets.ServerSocketAdapter
-import java.net.InetAddress
-import java.net.InetSocketAddress
-import java.net.MulticastSocket
-import java.net.NetworkInterface
+import java.net.*
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -83,11 +82,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         lock.acquire() // ACQUIRED
 
         val netIfaces = NetworkUtilities.getViableNetworkInterfaces()
-        //TODO THIS GETS THE NETWORK IFACES. PLEASE, FOR THE LOVE OF GOD, GET THE INTERFACE REQUIRED, SOMEHOW, FROM THE USER
+        //TODO THIS GETS THE NETWORK IFACES. GET THE INTERFACE REQUIRED, SOMEHOW, FROM THE USER
         netIface = netIfaces["wlan0"]!!
         networkInetAddress = netIface.inetAddresses.nextElement()
 
-        ourself = User(networkInetAddress, username, SERVER_PORT, Status.AVAILABLE)
+        val r = Random()
+        r.setSeed(System.currentTimeMillis()-r.nextInt())
+
+        ourself = User(networkInetAddress, username, SERVER_PORT, Status.AVAILABLE, r.nextInt(Int.MAX_VALUE))
         networkInformation = NetworkInformation(netIface.toString(), ourself)
 
         viewModelScope.launch {
@@ -100,7 +102,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     //you have achieved...L O K
     private fun initPeerDiscovery() {
-
         //for peer discovery
         val discoverInetSocketAddress = InetSocketAddress(
             networkInformation.multicastDiscoverGroup,
@@ -112,7 +113,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         multicastSocket.loopbackMode = false
         multicastSocket.broadcast = true
 
-        val serverSocketAdapter = ServerSocketAdapter(networkInetAddress, SERVER_PORT, 50)
+        val serverSocketAdapter = ServerSocketAdapter(networkInetAddress, SERVER_PORT, 25)
         val inboundConnectionServer = InboundConnectionServer()
         val multicastGroupSender = MulticastGroupPeerAnnouncer(ourself)
         val multicastGroupReceiver = MulticastGroupPeerReceiver()
@@ -125,11 +126,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             multicastSocket,
             networkInformation,
             roomWrapper,
-            5_000
+            500
         )
 
-        discoverer.highSpeedDiscovery()
-        while (true) discoverer.processOnce()
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                launch { runPeerDiscovery() }
+                launch { runPeerListener() }
+            }
+        }
+    }
+
+    private fun runPeerDiscovery() {
+        discoverer.highSpeedDiscover()
+        while (true) discoverer.discover()
+    }
+
+    private fun runPeerListener() {
+        while (true) discoverer.listen()
     }
 
     private fun initIOManager() {

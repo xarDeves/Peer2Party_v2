@@ -29,7 +29,7 @@ public class User {
 
     // holds essential data for each user in the group (IPV6 only)
     /* -------------------------- NETWORK STUFF -------------------------------- */
-    private String IDENTIFIER;
+    private final String IDENTIFIER;
 
     private final InetAddress address;
     private final int port;
@@ -41,20 +41,11 @@ public class User {
 
     /* ------------------------- MISCELLANEOUS STUFF ------------------------- */
     private final String username;
-    private volatile Status status = Status.UNKNOWN;
+    private volatile Status status;
 
-    public User(InetAddress adr, String name, int p) throws InvalidPortValueException {
-        if (!NetworkUtilities.portIsValid(p)) throw new InvalidPortValueException();
+    private final int priority;
 
-        address = adr;
-        username = name;
-        port = p;
-
-        Log.d("networker.peers", "Constructor: " + name);
-        instantiateID();
-    }
-
-    public User(InetAddress adr, String name, int p, Status st) throws InvalidPortValueException {
+    public User(InetAddress adr, String name, int p, Status st, int priority) throws InvalidPortValueException {
         if (!NetworkUtilities.portIsValid(p)) throw new InvalidPortValueException();
 
         address = adr;
@@ -62,8 +53,10 @@ public class User {
         port = p;
         status = st;
 
+        this.priority = priority;
+
         Log.d("networker.peers", "Constructor: " + name);
-        instantiateID();
+        IDENTIFIER = address.toString();
     }
 
     public boolean portIsValid() {
@@ -115,11 +108,12 @@ public class User {
         shutdown();
 
         currentUserSocket = new SocketAdapter(address, port);
+        Log.d("networker.peers.User.createUserSocket", "connected to " + currentUserSocket.log());
 
         try {
             sendSalutation();
         } catch (JSONException e) {
-            Log.d("networker.peers.User.createUserSocket", "sendSalutation() ", e);
+            Log.e("networker.peers.User.createUserSocket", "sendSalutation() ", e);
         }
     }
 
@@ -136,6 +130,7 @@ public class User {
     public void replaceSocket(SocketAdapter newSocket) throws IOException {
         shutdown();
         currentUserSocket = newSocket;
+        Log.d("networker.peers.User.replaceSocket", "connected to " + currentUserSocket.log());
     }
 
     public String getUsername() {
@@ -155,19 +150,15 @@ public class User {
     }
 
     public String getAddress() {
-        return address.getHostName();
-    }
-
-    public InetAddress getLogicalAddress() {
-        return address;
-    }
-
-    private void instantiateID() {
-        IDENTIFIER = address.toString();
+        return address.getHostAddress();
     }
 
     public String getIDENTIFIER() {
         return IDENTIFIER;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 
     public SocketAdapter getCurrentUserSocket() {

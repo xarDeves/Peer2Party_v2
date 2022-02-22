@@ -28,13 +28,14 @@ public class InboundConnectionServer implements PeerServer {
             try {
                 handleIndividualClient(ss, room, timeToReceiveMillis);
             } catch (SocketTimeoutException e) {
-                Log.d("networker.discovery.servers.listen", "SocketTimeoutException" , e);
+                Log.v("networker.discovery.servers.listen", "SocketTimeoutException" , e);
             }
 
             long end = System.currentTimeMillis();
             timeSpent = end - start;
 
             Log.d("networker.discovery.servers.listen", "current time spent server " + timeSpent);
+            Log.d("networker.discovery.servers.listen", "server log " + ss.log());
         }
     }
 

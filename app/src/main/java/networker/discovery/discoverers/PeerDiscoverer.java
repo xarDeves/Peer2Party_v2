@@ -4,6 +4,7 @@ import java.io.IOException;
 
 public interface PeerDiscoverer {
 
-    void highSpeedDiscovery() throws IOException;
-    void processOnce() throws IOException;
+    void highSpeedDiscover() throws IOException;
+    void discover() throws IOException;
+    void listen() throws IOException;
 }

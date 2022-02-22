@@ -41,9 +41,9 @@ import networker.sockets.ServerSocketAdapter;
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
 public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
-    private static final int BO_TIMEOUT_MILLIS_HIGH_SPEED = 15;
-    private static final int BO_TIMEOUT_MILLIS = 500;
-    private static final int SS_TIMEOUT_MILLIS = 500;
+    private static final int BO_TIMEOUT_HIGH_SPEED_MILLIS = 20;
+    private static final int BO_TIMEOUT_MILLIS = 5000;
+    private static final int SS_TIMEOUT_MILLIS = 15000;
     private final int BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION;
 
     private final PeerReceiver receiver;
@@ -54,7 +54,7 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
     private final ServerSocketAdapter serverSocket;
     private final NetworkInformation netInfo;
 
-    private final RoomKnowledge room;
+    private final RoomKnowledge rk;
 
     public MulticastGroupPeerDiscoverer(PeerReceiver recv, PeerAnnouncer sendr, PeerServer peerServer,
                                         ServerSocketAdapter ss, DatagramSocket ds, NetworkInformation info,
@@ -65,25 +65,26 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
 
         udpSocket = ds;
         serverSocket = ss;
-        room = roomKnowledge;
+        rk = roomKnowledge;
 
         netInfo = info;
-        // FOR COMPLETENESS SAKE
 
+        // FOR COMPLETENESS SAKE
         BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION = HIGH_SPEED_MILLIS;
     }
 
+    /** This method is blocking, and should be run in a thread in a loop. */
     @Override
-    public void highSpeedDiscovery() throws IOException {
+    public void highSpeedDiscover() throws IOException {
         long timeSpent = 0;
         final long start = System.currentTimeMillis();
         Queue<String> groupBroadcasts = new LinkedList<>();
-        udpSocket.setSoTimeout(BO_TIMEOUT_MILLIS_HIGH_SPEED);
+        udpSocket.setSoTimeout(BO_TIMEOUT_HIGH_SPEED_MILLIS);
 
         while (timeSpent < BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION) {
             sender.announce(udpSocket, netInfo);
 
-            groupBroadcasts.addAll(receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS_HIGH_SPEED));
+            groupBroadcasts.addAll(receiver.discoverPeers(udpSocket, BO_TIMEOUT_HIGH_SPEED_MILLIS));
 
             long end = System.currentTimeMillis();
             timeSpent = end - start;
@@ -93,19 +94,20 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
         processUsers(usersFound);
     }
 
-    //TODO: rework this, so we're constantly listening the mcast in a new thread,
-    // and set the announce and inbound server listen on a different thread
-    @Override
-    public void processOnce() throws IOException {
+    /** This method is blocking, and should be run in a thread in a loop. */
+    public void discover() throws IOException {
         udpSocket.setSoTimeout(BO_TIMEOUT_MILLIS);
-        serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
-
         sender.announce(udpSocket, netInfo);
-        inboundServer.listen(serverSocket, SS_TIMEOUT_MILLIS, room);
         Queue<String> groupBroadcasts = receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS);
 
         LinkedList<User> usersFound = filterValidJSON(groupBroadcasts);
         processUsers(usersFound);
+    }
+
+    @Override
+    public void listen() throws IOException {
+        serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
+        inboundServer.listen(serverSocket, SS_TIMEOUT_MILLIS, rk);
     }
 
     private LinkedList<User> filterValidJSON(Queue<String> groupBroadcasts) {
@@ -142,7 +144,7 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
         if (netInfo.getOurselves().equals(u)) return;
 
         // if this is a completely new peer...
-        if (!room.hasPeer(u)) {
+        if (!rk.hasPeer(u)) {
             Log.d("networker.discovery.discoverers.processFoundUser", "FOUND AND PROCESSING COMPLETELY NEW PEER " + u.getUsername());
             processNewPeer(u);
         } else {
@@ -154,15 +156,20 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
 
     private void processNewPeer(User u) throws IOException {
         try {
-            u.createUserSocket();
-            room.addPeer(new Peer(u));
+            //FIXME corner case with same num, just sum the address of the user and compare to our sum, whichever is greater has priority
+            if (netInfo.getOurselves().getPriority() < u.getPriority()) {
+                Log.e("networker.discovery.discoverers.processNewPeer", "user has priority over us " + u.getIDENTIFIER());
+                u.createUserSocket();
+                Log.e("networker.discovery.discoverers.processNewPeer", "Connected to " + u.getIDENTIFIER() + " " + u.getAddress());
+                rk.addPeer(new Peer(u));
+            }
         } catch (InvalidPortValueException e) {
             Log.d("networker.discovery.discoverers.processNewPeer", "u.createUserSocket()", e);
         }
     }
 
     private void processExistingPeer(User u) {
-        User uExisting = room.getPeer(u.getIDENTIFIER()).getUser();
+        User uExisting = rk.getPeer(u.getIDENTIFIER()).getUser();
         try {
             uExisting.lock();
 

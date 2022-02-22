@@ -43,7 +43,7 @@ public class MulticastGroupPeerReceiver implements PeerReceiver {
                 dataFound.add(recvd);
                 Log.d("networker.discovery.io.receivers.discoverPeers", recvd);
             } catch (SocketTimeoutException e) {
-                Log.d("networker.discovery.io.receivers.discoverPeers", "SocketTimeoutException", e);
+                Log.v("networker.discovery.io.receivers.discoverPeers", "SocketTimeoutException", e);
             }
 
             long end = System.currentTimeMillis();

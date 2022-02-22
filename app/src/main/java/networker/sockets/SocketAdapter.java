@@ -1,5 +1,6 @@
 package networker.sockets;
 
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,7 +10,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
-public class SocketAdapter {
+public class SocketAdapter implements Closeable, Loggable {
     private final Socket socket;
 
     public SocketAdapter(Socket s) {
@@ -48,10 +49,18 @@ public class SocketAdapter {
         return new DataInputStream(socket.getInputStream());
     }
 
+    @Override
+    public String log() {
+        return "host addr " + socket.getInetAddress().getHostAddress() + " port " +
+                socket.getPort() + " local address " + socket.getLocalAddress() + " local port " +
+                socket.getLocalPort();
+    }
+
     public boolean isClosed() {
         return socket.isClosed();
     }
 
+    @Override
     public void close() throws IOException {
         socket.close();
     }

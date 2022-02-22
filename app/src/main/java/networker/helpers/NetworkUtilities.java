@@ -17,6 +17,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Objects;
 
 import networker.exceptions.InvalidPortValueException;
 import networker.messages.MessageDeclaration;
@@ -34,6 +35,7 @@ public class NetworkUtilities {
     public static final String JSON_ADDRESS_PORT = "port";
     public static final String JSON_ADDRESS_USERNAME = "username";
     public static final String JSON_ADDRESS_STATUS = "status";
+    public static final String JSON_ADDRESS_PRIOTIY = "priority";
 
     // users should also declare themselves along with the message declaration(s)
     public static final int MAX_MESSAGE_DECLARATION_BUFFER_SIZE = 2048 + DISCOVERY_BUFFER_SIZE;
@@ -65,17 +67,19 @@ public class NetworkUtilities {
         salutation.put(JSON_ADDRESS_PORT, u.getPort());
         salutation.put(JSON_ADDRESS_USERNAME, u.getUsername());
         salutation.put(JSON_ADDRESS_STATUS, Status.toInt(u.getStatus()));
+        salutation.put(JSON_ADDRESS_PRIOTIY, u.getPriority());
 
         return salutation;
     }
 
     public static User processUserSalutationJSON(JSONObject jObj) throws JSONException, UnknownHostException, InvalidPortValueException {
+        int priority = jObj.getInt(JSON_ADDRESS_PRIOTIY);
         Status status = Status.toStatus(jObj.getInt(JSON_ADDRESS_STATUS));
         String username = jObj.getString(JSON_ADDRESS_USERNAME);
         int port = jObj.getInt(JSON_ADDRESS_PORT);
         InetAddress addr = InetAddress.getByName(jObj.getString(JSON_ADDRESS_IP));
 
-        return new User(addr, username, port, status);
+        return new User(addr, username, port, status, priority);
     }
 
     public static User processUserSalutationJSON(String salutation) throws JSONException, UnknownHostException, InvalidPortValueException {
@@ -158,7 +162,7 @@ public class NetworkUtilities {
 
     //port might be different user to socket, since listening port is different than the one contacting us
     public static boolean userDataIsConsistentToSocket(SocketAdapter s, User u) {
-        return s.getInetAddress() == u.getLogicalAddress();
+        return Objects.equals(s.getInetAddress().getHostAddress(), u.getAddress());
     }
 
     public static boolean portIsValid(int p) {
@@ -184,19 +188,17 @@ public class NetworkUtilities {
         try {
             for (Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces(); list.hasMoreElements(); ) {
                 NetworkInterface i = list.nextElement();
+
                 if (i.isLoopback()) continue;
                 if (i.getDisplayName().contains("rmnet")) continue;
 
                 Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface displayName " + i.getDisplayName());
-                Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface Name " + i.getName());
-                Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface InetAddresses ");
                 Enumeration<InetAddress> il = i.getInetAddresses();
 
                 int j = 0;
                 while(il.hasMoreElements()) {
                     InetAddress ia = il.nextElement();
-                    Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface address toString" + ia.toString());
-                    Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface address getHostAddress " + ia.getHostAddress());
+                    Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface InetAddress.getHostAddress " + ia.getHostAddress());
                     ++j;
                 }
 

@@ -1,11 +1,12 @@
 package networker.sockets;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
 
-public class ServerSocketAdapter {
+public class ServerSocketAdapter implements Closeable, Loggable {
     private final ServerSocket socket;
 
     public ServerSocketAdapter(ServerSocket s) {
@@ -32,6 +33,14 @@ public class ServerSocketAdapter {
         return socket.getInetAddress();
     }
 
+    @Override
+    public String log() {
+        return "host addr " + socket.getInetAddress().getHostAddress() +
+                " local SocketAddress " + socket.getLocalSocketAddress().toString() +
+                " local port " + socket.getLocalPort();
+    }
+
+    @Override
     public void close() throws IOException {
         socket.close();
     }
