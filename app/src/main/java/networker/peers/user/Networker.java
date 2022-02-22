@@ -12,9 +12,8 @@ import networker.peers.user.network.Networking;
 import networker.sockets.SocketAdapter;
 
 class Networker implements Networking {
+    private static final String TAG = "networker.peers.user:Networker";
     private static final int SO_TIMEOUT = 2000;
-
-    private final User user;
 
     private final InetAddress address;
     private final int port;
@@ -27,8 +26,6 @@ class Networker implements Networking {
         this.port = port;
 
         this.priority = priority;
-
-        user = u;
     }
 
     @Override
@@ -38,7 +35,7 @@ class Networker implements Networking {
         currentUserSocket = new SocketAdapter();
         currentUserSocket.connect(new InetSocketAddress(address, port), SO_TIMEOUT);
         currentUserSocket.setTimeout(SO_TIMEOUT);
-        Log.d("networker.peers.user.User.createUserSocket", "connected to " + currentUserSocket.log());
+        Log.d(TAG + ".createUserSocket", "connected to " + currentUserSocket.log());
     }
 
     @Override
@@ -50,7 +47,7 @@ class Networker implements Networking {
     public void replaceSocket(SocketAdapter newSocket) throws IOException {
         shutdown();
         currentUserSocket = newSocket;
-        Log.d("networker.peers.user.User.replaceSocket", "connected to " + currentUserSocket.log());
+        Log.d(TAG + ".replaceSocket", "replaced socket, connected to " + currentUserSocket.log());
     }
 
     @Override
