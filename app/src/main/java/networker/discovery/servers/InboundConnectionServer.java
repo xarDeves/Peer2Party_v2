@@ -19,14 +19,14 @@ import networker.sockets.SocketAdapter;
 public class InboundConnectionServer implements PeerServer {
 
     @Override
-    public void listen(ServerSocketAdapter ss, final int timeToReceiveMillis, RoomKnowledge room) throws IOException {
+    public void listen(ServerSocketAdapter ss, final int timeToReceiveMillis, final int soTimeToReceiveMillis, RoomKnowledge room) throws IOException {
 
         long timeSpent = 0;
         final long start = System.currentTimeMillis();
 
         while (timeSpent < timeToReceiveMillis) {
             try {
-                handleIndividualClient(ss, room, timeToReceiveMillis);
+                handleIndividualClient(ss, room, soTimeToReceiveMillis);
             } catch (SocketTimeoutException e) {
                 Log.v("networker.discovery.servers.listen", "SocketTimeoutException" , e);
             }

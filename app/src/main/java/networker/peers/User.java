@@ -106,7 +106,7 @@ public class User {
     public void createUserSocket() throws IOException, InvalidPortValueException {
         if (!portIsValid()) throw new InvalidPortValueException();
         shutdown();
-
+        //FIXME add timeout to socket creation
         currentUserSocket = new SocketAdapter(address, port);
         Log.d("networker.peers.User.createUserSocket", "connected to " + currentUserSocket.log());
 

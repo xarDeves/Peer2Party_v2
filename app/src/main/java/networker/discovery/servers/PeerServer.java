@@ -6,5 +6,5 @@ import networker.RoomKnowledge;
 import networker.sockets.ServerSocketAdapter;
 
 public interface PeerServer {
-    void listen(ServerSocketAdapter ss, int timeToReceiveMillis, RoomKnowledge knowledge) throws IOException;
+    void listen(ServerSocketAdapter ss, final int timeToReceiveMillis, final int soTimeToReceiveMillis, RoomKnowledge room) throws IOException ;
 }
