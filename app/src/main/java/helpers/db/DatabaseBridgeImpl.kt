@@ -1,4 +1,4 @@
-package helpers
+package helpers.db
 
 import data.Message
 import data.MessageType

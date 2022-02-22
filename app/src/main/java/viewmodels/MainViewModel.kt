@@ -2,9 +2,7 @@ package viewmodels
 
 import android.app.Application
 import android.content.Context.WIFI_SERVICE
-import android.net.Network
 import android.net.wifi.WifiManager
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -15,7 +13,7 @@ import data.DbDao
 import data.Message
 import fragments.ChatFragment
 import fragments.PeerListFragment
-import helpers.DatabaseBridgeImpl
+import helpers.db.DatabaseBridgeImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,7 +34,10 @@ import networker.peers.Peer
 import networker.peers.Status
 import networker.peers.User
 import networker.sockets.ServerSocketAdapter
-import java.net.*
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.MulticastSocket
+import java.net.NetworkInterface
 import java.util.*
 import java.util.concurrent.Executors
 

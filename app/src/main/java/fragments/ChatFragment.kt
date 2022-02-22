@@ -40,6 +40,7 @@ class ChatFragment : Fragment() {
     private lateinit var camVideoLauncher: ActivityResultLauncher<Intent>
     private var cameraMediaUri: Uri = Uri.EMPTY
 
+    //FIXME scroll recycler to bottom on app start
     private fun setupRecycler() {
         layoutManager = LinearLayoutManager(requireActivity())
         chatAdapter = ChatRecyclerAdapter(requireActivity())

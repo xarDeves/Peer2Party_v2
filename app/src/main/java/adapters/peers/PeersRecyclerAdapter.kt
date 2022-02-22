@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.peer2party.R
 import networker.peers.Peer
 
-class PeersRecyclerAdapter internal constructor(
+class PeersRecyclerAdapter(
     private val context: Context,
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -22,14 +22,14 @@ class PeersRecyclerAdapter internal constructor(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = inflater.inflate(R.layout.peer_inflatable, parent, false)
-        //return PeerViewHolder(inflater.inflate(R.layout.peer_inflatable, parent, false))
         return PeerViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        (holder as PeerViewHolder)
 
         val currentPeer = peers[position]
-        (holder as PeerViewHolder).checkBox.isChecked = currentPeer.isEnabled
+        holder.checkBox.isChecked = currentPeer.isEnabled
         holder.peerName.text = currentPeer.user.username
 
         holder.checkBox.setOnClickListener {

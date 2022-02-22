@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 
-import helpers.DatabaseBridge;
+import helpers.db.DatabaseBridge;
 import networker.RoomKnowledge;
 import networker.messages.MessageDeclaration;
 import networker.messages.MessageIntent;

@@ -17,7 +17,7 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 
 
-class ChatRecyclerAdapter internal constructor(
+class ChatRecyclerAdapter(
     private val context: Context,
     private val dao: DbDao = DatabaseHolder.getInstance(context).dao(),
     private val inflater: LayoutInflater = LayoutInflater.from(context)

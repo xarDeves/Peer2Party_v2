@@ -5,7 +5,7 @@ import android.util.Log;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import helpers.DatabaseBridge;
+import helpers.db.DatabaseBridge;
 import networker.RoomKnowledge;
 import networker.exceptions.OversizedMultimediaMessage;
 import networker.exceptions.OversizedTextMessage;
