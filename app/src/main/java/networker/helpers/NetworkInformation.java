@@ -62,6 +62,10 @@ public class NetworkInformation {
         return friendlyName;
     }
 
+    public boolean isOurself(User u) {
+        return ourselves.equals(u);
+    }
+
     public User getOurselves() {
         return ourselves;
     }

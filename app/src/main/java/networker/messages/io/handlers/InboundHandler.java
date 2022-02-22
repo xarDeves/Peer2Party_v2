@@ -52,6 +52,11 @@ public class InboundHandler {
             Log.e(TAG + ".handle", "Oversized multimedia message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), omm);
         } catch (IOException e) {
             Log.e(TAG + ".handle", "IOException w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), e);
+            try {
+                user.getNetworking().shutdown();
+            } catch (IOException ioException) {
+                Log.e(TAG + ".handle", "Shutdown failed when IOException is thrown?", ioException);
+            }
         } catch (InterruptedException e) {
             Log.e(TAG + ".handle", "InboundHandler interrupted uid " + user.getIDENTIFIER(), e);
         } finally {
@@ -69,16 +74,13 @@ public class InboundHandler {
         byte[] buffer = new byte[Math.toIntExact(mdl.getBodySize())];
 
         TextProvider provider = new TextProvider(contentSize);
-        Log.d("networker.messages.io.handlers.readText", "socket port is valid "
-                + user.getNetworking().portIsValid() + " and closed " + user.getNetworking().socketIsClosed());
         while((count = dis.read(buffer)) > 0 && totalbytesread < mdl.getBodySize()) {
-            Log.d("networker.messages.io.handlers.readText", "count " + count);
             totalbytesread += count;
             provider.insertData(buffer, count);
         }
 
         dbb.onTextReceived(provider, user);
-        Log.d("networker.messages.io.handlers.readText", "added dbb text " + provider.getData());
+        Log.d(TAG + ".readText", "added dbb text" + provider.getData());
     }
 
     private void readFile(DataInputStream dis) throws OversizedMultimediaMessage, IOException {
@@ -114,7 +116,7 @@ public class InboundHandler {
         provider.close();
 
         dbb.onMultimediaReceived(provider, user);
-        Log.d("networker.messages.io.handlers.readText: ", "added dbb path " + provider.getData());
+        Log.d(TAG + ".readFile", "added dbb path " + provider.getData());
     }
 
 }

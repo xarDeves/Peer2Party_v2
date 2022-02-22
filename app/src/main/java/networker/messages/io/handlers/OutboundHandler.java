@@ -6,8 +6,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import networker.RoomKnowledge;
-import networker.exceptions.InvalidPortValueException;
-import networker.helpers.NetworkUtilities;
 import networker.messages.content.ContentProcurer;
 import networker.peers.user.User;
 import networker.peers.user.synchronization.Synchronization;
@@ -26,16 +24,10 @@ public class OutboundHandler {
     }
 
     public void handle() {
+
         Synchronization sync = user.getSynchronization();
         try {
             sync.sendLock();
-
-            try {
-                NetworkUtilities.createConnectionIfThereIsNone(user);
-            } catch (IOException | InterruptedException | InvalidPortValueException e) {
-                Log.e(TAG + ".handle", "couldn't createConnectionIfThereIsNone", e);
-                return;
-            }
 
             DataOutputStream dos = user.getNetworking().getCurrentUserSocket().getDataOutputStream();
             sendHeader(dos);
@@ -48,6 +40,11 @@ public class OutboundHandler {
             Log.e(TAG + ".handle", "InterruptedException when sending to " + user.getUsername(), e);
         } catch (IOException e) {
             Log.e(TAG + ".handle", "IOException when sending to " + user.getUsername(), e);
+            try {
+                user.getNetworking().shutdown();
+            } catch (IOException ioException) {
+                Log.e(TAG + ".handle", "Shutdown failed when IOException is thrown?", ioException);
+            }
         } finally {
             sync.sendUnlock();
         }

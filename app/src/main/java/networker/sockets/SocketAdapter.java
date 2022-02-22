@@ -8,10 +8,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 
 public class SocketAdapter implements Closeable, Loggable {
-    private final Socket socket;
+    private Socket socket;
+
+    public SocketAdapter() {}
 
     public SocketAdapter(Socket s) {
         socket = s;
@@ -23,6 +26,10 @@ public class SocketAdapter implements Closeable, Loggable {
 
     public InetAddress getInetAddress() {
         return socket.getInetAddress();
+    }
+
+    public void connect(SocketAddress addr, int soTimeout) throws IOException {
+        socket.connect(addr, soTimeout);
     }
 
     public void setTimeout(int timeout) throws SocketException {

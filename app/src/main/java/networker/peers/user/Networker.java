@@ -2,11 +2,9 @@ package networker.peers.user;
 
 import android.util.Log;
 
-import org.json.JSONException;
-
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import networker.exceptions.InvalidPortValueException;
 import networker.helpers.NetworkUtilities;
@@ -14,6 +12,7 @@ import networker.peers.user.network.Networking;
 import networker.sockets.SocketAdapter;
 
 class Networker implements Networking {
+    private static final int SO_TIMEOUT = 2000;
 
     private final User user;
 
@@ -36,15 +35,10 @@ class Networker implements Networking {
     public void createUserSocket() throws IOException, InvalidPortValueException {
         if (!portIsValid()) throw new InvalidPortValueException();
         shutdown();
-        //FIXME add timeout to socket creation
-        currentUserSocket = new SocketAdapter(address, port);
+        currentUserSocket = new SocketAdapter();
+        currentUserSocket.connect(new InetSocketAddress(address, port), SO_TIMEOUT);
+        currentUserSocket.setTimeout(SO_TIMEOUT);
         Log.d("networker.peers.user.User.createUserSocket", "connected to " + currentUserSocket.log());
-
-        try {
-            sendSalutation();
-        } catch (JSONException e) {
-            Log.e("networker.peers.user.User.createUserSocket", "sendSalutation() ", e);
-        }
     }
 
     @Override
@@ -99,13 +93,8 @@ class Networker implements Networking {
         priority = p;
     }
 
-    void sendSalutation() throws IOException, JSONException {
-        DataOutputStream dos = currentUserSocket.getDataOutputStream();
-        dos.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.getUserSalutationJSON(user).toString()));
-        dos.flush();
-    }
-
-    void shutdown() throws IOException {
+    @Override
+    public void shutdown() throws IOException {
         if (currentUserSocket != null) {
             if (!currentUserSocket.isClosed()) currentUserSocket.close();
         }

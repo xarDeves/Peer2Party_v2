@@ -9,7 +9,10 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 
 import networker.RoomKnowledge;
+import networker.exceptions.InconsistentDataException;
 import networker.exceptions.InvalidPortValueException;
+import networker.exceptions.SelfConnectionException;
+import networker.helpers.NetworkInformation;
 import networker.helpers.NetworkUtilities;
 import networker.peers.Peer;
 import networker.peers.user.User;
@@ -21,9 +24,11 @@ import networker.sockets.SocketAdapter;
 public class InboundConnectionServer implements PeerServer {
     private static final String TAG = "networker.discovery.servers:InboundConnectionServer";
 
+    private final NetworkInformation netInfo;
     private final RoomKnowledge rk;
 
-    public InboundConnectionServer(RoomKnowledge roomKnowledge) {
+    public InboundConnectionServer(NetworkInformation networkInformation, RoomKnowledge roomKnowledge) {
+        netInfo = networkInformation;
         rk = roomKnowledge;
     }
 
@@ -50,28 +55,30 @@ public class InboundConnectionServer implements PeerServer {
 
     private void handleIndividualClient(ServerSocketAdapter ss, final int timeToReceiveMillis) throws IOException {
         SocketAdapter client = ss.accept();
+        Log.d(TAG + ".handleIndividualClient", "Found user!");
         client.setTimeout(timeToReceiveMillis);
 
         String salutation = getSalutation(client);
 
-        User u = null;
+        User user = null;
         try {
-            u = NetworkUtilities.processUserSalutationJSON(salutation);
-            u.getSynchronization().lock();
-            handleUser(u, client);
+            user = NetworkUtilities.processUserSalutationJSON(salutation);
+            user.getSynchronization().lock();
+            Log.d(TAG + ".handleIndividualClient", "Processed salutation! " + salutation + " Handling...");
+            handleUser(user, client);
         } catch (JSONException | InvalidPortValueException e) {
-            Log.e(TAG + ".handleIndividualClient", salutation, e);
+            Log.e(TAG + ".handleIndividualClient", "User failed verification check", e);
             client.close(); // forfeit the connection if client sent invalid data, there's clearly an issue
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | SelfConnectionException | InconsistentDataException e) {
             Log.e(TAG + ".handleIndividualClient", "", e);
         } finally {
-            if (u!=null) u.getSynchronization().unlock();
+            if (user!=null) user.getSynchronization().unlock();
         }
     }
 
-    private void handleUser(User u, SocketAdapter s) throws IOException {
-        //for some reason the user sent data that is inconsistent with the socket he's contacting us from
-        if (!NetworkUtilities.userDataIsConsistentToSocket(u, s)) return;
+    private void handleUser(User u, SocketAdapter s) throws IOException, InconsistentDataException, SelfConnectionException {
+        if (!NetworkUtilities.userIsConsistentToSocket(u, s)) throw new InconsistentDataException();
+        if (netInfo.isOurself(u)) throw new SelfConnectionException();
 
         if (!rk.hasPeer(u)) {
             handleNewPeer(u, s);

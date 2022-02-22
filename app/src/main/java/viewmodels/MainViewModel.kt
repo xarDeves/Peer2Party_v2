@@ -121,7 +121,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         multicastSocket.broadcast = true
 
         val serverSocketAdapter = ServerSocketAdapter(networkInetAddress, SERVER_PORT, 25)
-        val inboundConnectionServer = InboundConnectionServer(roomWrapper)
+        val inboundConnectionServer = InboundConnectionServer(networkInformation, roomWrapper)
         val multicastGroupSender = MulticastGroupPeerAnnouncer(ourself)
         val multicastGroupReceiver = MulticastGroupPeerReceiver()
 
@@ -168,7 +168,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         multicastSocket.broadcast = true
 
         val inboundProcessor = InboundProcessor(inboundExecutor, roomWrapper, dbBridge)
-        val outboundProcessor = OutboundProcessor(outboundExecutor, roomWrapper, dbBridge)
+        val outboundProcessor = OutboundProcessor(outboundExecutor, networkInformation, roomWrapper, dbBridge)
         val multicastGroupMessageAnnouncer = MulticastGroupMessageAnnouncer()
         val multicastGroupMessageReceiver = MulticastGroupMessageReceiver()
 

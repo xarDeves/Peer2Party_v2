@@ -4,12 +4,17 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONException;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 
 import helpers.db.DatabaseBridge;
 import networker.RoomKnowledge;
+import networker.exceptions.InvalidPortValueException;
+import networker.helpers.NetworkInformation;
+import networker.helpers.NetworkUtilities;
 import networker.messages.MessageDeclaration;
 import networker.messages.MessageIntent;
 import networker.messages.content.ContentProcurer;
@@ -22,13 +27,16 @@ public class OutboundProcessor implements OutboundMessageProcessor {
     private static final String TAG = "networker.messages.io.processors.outbound:OutboundProcessor";
 
     private final ExecutorService executor;
+    private final NetworkInformation netInfo;
     private final RoomKnowledge rk;
     private final DatabaseBridge dbb;
 
     public OutboundProcessor(@NonNull ExecutorService executorService,
+                             @NonNull NetworkInformation networkInformation,
                              @NonNull RoomKnowledge roomKnowledge,
                              @NonNull DatabaseBridge databaseBridge) {
         executor = executorService;
+        netInfo = networkInformation;
         rk = roomKnowledge;
         dbb = databaseBridge;
     }
@@ -60,9 +68,26 @@ public class OutboundProcessor implements OutboundMessageProcessor {
                 MessageDeclaration md = mdls.next();
                 try {
                     ContentProcurer cpr = ContentProcurerFactory.createProcurer(md);
+
+                    try {
+                        NetworkUtilities.createConnectionIfThereIsNone(u, netInfo);
+                    } catch (IOException e) {
+                        Log.e(TAG + ".dispatchThread", "Shutdown failed when IOException is thrown?", e);
+                        u.getNetworking().shutdown();
+                        return;
+                    } catch (InterruptedException | InvalidPortValueException | JSONException e) {
+                        Log.e(TAG + ".dispatchThread", "", e);
+                        return;
+                    }
+
                     (new OutboundHandler(u, cpr, rk)).handle();
                 } catch (IOException e) {
                     Log.e(TAG + ".dispatchThread", "", e);
+                    try {
+                        u.getNetworking().shutdown();
+                    } catch (IOException ioException) {
+                        Log.e(TAG + ".dispatchThread", "Shutdown failed when IOException is thrown?", ioException);
+                    }
                 }
             }
         });

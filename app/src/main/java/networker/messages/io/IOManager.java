@@ -63,8 +63,9 @@ public class IOManager implements MessageManager {
             // if roomknowledge has the peer, and he's enabled on our side, check if we're one of the receivers
             if (rk.hasPeer(mi.getSource()) && rk.getPeer(mi.getSource()).isEnabled()) {
                 for (String r: mi.getReceivers()) {
+                    Log.d(TAG + ".discover", "Receiver " + r); //FIXME
                     //we're one of the receivers, receive this intent
-                    if (r.equals(ourself.getIDENTIFIER())) {
+                    if (r.equals(ourself.getNetworking().getHostAddress())) {
                         receive(mi);
                         break;
                     }

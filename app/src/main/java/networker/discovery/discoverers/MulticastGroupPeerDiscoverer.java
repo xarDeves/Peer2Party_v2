@@ -102,6 +102,7 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
     /** This method is blocking, and should be run in a thread in a loop. */
     public void discover() throws IOException {
         udpSocket.setSoTimeout(BO_TIMEOUT_MILLIS);
+
         sender.announce(udpSocket, netInfo);
         Queue<String> groupBroadcasts = receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS);
 
@@ -136,7 +137,14 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
                 Log.d(TAG + ".processUsers", "Found & processing " + u.getUsername());
                 processUser(u);
                 Log.d(TAG + ".processUsers", "Finished processing " + u.getUsername());
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
+                Log.e(TAG + ".processUsers", "", e);
+                try {
+                    u.getNetworking().shutdown();
+                } catch (IOException ioException) {
+                    Log.e(TAG + ".processUsers", "Shutdown failed when IOException is thrown?", ioException);
+                }
+            } catch (InterruptedException e) {
                 Log.e(TAG + ".processUsers", "", e);
             } finally {
                 sync.unlock();
@@ -146,7 +154,7 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
 
     private void processUser(User u) throws IOException {
         // corner case: ourself
-        if (netInfo.getOurselves().equals(u)) return;
+        if (netInfo.isOurself(u)) return;
 
         // if this is a completely new peer...
         if (!rk.hasPeer(u)) {
@@ -162,15 +170,16 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
         try {
             //FIXME corner case with same num, just sum the address of the user and compare to our sum, whichever is greater has priority
             Networking net = u.getNetworking();
-            Log.e(TAG + ".processNewPeer", "New peer has priority "+ net.getPriority() +
-                    ", we have "+ netInfo.getOurselves().getNetworking().getPriority());
             if (netInfo.getOurselves().getNetworking().getPriority() < net.getPriority()) {
                 Log.d(TAG + ".processNewPeer", u.getUsername() + " has priority over us, creating socket");
                 net.createUserSocket();
+                NetworkUtilities.sendSalutation(u, netInfo);
                 rk.addPeer(new Peer(u));
             }
         } catch (InvalidPortValueException e) {
             Log.e(TAG + ".processNewPeer", "User invalid port value " + u.getNetworking().getPort(), e);
+        } catch (JSONException e) {
+            Log.e(TAG + ".processNewPeer", "Invalid json from ourself", e);
         }
     }
 
@@ -182,8 +191,16 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
             //update status & priority
             uExisting.setStatus(u.getStatus());
             uExisting.getNetworking().setPriority(u.getNetworking().getPriority());
-        } catch (InterruptedException e) {
+            NetworkUtilities.createConnectionIfThereIsNone(uExisting, netInfo);
+        } catch (JSONException | InterruptedException | InvalidPortValueException e) {
             Log.e(TAG + ".processExistingPeer", "", e);
+        } catch (IOException e) {
+            Log.e(TAG + ".processExistingPeer", "", e);
+            try {
+                uExisting.getNetworking().shutdown();
+            } catch (IOException ioException) {
+                Log.e(TAG + ".processExistingPeer", "Shutdown failed when IOException is thrown?", e);
+            }
         } finally {
             sync.unlock();
         }

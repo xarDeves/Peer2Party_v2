@@ -17,13 +17,13 @@ public class User {
     private final Synchronization synchronizer = new Synchronizer((byte)3, (byte)2, (byte)1);
 
     /* -------------------------- NETWORK STUFF -------------------------------- */
-    private final String IDENTIFIER;
     private final Networking networker;
 
     /* ------------------------- AUTHENTICATION STUFF ------------------------- */
     private final Authentication auth = new Authenticator();
 
     /* ------------------------- MISCELLANEOUS STUFF ------------------------- */
+    private final String IDENTIFIER;
     private final String username;
     private volatile Status status;
 
@@ -71,11 +71,9 @@ public class User {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-
-        Networking userNetworking = user.getNetworking();
+        Networking userNetworking = ((User) o).getNetworking();
         // the unique identifier comparison is not needed right now, but is here later on for completeness sake
-        return networker.getAddress().equals(userNetworking.getAddress());
+        return userNetworking.getHostAddress().equals(getNetworking().getHostAddress());
     }
 
 }

@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -67,13 +68,19 @@ public class NetworkUtilities {
 
         JSONObject salutation = new JSONObject();
         Networking net = u.getNetworking();
-        salutation.put(JSON_ADDRESS_IP, net.getAddress());
+        salutation.put(JSON_ADDRESS_IP, net.getHostAddress());
         salutation.put(JSON_ADDRESS_PORT, net.getPort());
         salutation.put(JSON_ADDRESS_USERNAME, u.getUsername());
         salutation.put(JSON_ADDRESS_STATUS, Status.toInt(u.getStatus()));
         salutation.put(JSON_ADDRESS_PRIOTIY, net.getPriority());
 
         return salutation;
+    }
+
+    public static User processUserSalutationJSON(String salutation) throws JSONException, UnknownHostException, InvalidPortValueException {
+        JSONObject jObj = new JSONObject(salutation);
+
+        return processUserSalutationJSON(jObj);
     }
 
     public static User processUserSalutationJSON(JSONObject jObj) throws JSONException, UnknownHostException, InvalidPortValueException {
@@ -84,12 +91,6 @@ public class NetworkUtilities {
         InetAddress addr = InetAddress.getByName(jObj.getString(JSON_ADDRESS_IP));
 
         return new User(addr, username, port, status, priority);
-    }
-
-    public static User processUserSalutationJSON(String salutation) throws JSONException, UnknownHostException, InvalidPortValueException {
-        JSONObject jObj = new JSONObject(salutation);
-
-        return processUserSalutationJSON(jObj);
     }
 
     public static String createMessageIntentJSON(MessageIntent msg) throws JSONException {
@@ -165,7 +166,7 @@ public class NetworkUtilities {
     }
 
     //port might be different user to socket, since listening port is different than the one contacting us
-    public static boolean userDataIsConsistentToSocket(User u, SocketAdapter s) {
+    public static boolean userIsConsistentToSocket(User u, SocketAdapter s) {
         return Objects.equals(s.getInetAddress().getHostAddress(), u.getNetworking().getHostAddress());
     }
 
@@ -173,7 +174,7 @@ public class NetworkUtilities {
         return p > 0 && p < 65535;
     }
 
-    public static void createConnectionIfThereIsNone(User u) throws IOException, InterruptedException, InvalidPortValueException {
+    public static void createConnectionIfThereIsNone(User u, NetworkInformation netInfo) throws IOException, InterruptedException, InvalidPortValueException, JSONException {
         Synchronization sync = u.getSynchronization();
         Networking net = u.getNetworking();
         try {
@@ -182,9 +183,16 @@ public class NetworkUtilities {
             if (net.getCurrentUserSocket() != null && !net.getCurrentUserSocket().isClosed()) return;
 
             net.createUserSocket();
+            NetworkUtilities.sendSalutation(u, netInfo);
         } finally {
             sync.unlock();
         }
+    }
+
+    public static void sendSalutation(User u, NetworkInformation netInfo) throws IOException, JSONException {
+        DataOutputStream dos = u.getNetworking().getCurrentUserSocket().getDataOutputStream();
+        dos.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.getUserSalutationJSON(netInfo.getOurselves()).toString()));
+        dos.flush();
     }
 
     public static HashMap<String, NetworkInterface> getViableNetworkInterfaces() {

@@ -18,4 +18,5 @@ public interface Networking {
     String getHostAddress();
     int getPriority();
     void setPriority(int p);
+    void shutdown() throws IOException;
 }
