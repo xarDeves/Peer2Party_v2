@@ -10,6 +10,7 @@ import networker.helpers.NetworkUtilities;
 import networker.messages.content.ContentProcurer;
 
 public class TextProcurer implements ContentProcurer {
+    private static final String TAG = "networker.messages.content.procurers:TextProcurer";
 
     private final long totalSize;
     private final byte[] content;
@@ -45,13 +46,13 @@ public class TextProcurer implements ContentProcurer {
         hasNext = start > content.length && end > content.length;
 
         if (start > content.length) {
-            Log.d("networker.messages.content.procurers.TextProcurer", "consume start: " + start);
+            Log.e(TAG + ".consume", "consume start: " + start + " content.length " + content.length);
             return 0;
         }
 
         if (end > content.length) {
             end = content.length; //trim
-            Log.d("networker.messages.content.procurers.TextProcurer", "consume end: " + end);
+            Log.d(TAG + ".consume", "consume end: " + end + " content.length " + content.length);
         }
 
         buffer = Arrays.copyOfRange(content, start, end);

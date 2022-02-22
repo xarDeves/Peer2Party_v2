@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import networker.peers.User;
+import networker.peers.user.User;
 
 public class MessageIntent {
     private final User source;

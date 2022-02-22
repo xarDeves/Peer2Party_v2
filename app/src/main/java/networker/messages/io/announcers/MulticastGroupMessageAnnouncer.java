@@ -13,6 +13,7 @@ import networker.helpers.NetworkUtilities;
 import networker.messages.MessageIntent;
 
 public class MulticastGroupMessageAnnouncer implements MessageAnnouncer {
+    private static final String TAG = "networker.messages.io.announcers:MulticastGroupMessageAnnouncer";
 
     @Override
     public void announce(DatagramSocket socket, MessageIntent mi, NetworkInformation info) throws IOException {
@@ -21,9 +22,9 @@ public class MulticastGroupMessageAnnouncer implements MessageAnnouncer {
             byte[] decl = NetworkUtilities.convertUTF8StringToBytes(js);
             DatagramPacket msg = NetworkUtilities.createDatagramPacket(decl, info.getMulticastMessagesGroup(), info.getMessagePort());
             socket.send(msg);
-            Log.d("networker.messages.io.announcers.announce", "Sent, bLength " + decl.length + " " + js);
+            Log.d(TAG + ".announce", "Sent bLength " + decl.length + " " + js);
         } catch (JSONException e) {
-            Log.d("networker.messages.io.announcers.announce", "NetworkUtilities.getDeclarationBroadcast(mi);", e);
+            Log.e(TAG + ".announce", "NetworkUtilities.getDeclarationBroadcast(mi);", e);
         }
     }
 }

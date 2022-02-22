@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import networker.peers.Peer;
-import networker.peers.User;
+import networker.peers.user.User;
 
 public class RoomKnowledge {
     // String (ID)

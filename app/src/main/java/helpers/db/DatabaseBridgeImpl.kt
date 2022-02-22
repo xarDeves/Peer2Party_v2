@@ -6,7 +6,7 @@ import helpers.DateTimeHelper.fetchDateTime
 import networker.messages.MessageDeclaration
 import networker.messages.content.providers.MultimediaProvider
 import networker.messages.content.providers.TextProvider
-import networker.peers.User
+import networker.peers.user.User
 import viewmodels.MainViewModel
 
 //FIXME change name

@@ -24,10 +24,13 @@ import networker.messages.MessageDeclaration;
 import networker.messages.MessageIntent;
 import networker.messages.MessageType;
 import networker.peers.Status;
-import networker.peers.User;
+import networker.peers.user.User;
+import networker.peers.user.network.Networking;
+import networker.peers.user.synchronization.Synchronization;
 import networker.sockets.SocketAdapter;
 
 public class NetworkUtilities {
+    private static final String TAG = "networker.helpers:NetworkUtilities";
 
     public static final int DISCOVERY_BUFFER_SIZE = 256; // in bytes, 256 == 2 kilobytes
 
@@ -63,11 +66,12 @@ public class NetworkUtilities {
         // https://www.tutorialspoint.com/json/json_java_example.htm
 
         JSONObject salutation = new JSONObject();
-        salutation.put(JSON_ADDRESS_IP, u.getAddress());
-        salutation.put(JSON_ADDRESS_PORT, u.getPort());
+        Networking net = u.getNetworking();
+        salutation.put(JSON_ADDRESS_IP, net.getAddress());
+        salutation.put(JSON_ADDRESS_PORT, net.getPort());
         salutation.put(JSON_ADDRESS_USERNAME, u.getUsername());
         salutation.put(JSON_ADDRESS_STATUS, Status.toInt(u.getStatus()));
-        salutation.put(JSON_ADDRESS_PRIOTIY, u.getPriority());
+        salutation.put(JSON_ADDRESS_PRIOTIY, net.getPriority());
 
         return salutation;
     }
@@ -161,8 +165,8 @@ public class NetworkUtilities {
     }
 
     //port might be different user to socket, since listening port is different than the one contacting us
-    public static boolean userDataIsConsistentToSocket(SocketAdapter s, User u) {
-        return Objects.equals(s.getInetAddress().getHostAddress(), u.getAddress());
+    public static boolean userDataIsConsistentToSocket(User u, SocketAdapter s) {
+        return Objects.equals(s.getInetAddress().getHostAddress(), u.getNetworking().getHostAddress());
     }
 
     public static boolean portIsValid(int p) {
@@ -170,14 +174,16 @@ public class NetworkUtilities {
     }
 
     public static void createConnectionIfThereIsNone(User u) throws IOException, InterruptedException, InvalidPortValueException {
+        Synchronization sync = u.getSynchronization();
+        Networking net = u.getNetworking();
         try {
-            u.lock();
-            if (u.portIsValid()) return;
-            if (u.getCurrentUserSocket() != null && !u.getCurrentUserSocket().isClosed()) return;
+            sync.lock();
+            if (net.portIsValid()) return;
+            if (net.getCurrentUserSocket() != null && !net.getCurrentUserSocket().isClosed()) return;
 
-            u.createUserSocket();
+            net.createUserSocket();
         } finally {
-            u.unlock();
+            sync.unlock();
         }
     }
 
@@ -192,13 +198,13 @@ public class NetworkUtilities {
                 if (i.isLoopback()) continue;
                 if (i.getDisplayName().contains("rmnet")) continue;
 
-                Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface displayName " + i.getDisplayName());
+                Log.e(TAG + ".getViableNetworkInterfaces", "network_interface displayName " + i.getDisplayName());
                 Enumeration<InetAddress> il = i.getInetAddresses();
 
                 int j = 0;
                 while(il.hasMoreElements()) {
                     InetAddress ia = il.nextElement();
-                    Log.e("networker.helpers.getViableNetworkInterfaces", "network_interface InetAddress.getHostAddress " + ia.getHostAddress());
+                    Log.e(TAG + ".getViableNetworkInterfaces", "network_interface InetAddress.getHostAddress " + ia.getHostAddress());
                     ++j;
                 }
 
@@ -208,7 +214,7 @@ public class NetworkUtilities {
                 networkInterfaces.put(i.getDisplayName(), i);
             }
         } catch (SocketException e) {
-            Log.d("networker.helpers.getViableNetworkInterfaces", "NetworkInterface.getNetworkInterfaces()", e);
+            Log.e(TAG + ".getViableNetworkInterfaces", "", e);
         }
 
         return networkInterfaces;

@@ -13,9 +13,12 @@ import networker.messages.MessageDeclaration;
 import networker.messages.content.providers.MultimediaProvider;
 import networker.messages.content.providers.TextProvider;
 import networker.messages.io.IOManager;
-import networker.peers.User;
+import networker.peers.user.User;
+import networker.peers.user.synchronization.Synchronization;
 
 public class InboundHandler {
+    private static final String TAG = "networker.messages.io.handlers:InboundHandler";
+
     private final MessageDeclaration mdl;
     private final User user;
     private final RoomKnowledge rk;
@@ -32,28 +35,28 @@ public class InboundHandler {
     }
 
     public void handle() {
+        Synchronization sync = user.getSynchronization();
         try {
-            user.receiveLock();
-            DataInputStream dis = user.getCurrentUserSocket().getDataInputStream();
+            sync.receiveLock();
+            DataInputStream dis = user.getNetworking().getCurrentUserSocket().getDataInputStream();
 
             if (!mdl.getContentType().isFile()) readText(dis);
             if (mdl.getContentType().isFile())  readFile(dis);
 
             rk.increaseContentSizeReceived(mdl.getBodySize());
             rk.incrementMessageReceived();
-            Log.d("networker.messages.io.handlers.handle", "Receival successful! bodyize: " + mdl.getBodySize());
+            Log.d(TAG + ".handle", "Receive successful! bodysize: " + mdl.getBodySize());
         } catch (OversizedTextMessage otm) {
-            Log.d("networker.messages.io.handlers.handle", "Oversized text message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), otm);
+            Log.e(TAG + ".handle", "Oversized text message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), otm);
         } catch (OversizedMultimediaMessage omm) {
-            Log.d("networker.messages.io.handlers.handle", "Oversized multimedia message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), omm);
+            Log.e(TAG + ".handle", "Oversized multimedia message w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), omm);
         } catch (IOException e) {
-            Log.d("networker.messages.io.handlers.handle" , "IOException w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), e);
+            Log.e(TAG + ".handle", "IOException w/ bodysize " + mdl.getBodySize() + " from " + user.getIDENTIFIER(), e);
         } catch (InterruptedException e) {
-            Log.d("networker.messages.io.handlers.handle", "InboundHandler interrupted uid " + user.getIDENTIFIER(), e);
+            Log.e(TAG + ".handle", "InboundHandler interrupted uid " + user.getIDENTIFIER(), e);
         } finally {
-            user.receiveUnlock();
+            sync.receiveUnlock();
         }
-
 
     }
 
@@ -66,7 +69,8 @@ public class InboundHandler {
         byte[] buffer = new byte[Math.toIntExact(mdl.getBodySize())];
 
         TextProvider provider = new TextProvider(contentSize);
-        Log.d("networker.messages.io.handlers.readText", "socket port is valid " + user.portIsValid() + " and closed " + user.socketIsClosed());
+        Log.d("networker.messages.io.handlers.readText", "socket port is valid "
+                + user.getNetworking().portIsValid() + " and closed " + user.getNetworking().socketIsClosed());
         while((count = dis.read(buffer)) > 0 && totalbytesread < mdl.getBodySize()) {
             Log.d("networker.messages.io.handlers.readText", "count " + count);
             totalbytesread += count;

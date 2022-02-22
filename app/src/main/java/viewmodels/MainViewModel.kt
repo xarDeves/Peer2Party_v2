@@ -32,7 +32,7 @@ import networker.messages.io.processors.outbound.OutboundProcessor
 import networker.messages.io.receivers.MulticastGroupMessageReceiver
 import networker.peers.Peer
 import networker.peers.Status
-import networker.peers.User
+import networker.peers.user.User
 import networker.sockets.ServerSocketAdapter
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -71,7 +71,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         NetworkInterface.getNetworkInterfaces()?.toList()?.map { networkInterface ->
             networkInterface.inetAddresses?.toList()?.find {
                 !it.isLoopbackAddress && it is InetAddress
-            }?.let { return it.hostAddress }
+            }?.let { return it.hostAddress!! }
         }
         return ""
     }
@@ -90,7 +90,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val r = Random()
         r.setSeed(System.currentTimeMillis()-r.nextInt())
 
-        ourself = User(networkInetAddress, username, SERVER_PORT, Status.AVAILABLE, r.nextInt(Int.MAX_VALUE))
+        ourself = User(
+            networkInetAddress,
+            username,
+            SERVER_PORT,
+            Status.AVAILABLE,
+            r.nextInt(Int.MAX_VALUE)
+        )
         networkInformation = NetworkInformation(netIface.toString(), ourself)
 
         viewModelScope.launch {
@@ -115,7 +121,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         multicastSocket.broadcast = true
 
         val serverSocketAdapter = ServerSocketAdapter(networkInetAddress, SERVER_PORT, 25)
-        val inboundConnectionServer = InboundConnectionServer()
+        val inboundConnectionServer = InboundConnectionServer(roomWrapper)
         val multicastGroupSender = MulticastGroupPeerAnnouncer(ourself)
         val multicastGroupReceiver = MulticastGroupPeerReceiver()
 

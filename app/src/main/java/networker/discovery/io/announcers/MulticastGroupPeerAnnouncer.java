@@ -10,7 +10,7 @@ import java.net.DatagramSocket;
 
 import networker.helpers.NetworkInformation;
 import networker.helpers.NetworkUtilities;
-import networker.peers.User;
+import networker.peers.user.User;
 
 /** Requires multicast permissions.
  * Requires acquiring WifiManager.MulticastLock.
@@ -20,8 +20,8 @@ import networker.peers.User;
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
 public class MulticastGroupPeerAnnouncer implements PeerAnnouncer {
-    // this must later run as a client (send only when prompted)
-    // this must have the input of ourself (the current user)
+    private static final String TAG = "networker.discovery.io.announcers:MulticastGroupPeerAnnouncer";
+
     private final User ourself;
 
     public MulticastGroupPeerAnnouncer(User user) {
@@ -38,11 +38,11 @@ public class MulticastGroupPeerAnnouncer implements PeerAnnouncer {
             DatagramPacket msg = NetworkUtilities.createDatagramPacket(salutations, info.getMulticastDiscoverGroup(), info.getDiscoverPort());
             // double send
             socket.send(msg);
-            Log.d("networker.discovery.io.announcers.announce", "Sent first, bLength " + salutations.length + " " + s);
+            Log.d(TAG + ".announce", "Sent first, bLength " + salutations.length + " " + s);
             socket.send(msg);
-            Log.d("networker.discovery.io.announcers.announce", "Sent second, bLength " + salutations.length + " " + s);
+            Log.d(TAG + ".announce", "Sent send, bLength " + salutations.length + " " + s);
         } catch (JSONException e) {
-            Log.d("networker.discovery.io.announcers.announce", "NetworkUtilities.getUserSalutation(ourself)", e);
+            Log.e(TAG + ".announce", "NetworkUtilities.getUserSalutation(ourself)", e);
         }
     }
 

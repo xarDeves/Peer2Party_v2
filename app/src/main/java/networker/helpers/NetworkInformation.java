@@ -5,7 +5,7 @@ import android.util.Log;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import networker.peers.User;
+import networker.peers.user.User;
 
 // placeholder name, must find something more specific...
 public class NetworkInformation {

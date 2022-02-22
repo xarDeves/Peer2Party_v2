@@ -18,7 +18,9 @@ import networker.exceptions.InvalidPortValueException;
 import networker.helpers.NetworkInformation;
 import networker.helpers.NetworkUtilities;
 import networker.peers.Peer;
-import networker.peers.User;
+import networker.peers.user.User;
+import networker.peers.user.network.Networking;
+import networker.peers.user.synchronization.Synchronization;
 import networker.sockets.ServerSocketAdapter;
 
 /**
@@ -41,6 +43,8 @@ import networker.sockets.ServerSocketAdapter;
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
 public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
+    private static final String TAG = "networker.discovery.discoverers:MulticastGroupPeerDiscoverer";
+
     private static final int BO_TIMEOUT_HIGH_SPEED_MILLIS = 20;
     private static final int BO_TIMEOUT_MILLIS = 5000;
     private static final int SS_TIMEOUT_MILLIS = 15000;
@@ -91,7 +95,7 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
             timeSpent = end - start;
         }
 
-        LinkedList<User> usersFound = filterValidJSON(groupBroadcasts);
+        LinkedList<User> usersFound = filterValidUsers(groupBroadcasts);
         processUsers(usersFound);
     }
 
@@ -101,24 +105,24 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
         sender.announce(udpSocket, netInfo);
         Queue<String> groupBroadcasts = receiver.discoverPeers(udpSocket, BO_TIMEOUT_MILLIS);
 
-        LinkedList<User> usersFound = filterValidJSON(groupBroadcasts);
+        LinkedList<User> usersFound = filterValidUsers(groupBroadcasts);
         processUsers(usersFound);
     }
 
     @Override
     public void listen() throws IOException {
         serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
-        inboundServer.listen(serverSocket, SS_TIMEOUT_MILLIS, SS_SO_TIMEOUT_MILLIS, rk);
+        inboundServer.listen(serverSocket, SS_TIMEOUT_MILLIS, SS_SO_TIMEOUT_MILLIS);
     }
 
-    private LinkedList<User> filterValidJSON(Queue<String> groupBroadcasts) {
+    private LinkedList<User> filterValidUsers(Queue<String> groupBroadcasts) {
         LinkedList<User> usersFound = new LinkedList<>();
         for (String bCast : groupBroadcasts) {
             try {
-                Log.d("networker.discovery.discoverers.filterValidJSON", "processOnce: " + bCast);
+                Log.v(TAG + ".filterValidUsers", "Processing " + bCast);
                 usersFound.add(NetworkUtilities.processUserSalutationJSON(bCast));
             } catch (JSONException | UnknownHostException | InvalidPortValueException e) {
-                Log.d("networker.discovery.discoverers.filterValidJSON", bCast, e);
+                Log.e(TAG + ".filterValidUsers", bCast, e);
             }
         }
         return usersFound;
@@ -126,61 +130,62 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
 
     private void processUsers(LinkedList<User> usersFound) {
         for (User u : usersFound) {
+            Synchronization sync = u.getSynchronization();
             try {
-                Log.d("networker.discovery.discoverers.processUsers", "FOUND AND PROCESSING " + u.getUsername());
-                u.lock();
-                processFoundUser(u);
-            } catch (IOException e) {
-                Log.d("networker.discovery.discoverers.processUsers", e.getMessage(), e);
-            } catch (InterruptedException e) {
-                Log.e("networker.discovery.discoverers.processUsers", e.getMessage(), e);
+                sync.lock();
+                Log.d(TAG + ".processUsers", "Found & processing " + u.getUsername());
+                processUser(u);
+                Log.d(TAG + ".processUsers", "Finished processing " + u.getUsername());
+            } catch (IOException | InterruptedException e) {
+                Log.e(TAG + ".processUsers", "", e);
             } finally {
-                u.unlock();
+                sync.unlock();
             }
         }
     }
 
-    private void processFoundUser(User u) throws IOException {
+    private void processUser(User u) throws IOException {
         // corner case: ourself
         if (netInfo.getOurselves().equals(u)) return;
 
         // if this is a completely new peer...
         if (!rk.hasPeer(u)) {
-            Log.d("networker.discovery.discoverers.processFoundUser", "FOUND AND PROCESSING COMPLETELY NEW PEER " + u.getUsername());
             processNewPeer(u);
-        } else {
-            Log.d("networker.discovery.discoverers.processFoundUser", "FOUND AND PROCESSING EXISTING PEER " + u.getUsername());
-            // if this peer already exists...
-            processExistingPeer(u);
+            return;
         }
+
+        // if this peer already exists...
+        processExistingPeer(u);
     }
 
     private void processNewPeer(User u) throws IOException {
         try {
             //FIXME corner case with same num, just sum the address of the user and compare to our sum, whichever is greater has priority
-            if (netInfo.getOurselves().getPriority() < u.getPriority()) {
-                Log.e("networker.discovery.discoverers.processNewPeer", "user has priority over us " + u.getIDENTIFIER());
-                u.createUserSocket();
-                Log.e("networker.discovery.discoverers.processNewPeer", "Connected to " + u.getIDENTIFIER() + " " + u.getAddress());
+            Networking net = u.getNetworking();
+            Log.e(TAG + ".processNewPeer", "New peer has priority "+ net.getPriority() +
+                    ", we have "+ netInfo.getOurselves().getNetworking().getPriority());
+            if (netInfo.getOurselves().getNetworking().getPriority() < net.getPriority()) {
+                Log.d(TAG + ".processNewPeer", u.getUsername() + " has priority over us, creating socket");
+                net.createUserSocket();
                 rk.addPeer(new Peer(u));
             }
         } catch (InvalidPortValueException e) {
-            Log.d("networker.discovery.discoverers.processNewPeer", "u.createUserSocket()", e);
+            Log.e(TAG + ".processNewPeer", "User invalid port value " + u.getNetworking().getPort(), e);
         }
     }
 
     private void processExistingPeer(User u) {
-        User uExisting = rk.getPeer(u.getIDENTIFIER()).getUser();
+        User uExisting = rk.getPeer(u).getUser();
+        Synchronization sync = uExisting.getSynchronization();
         try {
-            uExisting.lock();
-
-            if (uExisting.equals(u)) return; //ignore if it's completely the same and nothing changed
-
-            uExisting.setStatus(u.getStatus()); // set the status to the new one
+            sync.lock();
+            //update status & priority
+            uExisting.setStatus(u.getStatus());
+            uExisting.getNetworking().setPriority(u.getNetworking().getPriority());
         } catch (InterruptedException e) {
-            Log.e("networker.discovery.discoverers.processExistingPeer", "uExisting.lock()", e);
+            Log.e(TAG + ".processExistingPeer", "", e);
         } finally {
-            uExisting.unlock();
+            sync.unlock();
         }
     }
 

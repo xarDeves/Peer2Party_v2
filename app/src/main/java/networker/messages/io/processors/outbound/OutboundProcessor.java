@@ -16,9 +16,11 @@ import networker.messages.content.ContentProcurer;
 import networker.messages.content.factories.ContentProcurerFactory;
 import networker.messages.io.handlers.OutboundHandler;
 import networker.peers.Peer;
-import networker.peers.User;
+import networker.peers.user.User;
 
 public class OutboundProcessor implements OutboundMessageProcessor {
+    private static final String TAG = "networker.messages.io.processors.outbound:OutboundProcessor";
+
     private final ExecutorService executor;
     private final RoomKnowledge rk;
     private final DatabaseBridge dbb;
@@ -60,7 +62,7 @@ public class OutboundProcessor implements OutboundMessageProcessor {
                     ContentProcurer cpr = ContentProcurerFactory.createProcurer(md);
                     (new OutboundHandler(u, cpr, rk)).handle();
                 } catch (IOException e) {
-                    Log.d("networker.messages.io.processors.outbound.dispatchThread", e.getMessage(), e);
+                    Log.e(TAG + ".dispatchThread", "", e);
                 }
             }
         });

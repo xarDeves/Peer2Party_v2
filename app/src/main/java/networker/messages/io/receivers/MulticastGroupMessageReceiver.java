@@ -11,6 +11,7 @@ import java.net.SocketTimeoutException;
 import networker.helpers.NetworkUtilities;
 
 public class MulticastGroupMessageReceiver implements MessageReceiver {
+    private static final String TAG = "networker.messages.io.receivers:MulticastGroupMessageReceiver";
 
     @Override
     public String discoverAnnouncement(DatagramSocket so, int timeToReceiveMillis) throws IOException {
@@ -23,18 +24,16 @@ public class MulticastGroupMessageReceiver implements MessageReceiver {
         final long start = System.currentTimeMillis();
 
         while (timeSpent < timeToReceiveMillis) {
-            String s = "";
-
             try {
                 return receivePeerMulticast(socket);
             } catch (SocketTimeoutException e) {
-                Log.v("MulticastGroupMessageReceiver.discoverAnnouncement", "SocketTimeoutException", e);
+                Log.v(TAG + ".discoverAnnouncement", "", e);
             }
 
             long end = System.currentTimeMillis();
             timeSpent = end - start;
 
-            Log.d("MulticastGroupMessageReceiver.discoverAnnouncement", "current time spent " + timeSpent + " found data " + s);
+            Log.d(TAG + ".discoverAnnouncement", "current time spent " + timeSpent);
         }
 
         return "";
@@ -44,7 +43,7 @@ public class MulticastGroupMessageReceiver implements MessageReceiver {
         byte[] buffer = new byte[NetworkUtilities.MAX_MESSAGE_DECLARATION_BUFFER_SIZE];
         DatagramPacket recv = new DatagramPacket(buffer, buffer.length);
         socket.receive(recv);
-        Log.d("MulticastGroupMessageReceiver.receivePeerMulticast", "recv.getLength() " + recv.getLength());
+        Log.d(TAG + ".receivePeerMulticast", "recv.getLength() " + recv.getLength());
         return NetworkUtilities.convertBytesToUTF8String(buffer);
     }
 }

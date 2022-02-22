@@ -17,9 +17,11 @@ import networker.messages.io.announcers.MessageAnnouncer;
 import networker.messages.io.processors.inbound.InboundMessageProcessor;
 import networker.messages.io.processors.outbound.OutboundMessageProcessor;
 import networker.messages.io.receivers.MessageReceiver;
-import networker.peers.User;
+import networker.peers.user.User;
 
 public class IOManager implements MessageManager {
+    private static final String TAG = "networker.messages.io:IOManager";
+
     public static final int MULTIMEDIA_BLOCK_SIZE = 500_000; // 500 KB
     public static final int TEXT_BLOCK_SIZE = 10_000; // 10 KB
     public static final int MAXIMUM_TEXT_SIZE = 10_000_000; // 10 MB
@@ -69,7 +71,7 @@ public class IOManager implements MessageManager {
                 }
             }
         } catch (JSONException | InvalidPortValueException | UnknownHostException e) {
-            Log.d("networker.messages.io.discover" , "NetworkUtilities.processMessageIntent(intentJson);", e);
+            Log.e(TAG + ".discover", "", e);
         }
     }
 

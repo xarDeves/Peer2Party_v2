@@ -22,6 +22,7 @@ import networker.helpers.NetworkUtilities;
  * @link https://codeisland.org/2012/udp-multicast-on-android
  */
 public class MulticastGroupPeerReceiver implements PeerReceiver {
+    private static final String TAG = "networker.discovery.io.receivers:MulticastGroupPeerReceiver";
     // this must run as a server with a timed delay (15s receive, with a random +/- of 1s, then send twice)
 
     public Queue<String> discoverPeers(DatagramSocket so, final int timeToReceiveMillis) throws IOException {
@@ -41,15 +42,15 @@ public class MulticastGroupPeerReceiver implements PeerReceiver {
             try {
                 String recvd = receivePeerMulticast(socket);
                 dataFound.add(recvd);
-                Log.d("networker.discovery.io.receivers.discoverPeers", recvd);
+                Log.d(TAG + ".discoverPeers", "Received: " + recvd);
             } catch (SocketTimeoutException e) {
-                Log.v("networker.discovery.io.receivers.discoverPeers", "SocketTimeoutException", e);
+                Log.e(TAG + ".discoverPeers", "", e);
             }
 
             long end = System.currentTimeMillis();
             timeSpent = end - start;
 
-            Log.d("networker.discovery.io.receivers.discoverPeers", "current time spent " + timeSpent + " found data " + s);
+            Log.d(TAG + ".discoverPeers", "current time spent " + timeSpent);
         }
 
         return dataFound;

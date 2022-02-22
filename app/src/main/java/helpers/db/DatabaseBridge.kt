@@ -3,7 +3,7 @@ package helpers.db
 import networker.messages.MessageDeclaration
 import networker.messages.content.providers.MultimediaProvider
 import networker.messages.content.providers.TextProvider
-import networker.peers.User
+import networker.peers.user.User
 
 //FIXME change name
 interface DatabaseBridge {

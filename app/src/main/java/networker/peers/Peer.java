@@ -1,5 +1,7 @@
 package networker.peers;
 
+import networker.peers.user.User;
+
 public class Peer {
     private final User user;
     private volatile boolean enabled = false;
