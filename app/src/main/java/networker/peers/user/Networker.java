@@ -81,8 +81,7 @@ class Networker implements Networking {
     @Override
     public void shutdown() throws IOException {
         if (currentUserSocket != null) {
-            Log.d(TAG + ":DSESSION:.shutdown", "SHUTTING DOWN " + currentUserSocket.log()); // FIXME
-            //FIXME if (!currentUserSocket.isClosed()) currentUserSocket.close();
+            if (!currentUserSocket.isClosed()) currentUserSocket.close();
         }
     }
 }
