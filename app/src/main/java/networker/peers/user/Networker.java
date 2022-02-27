@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import networker.exceptions.InvalidPortValueException;
-import networker.helpers.NetworkUtilities;
 import networker.peers.user.network.Networking;
 import networker.sockets.SocketAdapter;
 
@@ -21,21 +19,20 @@ class Networker implements Networking {
 
     private SocketAdapter currentUserSocket = null;
 
-    Networker(InetAddress address, int port, int priority, User u) {
+    Networker(InetAddress address, int port, int priority) {
         this.address = address;
         this.port = port;
-
         this.priority = priority;
     }
 
     @Override
-    public void createUserSocket() throws IOException, InvalidPortValueException {
-        if (!portIsValid()) throw new InvalidPortValueException();
+    public void createUserSocket() throws IOException {
         shutdown();
         currentUserSocket = new SocketAdapter();
-        currentUserSocket.connect(new InetSocketAddress(address, port), SO_TIMEOUT);
+        InetSocketAddress soAddr = new InetSocketAddress(address, port);
+        currentUserSocket.connect(soAddr, SO_TIMEOUT);
         currentUserSocket.setTimeout(SO_TIMEOUT);
-        Log.d(TAG + ".createUserSocket", "connected to " + currentUserSocket.log());
+        //FIXME add socket timeout catch exception to all callees
     }
 
     @Override
@@ -47,22 +44,13 @@ class Networker implements Networking {
     public void replaceSocket(SocketAdapter newSocket) throws IOException {
         shutdown();
         currentUserSocket = newSocket;
+        currentUserSocket.setTimeout(SO_TIMEOUT);
         Log.d(TAG + ".replaceSocket", "replaced socket, connected to " + currentUserSocket.log());
     }
 
     @Override
     public SocketAdapter getCurrentUserSocket() {
         return currentUserSocket;
-    }
-
-    @Override
-    public boolean portIsValid() {
-        return NetworkUtilities.portIsValid(port);
-    }
-
-    @Override
-    public boolean socketIsClosed() {
-        return currentUserSocket.isClosed();
     }
 
     @Override
@@ -93,7 +81,8 @@ class Networker implements Networking {
     @Override
     public void shutdown() throws IOException {
         if (currentUserSocket != null) {
-            if (!currentUserSocket.isClosed()) currentUserSocket.close();
+            Log.d(TAG + ":DSESSION:.shutdown", "SHUTTING DOWN " + currentUserSocket.log()); // FIXME
+            //FIXME if (!currentUserSocket.isClosed()) currentUserSocket.close();
         }
     }
 }

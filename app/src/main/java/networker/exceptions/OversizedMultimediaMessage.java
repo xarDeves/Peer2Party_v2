@@ -1,4 +1,4 @@
 package networker.exceptions;
 
-public class OversizedMultimediaMessage extends Exception {
+public class OversizedMultimediaMessage extends OversizedMessage {
 }

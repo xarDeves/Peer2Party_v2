@@ -27,7 +27,6 @@ import networker.messages.MessageType;
 import networker.peers.Status;
 import networker.peers.user.User;
 import networker.peers.user.network.Networking;
-import networker.peers.user.synchronization.Synchronization;
 import networker.sockets.SocketAdapter;
 
 public class NetworkUtilities {
@@ -42,7 +41,7 @@ public class NetworkUtilities {
     public static final String JSON_ADDRESS_PRIOTIY = "priority";
 
     // users should also declare themselves along with the message declaration(s)
-    public static final int MAX_MESSAGE_DECLARATION_BUFFER_SIZE = 2048 + DISCOVERY_BUFFER_SIZE;
+    public static final int MAX_MESSAGE_DECLARATION_BUFFER_SIZE = 4096 + DISCOVERY_BUFFER_SIZE;
 
     public static final String JSON_USER_DECLARATION = "declr";
     public static final String JSON_MESSAGE_COUNT = "count";
@@ -51,19 +50,7 @@ public class NetworkUtilities {
     public static final String JSON_MCONTENT_TYPE = "mtype";
     public static final String JSON_RECIPIENT_ARRAY = "recvs";
 
-    public static byte[] convertUTF8StringToBytes(String s) {
-        return s.getBytes(StandardCharsets.UTF_8);
-    }
-
-    public static String convertBytesToUTF8String(byte[] bytes) {
-        return new String(bytes, StandardCharsets.UTF_8);
-    }
-
-    public static DatagramPacket createDatagramPacket(byte[] buffer, InetAddress group, int port) {
-        return new DatagramPacket(buffer, buffer.length, group, port);
-    }
-
-    public static JSONObject getUserSalutationJSON(User u) throws JSONException {
+    public static JSONObject createSalutationJSON(User u) throws JSONException {
         // https://www.tutorialspoint.com/json/json_java_example.htm
 
         JSONObject salutation = new JSONObject();
@@ -91,43 +78,6 @@ public class NetworkUtilities {
         InetAddress addr = InetAddress.getByName(jObj.getString(JSON_ADDRESS_IP));
 
         return new User(addr, username, port, status, priority);
-    }
-
-    public static String createMessageIntentJSON(MessageIntent msg) throws JSONException {
-        JSONObject declaration = new JSONObject();
-        /* --------------- PUT USER DECLARATION AND MESSAGE COUNT --------------- */
-        declaration.put(JSON_USER_DECLARATION, getUserSalutationJSON(msg.getSource()));
-        declaration.put(JSON_MESSAGE_COUNT, msg.getCount());
-
-        /* --------------- PUT RECEIVER IDs --------------- */
-        JSONArray array = new JSONArray();
-        for (String id : msg.getReceivers()) {
-            array.put(id);
-        }
-        declaration.put(JSON_RECIPIENT_ARRAY, array);
-
-        /* --------------- PUT MESSAGE DECLARATIONS --------------- */
-        int count = 0;
-        Iterator<MessageDeclaration> it = msg.getMessageDeclarations();
-        while (it.hasNext()) {
-            MessageDeclaration mdl = it.next();
-            // json of jsons
-            declaration.put(String.valueOf(count), createMessageDeclarationJSON(mdl));
-        }
-
-        return declaration.toString();
-    }
-
-    private static JSONObject createMessageDeclarationJSON(MessageDeclaration messageDeclaration) throws JSONException {
-        JSONObject declaration = new JSONObject();
-
-        declaration.put(JSON_MCONTENT_SIZE, messageDeclaration.getBodySize());
-        declaration.put(JSON_MCONTENT_TYPE, messageDeclaration.getContentType().toInt());
-
-        if (messageDeclaration.getContentType().isFile())
-            declaration.put(JSON_MTITLE_SIZE, messageDeclaration.getHeaderSize());
-
-        return declaration;
     }
 
     public static MessageIntent processMessageIntent(String message) throws JSONException, InvalidPortValueException, UnknownHostException {
@@ -165,6 +115,55 @@ public class NetworkUtilities {
         return new MessageDeclaration(contentSize, messageType);
     }
 
+    public static String createMessageIntentJSON(MessageIntent msg) throws JSONException {
+        JSONObject declaration = new JSONObject();
+        /* --------------- PUT USER DECLARATION AND MESSAGE COUNT --------------- */
+        declaration.put(JSON_USER_DECLARATION, createSalutationJSON(msg.getSource()));
+        declaration.put(JSON_MESSAGE_COUNT, msg.getCount());
+
+        /* --------------- PUT RECEIVER IDs --------------- */
+        JSONArray array = new JSONArray();
+        for (String id : msg.getReceivers()) {
+            array.put(id);
+        }
+        declaration.put(JSON_RECIPIENT_ARRAY, array);
+
+        /* --------------- PUT MESSAGE DECLARATIONS --------------- */
+        int count = 0;
+        Iterator<MessageDeclaration> it = msg.getMessageDeclarations();
+        while (it.hasNext()) {
+            MessageDeclaration mdl = it.next();
+            // json of jsons
+            declaration.put(String.valueOf(count), createMessageDeclarationJSON(mdl));
+        }
+
+        return declaration.toString();
+    }
+
+    private static JSONObject createMessageDeclarationJSON(MessageDeclaration messageDeclaration) throws JSONException {
+        JSONObject declaration = new JSONObject();
+
+        declaration.put(JSON_MCONTENT_SIZE, messageDeclaration.getBodySize());
+        declaration.put(JSON_MCONTENT_TYPE, messageDeclaration.getContentType().toInt());
+
+        if (messageDeclaration.getContentType().isFile())
+            declaration.put(JSON_MTITLE_SIZE, messageDeclaration.getHeaderSize());
+
+        return declaration;
+    }
+
+    public static byte[] convertUTF8StringToBytes(String s) {
+        return s.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static String convertBytesToUTF8String(byte[] bytes) {
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    public static DatagramPacket createDatagramPacket(byte[] buffer, InetAddress group, int port) {
+        return new DatagramPacket(buffer, buffer.length, group, port);
+    }
+
     //port might be different user to socket, since listening port is different than the one contacting us
     public static boolean userIsConsistentToSocket(User u, SocketAdapter s) {
         return Objects.equals(s.getInetAddress().getHostAddress(), u.getNetworking().getHostAddress());
@@ -174,24 +173,18 @@ public class NetworkUtilities {
         return p > 0 && p < 65535;
     }
 
-    public static void createConnectionIfThereIsNone(User u, NetworkInformation netInfo) throws IOException, InterruptedException, InvalidPortValueException, JSONException {
-        Synchronization sync = u.getSynchronization();
-        Networking net = u.getNetworking();
-        try {
-            sync.lock();
-            if (net.portIsValid()) return;
-            if (net.getCurrentUserSocket() != null && !net.getCurrentUserSocket().isClosed()) return;
+    public static void createConnectionIfThereIsNone(User receiver, User sender) throws IOException, InterruptedException, InvalidPortValueException, JSONException {
+        Networking net = receiver.getNetworking();
+        if (net.connectionIsUsable()) return;
 
-            net.createUserSocket();
-            NetworkUtilities.sendSalutation(u, netInfo);
-        } finally {
-            sync.unlock();
-        }
+        net.createUserSocket();
+        NetworkUtilities.sendSalutation(receiver, sender);
+        Log.d(TAG + ".createConnectionIfThereIsNone", "Created new connection " + net.getCurrentUserSocket().log());
     }
 
-    public static void sendSalutation(User u, NetworkInformation netInfo) throws IOException, JSONException {
-        DataOutputStream dos = u.getNetworking().getCurrentUserSocket().getDataOutputStream();
-        dos.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.getUserSalutationJSON(netInfo.getOurselves()).toString()));
+    public static void sendSalutation(User receiver, User sender) throws IOException, JSONException {
+        DataOutputStream dos = receiver.getNetworking().getCurrentUserSocket().getDataOutputStream();
+        dos.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.createSalutationJSON(sender).toString()));
         dos.flush();
     }
 

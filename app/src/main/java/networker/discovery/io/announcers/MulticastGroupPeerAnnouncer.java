@@ -10,7 +10,6 @@ import java.net.DatagramSocket;
 
 import networker.helpers.NetworkInformation;
 import networker.helpers.NetworkUtilities;
-import networker.peers.user.User;
 
 /** Requires multicast permissions.
  * Requires acquiring WifiManager.MulticastLock.
@@ -22,18 +21,12 @@ import networker.peers.user.User;
 public class MulticastGroupPeerAnnouncer implements PeerAnnouncer {
     private static final String TAG = "networker.discovery.io.announcers:MulticastGroupPeerAnnouncer";
 
-    private final User ourself;
-
-    public MulticastGroupPeerAnnouncer(User user) {
-        ourself = user;
-    }
-
     public void announce(DatagramSocket socket, NetworkInformation info) throws IOException {
         // https://developer.android.com/reference/java/net/MulticastSocket
         // we don't need to be a member of the multicast group to send messages to it, so no real processing is required here
 
         try {
-            String s = NetworkUtilities.getUserSalutationJSON(ourself).toString();
+            String s = NetworkUtilities.createSalutationJSON(info.getOurselves()).toString();
             byte[] salutations = NetworkUtilities.convertUTF8StringToBytes(s);
             DatagramPacket msg = NetworkUtilities.createDatagramPacket(salutations, info.getMulticastDiscoverGroup(), info.getDiscoverPort());
             // double send

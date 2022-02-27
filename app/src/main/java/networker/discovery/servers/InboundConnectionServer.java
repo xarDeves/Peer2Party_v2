@@ -34,13 +34,13 @@ public class InboundConnectionServer implements PeerServer {
 
     @Override
     public void listen(ServerSocketAdapter ss, final int timeToReceiveMillis, final int soTimeToReceiveMillis) throws IOException {
-
         long timeSpent = 0;
         final long start = System.currentTimeMillis();
 
         while (timeSpent < timeToReceiveMillis) {
             try {
                 handleIndividualClient(ss, soTimeToReceiveMillis);
+                Log.d(TAG + ".listen", "Finished handling user");
             } catch (SocketTimeoutException e) {
                 Log.v(TAG + ".listen", "", e);
             }
@@ -49,16 +49,15 @@ public class InboundConnectionServer implements PeerServer {
             timeSpent = end - start;
 
             Log.d(TAG + ".listen", "server time spent " + timeSpent);
-            Log.d(TAG + ".listen", "server socket log " + ss.log());
         }
     }
 
-    private void handleIndividualClient(ServerSocketAdapter ss, final int timeToReceiveMillis) throws IOException {
+    private void handleIndividualClient(ServerSocketAdapter ss, final int soTimeToReceiveMillis) throws IOException {
         SocketAdapter client = ss.accept();
         Log.d(TAG + ".handleIndividualClient", "Found user!");
-        client.setTimeout(timeToReceiveMillis);
+        client.setTimeout(soTimeToReceiveMillis);
 
-        String salutation = getSalutation(client);
+        String salutation = getSalutation(client.getDataInputStream());
 
         User user = null;
         try {
@@ -85,19 +84,18 @@ public class InboundConnectionServer implements PeerServer {
             return;
         }
 
-        handleExistingPeer(u, s);
+        handleExistingPeer(rk.getPeer(u).getUser(), s);
     }
 
     private void handleNewPeer(User u, SocketAdapter s) throws IOException {
         u.getNetworking().replaceSocket(s);
+        Log.d(TAG + ".handleNewPeer", "Added socket to user " + u.getIDENTIFIER());
         rk.addPeer(new Peer(u));
-        Log.d(TAG + ".handleNewPeer", "Added socket to peer " + u.getIDENTIFIER());
     }
 
     private void handleExistingPeer(User u, SocketAdapter s) throws IOException {
-        User knownUser = rk.getPeer(u).getUser();
-        Networking net = knownUser.getNetworking();
-        Synchronization sync = knownUser.getSynchronization();
+        Networking net = u.getNetworking();
+        Synchronization sync = u.getSynchronization();
         try {
             sync.lock();
             //for some reason, an already known peer tries to refresh the connection with us, perhaps his side of comms died
@@ -111,13 +109,13 @@ public class InboundConnectionServer implements PeerServer {
         }
     }
 
-    private String getSalutation(SocketAdapter socket) throws IOException {
+    private String getSalutation(DataInputStream is) throws IOException {
         byte[] buffer = new byte[NetworkUtilities.DISCOVERY_BUFFER_SIZE];
 
         try {
-            DataInputStream is = socket.getDataInputStream();
-            is.read(buffer);
+            int bRead = is.read(buffer);
         } catch (SocketTimeoutException e) {
+            Log.e(TAG + ".getSalutation", "", e);
             return "";
         }
         return NetworkUtilities.convertBytesToUTF8String(buffer);

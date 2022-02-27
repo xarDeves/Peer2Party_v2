@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import networker.RoomKnowledge;
 import networker.messages.content.ContentProcurer;
@@ -17,19 +18,19 @@ public class OutboundHandler {
     private final ContentProcurer procurer;
     private final RoomKnowledge rk;
 
-    public OutboundHandler(User u, ContentProcurer cpr, RoomKnowledge rk) {
+    public OutboundHandler(User u, ContentProcurer cpr, RoomKnowledge roomKnowledge) {
         user = u;
         procurer = cpr;
-        this.rk = rk;
+        rk = roomKnowledge;
     }
 
     public void handle() {
-
         Synchronization sync = user.getSynchronization();
         try {
             sync.sendLock();
 
             DataOutputStream dos = user.getNetworking().getCurrentUserSocket().getDataOutputStream();
+
             sendHeader(dos);
             sendBody(dos);
 
@@ -38,6 +39,8 @@ public class OutboundHandler {
             Log.d(TAG + ".handle", "Successfully sent to " + user.getUsername());
         } catch (InterruptedException e) {
             Log.e(TAG + ".handle", "InterruptedException when sending to " + user.getUsername(), e);
+        } catch (SocketTimeoutException e) {
+            Log.e(TAG + ".handle", "Timeout exception when sending to " + user.getUsername(), e);
         } catch (IOException e) {
             Log.e(TAG + ".handle", "IOException when sending to " + user.getUsername(), e);
             try {
@@ -66,4 +69,5 @@ public class OutboundHandler {
             dos.flush();
         }
     }
+
 }

@@ -4,17 +4,17 @@ import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 
 public class SocketAdapter implements Closeable, Loggable {
-    private Socket socket;
+    private final Socket socket;
 
-    public SocketAdapter() {}
+    public SocketAdapter() {
+        socket = new Socket();
+    }
 
     public SocketAdapter(Socket s) {
         socket = s;
@@ -40,16 +40,8 @@ public class SocketAdapter implements Closeable, Loggable {
         return socket.getPort();
     }
 
-    public OutputStream getOutputStream() throws IOException {
-        return socket.getOutputStream();
-    }
-
     public DataOutputStream getDataOutputStream() throws IOException {
         return new DataOutputStream(socket.getOutputStream());
-    }
-
-    public InputStream getInputStream() throws IOException {
-        return socket.getInputStream();
     }
 
     public DataInputStream getDataInputStream() throws IOException {
@@ -58,9 +50,10 @@ public class SocketAdapter implements Closeable, Loggable {
 
     @Override
     public String log() {
-        return "host addr " + socket.getInetAddress().getHostAddress() + " port " +
-                socket.getPort() + " local address " + socket.getLocalAddress() + " local port " +
-                socket.getLocalPort();
+        return  "remote SoAddr " + socket.getRemoteSocketAddress().toString() + "\nhost addr " +
+                socket.getInetAddress().getHostAddress() + " port " + socket.getPort() +
+                "\nlocal address " + socket.getLocalAddress() + " local port " +
+                socket.getLocalPort() + "\nisclosed " + socket.isClosed();
     }
 
     public boolean isClosed() {
@@ -71,7 +64,5 @@ public class SocketAdapter implements Closeable, Loggable {
     public void close() throws IOException {
         socket.close();
     }
-
-    //add other stuff as things go on...
 
 }

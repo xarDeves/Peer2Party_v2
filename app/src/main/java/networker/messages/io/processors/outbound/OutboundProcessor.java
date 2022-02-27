@@ -42,10 +42,10 @@ public class OutboundProcessor implements OutboundMessageProcessor {
     }
 
     @Override
-    public void send(@NonNull MessageIntent intent) {
+    public void send(@NonNull final MessageIntent intent) {
         for (String r : intent.getReceivers()) {
             Peer p = rk.getPeer(r);
-            //if the peer exists, and is enabled
+            //if the peer exists
             if (p != null) {
                 dispatchThread(p.getUser(), intent.getMessageDeclarations());
             }
@@ -62,24 +62,18 @@ public class OutboundProcessor implements OutboundMessageProcessor {
         }
     }
 
+    /** Sends the data 1:N, 1 user, N declarations */
     private void dispatchThread(final User u, final Iterator<MessageDeclaration> mdls) {
         executor.execute(() -> {
+            if (!createConnection(u)) {
+                // ABORT!
+                Log.e(TAG + ".dispatchThread", "Fatal failure! There was no socket, or creation of new socket failed fatally!");
+                return;
+            }
             while(mdls.hasNext()) {
                 MessageDeclaration md = mdls.next();
                 try {
                     ContentProcurer cpr = ContentProcurerFactory.createProcurer(md);
-
-                    try {
-                        NetworkUtilities.createConnectionIfThereIsNone(u, netInfo);
-                    } catch (IOException e) {
-                        Log.e(TAG + ".dispatchThread", "Shutdown failed when IOException is thrown?", e);
-                        u.getNetworking().shutdown();
-                        return;
-                    } catch (InterruptedException | InvalidPortValueException | JSONException e) {
-                        Log.e(TAG + ".dispatchThread", "", e);
-                        return;
-                    }
-
                     (new OutboundHandler(u, cpr, rk)).handle();
                 } catch (IOException e) {
                     Log.e(TAG + ".dispatchThread", "", e);
@@ -91,6 +85,28 @@ public class OutboundProcessor implements OutboundMessageProcessor {
                 }
             }
         });
+    }
+
+    /** Returns true if everything's okay, false to abort */
+    private boolean createConnection(final User u) {
+        try {
+            u.getSynchronization().lock();
+            NetworkUtilities.createConnectionIfThereIsNone(u, netInfo.getOurselves());
+        } catch (IOException e) {
+            Log.e(TAG + ".createConnection", "Shutdown failed when IOException is thrown?", e);
+            try {
+                u.getNetworking().shutdown();
+            } catch (IOException ioException) {
+                Log.e(TAG + ".createConnection", "Shutdown failed when IOException is thrown?", ioException);
+            }
+            return false;
+        } catch (InterruptedException | InvalidPortValueException | JSONException e) {
+            Log.e(TAG + ".createConnection", "", e);
+            return false;
+        } finally {
+            u.getSynchronization().unlock();
+        }
+        return true;
     }
 
 }

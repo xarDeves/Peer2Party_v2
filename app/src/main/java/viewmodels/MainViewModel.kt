@@ -44,28 +44,25 @@ import java.util.concurrent.Executors
 //TODO determine hotspot active https://stackoverflow.com/questions/12401108/how-to-check-programmatically-if-hotspot-is-enabled-or-disabled
 //TODO get hotspot ip if active https://stackoverflow.com/questions/9573196/how-to-get-the-ip-of-the-wifi-hotspot-in-androidhttps://stackoverflow.com/questions/9573196/how-to-get-the-ip-of-the-wifi-hotspot-in-android
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val THREAD_COUNT = Runtime.getRuntime().availableProcessors()
+    private val THREAD_COUNT = Runtime.getRuntime().availableProcessors() * 2 //this is somewhat taxing, but it's IO bound so it's alright
     private val SERVER_PORT = 7788
 
     private lateinit var netIface: NetworkInterface
     private lateinit var networkInetAddress: InetAddress
     private lateinit var username: String
 
-    val fragments: Array<Fragment> = arrayOf(ChatFragment(), PeerListFragment())
-
     private val dao: DbDao = DatabaseHolder.getInstance(application).dao()
-    var roomWrapper: RoomWrapper = RoomWrapper()
-
+    val fragments: Array<Fragment> = arrayOf(ChatFragment(), PeerListFragment())
     var allMessages: LiveData<List<Message>> = dao.getAllMessages()
     var peers: MutableLiveData<ArrayList<Peer>> = MutableLiveData(ArrayList())
 
+    var roomWrapper: RoomWrapper = RoomWrapper()
+    lateinit var ourself: User
     private lateinit var networkInformation: NetworkInformation
     private lateinit var discoverer: MulticastGroupPeerDiscoverer
-    lateinit var ourself: User
-    lateinit var ioManager: IOManager
-
-    val dbBridge = DatabaseBridgeImpl(this)
+    private lateinit var ioManager: IOManager
+    private val ioManagerSendExecutor = Executors.newSingleThreadExecutor()
+    private val dbBridge = DatabaseBridgeImpl(this)
 
     private fun getInetAddress(): String {
         NetworkInterface.getNetworkInterfaces()?.toList()?.map { networkInterface ->
@@ -97,7 +94,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             Status.AVAILABLE,
             r.nextInt(Int.MAX_VALUE)
         )
-        networkInformation = NetworkInformation(netIface.toString(), ourself)
+        networkInformation = NetworkInformation(netIface.displayName, ourself)
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -122,7 +119,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         val serverSocketAdapter = ServerSocketAdapter(networkInetAddress, SERVER_PORT, 25)
         val inboundConnectionServer = InboundConnectionServer(networkInformation, roomWrapper)
-        val multicastGroupSender = MulticastGroupPeerAnnouncer(ourself)
+        val multicastGroupSender = MulticastGroupPeerAnnouncer()
         val multicastGroupReceiver = MulticastGroupPeerReceiver()
 
         discoverer = MulticastGroupPeerDiscoverer(
@@ -133,13 +130,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             multicastSocket,
             networkInformation,
             roomWrapper,
-            500
+            200
         )
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                launch { runPeerDiscovery() }
                 launch { runPeerListener() }
+                launch { runPeerDiscovery() }
             }
         }
     }
@@ -180,7 +177,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             inboundProcessor,
             roomWrapper,
             networkInformation,
-            ourself
         )
 
         while (true) ioManager.discover()
@@ -195,9 +191,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun send(intent: MessageIntent) {
-        Thread {
+        ioManagerSendExecutor.execute {
             ioManager.send(intent)
-        }.start()
+        }
     }
 
     fun insertEntity(entity: Message) {

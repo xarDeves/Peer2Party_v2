@@ -1,5 +1,7 @@
 package networker.sockets;
 
+import android.util.Log;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -7,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.SocketException;
 
 public class ServerSocketAdapter implements Closeable, Loggable {
+    private static final String TAG = "networker.sockets:ServerSocketAdapter";
     private final ServerSocket socket;
 
     public ServerSocketAdapter(ServerSocket s) {
@@ -44,7 +47,5 @@ public class ServerSocketAdapter implements Closeable, Loggable {
     public void close() throws IOException {
         socket.close();
     }
-
-    //add other stuff as things go on...
 
 }

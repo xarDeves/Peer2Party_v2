@@ -3,20 +3,17 @@ package networker.peers.user.network;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import networker.exceptions.InvalidPortValueException;
 import networker.sockets.SocketAdapter;
 
 public interface Networking {
-    void createUserSocket() throws IOException, InvalidPortValueException;
-    boolean connectionIsUsable();
+    void createUserSocket() throws IOException;
     void replaceSocket(SocketAdapter newSocket) throws IOException;
-    SocketAdapter getCurrentUserSocket();
-    boolean portIsValid();
-    boolean socketIsClosed();
+    boolean connectionIsUsable();
     int getPort();
-    InetAddress getAddress();
-    String getHostAddress();
     int getPriority();
     void setPriority(int p);
+    String getHostAddress();
+    InetAddress getAddress();
+    SocketAdapter getCurrentUserSocket();
     void shutdown() throws IOException;
 }

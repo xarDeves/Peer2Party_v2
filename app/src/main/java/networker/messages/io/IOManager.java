@@ -17,7 +17,6 @@ import networker.messages.io.announcers.MessageAnnouncer;
 import networker.messages.io.processors.inbound.InboundMessageProcessor;
 import networker.messages.io.processors.outbound.OutboundMessageProcessor;
 import networker.messages.io.receivers.MessageReceiver;
-import networker.peers.user.User;
 
 public class IOManager implements MessageManager {
     private static final String TAG = "networker.messages.io:IOManager";
@@ -33,14 +32,13 @@ public class IOManager implements MessageManager {
     private final OutboundMessageProcessor outboundProcessor;
     private final InboundMessageProcessor inboundProcessor;
     private final NetworkInformation netInfo;
-    private final User ourself;
     private final MessageAnnouncer announcer;
     private final DatagramSocket udpSocket;
     private final RoomKnowledge rk;
 
     public IOManager(MessageReceiver mr, MessageAnnouncer ma, DatagramSocket ds,
                      OutboundMessageProcessor omp, InboundMessageProcessor imp,
-                     RoomKnowledge room, NetworkInformation info, User ourself) {
+                     RoomKnowledge room, NetworkInformation info) {
 
         discoverer = mr;
         announcer = ma;
@@ -50,22 +48,24 @@ public class IOManager implements MessageManager {
         outboundProcessor = omp;
         inboundProcessor = imp;
         netInfo = info;
-        this.ourself = ourself;
     }
 
     /** This method is blocking, and should be run in a thread in a loop. */
     @Override
     public void discover() throws IOException {
         try {
-            String intentJson = discoverer.discoverAnnouncement(udpSocket, BO_TIMEOUT_MILLIS);
-            MessageIntent mi = NetworkUtilities.processMessageIntent(intentJson);
+            MessageIntent mi;
+            do {
+                String intentJson = discoverer.discoverAnnouncement(udpSocket, BO_TIMEOUT_MILLIS);
+                mi = NetworkUtilities.processMessageIntent(intentJson);
+            } while (netInfo.isOurself(mi.getSource())); //making sure we're not receiving ourself
 
-            // if roomknowledge has the peer, and he's enabled on our side, check if we're one of the receivers
+            // if roomknowledge has the peer that sent this message, and he's enabled on our side, check if we're one of the receivers
             if (rk.hasPeer(mi.getSource()) && rk.getPeer(mi.getSource()).isEnabled()) {
                 for (String r: mi.getReceivers()) {
-                    Log.d(TAG + ".discover", "Receiver " + r); //FIXME
                     //we're one of the receivers, receive this intent
-                    if (r.equals(ourself.getNetworking().getHostAddress())) {
+                    if (r.equals(netInfo.getOurselves().getNetworking().getHostAddress())) {
+                        Log.d(TAG + ".discover", "we're one of the receivers, receiving!");
                         receive(mi);
                         break;
                     }
@@ -83,10 +83,8 @@ public class IOManager implements MessageManager {
 
     @Override
     public void send(MessageIntent mi) throws IOException {
-        synchronized (this) {
-            announcer.announce(udpSocket, mi, netInfo);
-            outboundProcessor.send(mi);
-        }
+        outboundProcessor.send(mi);
+        announcer.announce(udpSocket, mi, netInfo);
     }
 
 }

@@ -45,11 +45,11 @@ import networker.sockets.ServerSocketAdapter;
 public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
     private static final String TAG = "networker.discovery.discoverers:MulticastGroupPeerDiscoverer";
 
-    private static final int BO_TIMEOUT_HIGH_SPEED_MILLIS = 20;
-    private static final int BO_TIMEOUT_MILLIS = 5000;
-    private static final int SS_TIMEOUT_MILLIS = 15000;
-    private static final int SS_SO_TIMEOUT_MILLIS = 1000;
     private final int BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION;
+    private static final int BO_TIMEOUT_HIGH_SPEED_MILLIS = 20;
+    private static final int BO_TIMEOUT_MILLIS = 5_000;
+    private static final int SS_TIMEOUT_MILLIS = 30_000; //60s
+    private static final int SS_SO_TIMEOUT_MILLIS = 500;
 
     private final PeerReceiver receiver;
     private final PeerAnnouncer sender;
@@ -169,15 +169,13 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
     private void processNewPeer(User u) throws IOException {
         try {
             //FIXME corner case with same num, just sum the address of the user and compare to our sum, whichever is greater has priority
-            Networking net = u.getNetworking();
-            if (netInfo.getOurselves().getNetworking().getPriority() < net.getPriority()) {
+            Networking newUserNetworker = u.getNetworking();
+            if (netInfo.getOurselves().getNetworking().getPriority() < newUserNetworker.getPriority()) {
                 Log.d(TAG + ".processNewPeer", u.getUsername() + " has priority over us, creating socket");
-                net.createUserSocket();
-                NetworkUtilities.sendSalutation(u, netInfo);
+                newUserNetworker.createUserSocket();
+                NetworkUtilities.sendSalutation(u, netInfo.getOurselves());
                 rk.addPeer(new Peer(u));
             }
-        } catch (InvalidPortValueException e) {
-            Log.e(TAG + ".processNewPeer", "User invalid port value " + u.getNetworking().getPort(), e);
         } catch (JSONException e) {
             Log.e(TAG + ".processNewPeer", "Invalid json from ourself", e);
         }
@@ -187,11 +185,12 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
         User uExisting = rk.getPeer(u).getUser();
         Synchronization sync = uExisting.getSynchronization();
         try {
+            // lock the already existing user, since we'll be reusing the existing variable in-memory
             sync.lock();
             //update status & priority
             uExisting.setStatus(u.getStatus());
             uExisting.getNetworking().setPriority(u.getNetworking().getPriority());
-            NetworkUtilities.createConnectionIfThereIsNone(uExisting, netInfo);
+            NetworkUtilities.createConnectionIfThereIsNone(uExisting, netInfo.getOurselves());
         } catch (JSONException | InterruptedException | InvalidPortValueException e) {
             Log.e(TAG + ".processExistingPeer", "", e);
         } catch (IOException e) {

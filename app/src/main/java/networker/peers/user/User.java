@@ -33,8 +33,8 @@ public class User {
         username = name;
         status = st;
 
-        IDENTIFIER = adr.getHostAddress();
-        networker = new Networker(adr, p, priority, this);
+        IDENTIFIER = adr.getHostAddress(); 
+        networker = new Networker(adr, p, priority);
 
         Log.d(TAG + ".User", "Created " + name);
     }
