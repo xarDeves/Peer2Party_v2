@@ -60,20 +60,23 @@ public class IOManager implements MessageManager {
                 mi = NetworkUtilities.processMessageIntent(intentJson);
             } while (netInfo.isOurself(mi.getSource())); //making sure we're not receiving ourself
 
-            // if roomknowledge has the peer that sent this message, and he's enabled on our side, check if we're one of the receivers
+            // if roomknowledge has the peer that sent this message, and he's enabled on our side
             if (rk.hasPeer(mi.getSource()) && rk.getPeer(mi.getSource()).isEnabled()) {
-                for (String r: mi.getReceivers()) {
-                    //we're one of the receivers, receive this intent
-                    if (r.equals(netInfo.getOurselves().getNetworking().getHostAddress())) {
-                        Log.d(TAG + ".discover", "we're one of the receivers, receiving!");
-                        receive(mi);
-                        break;
-                    }
-                }
+                if (containsOurself(mi)) receive(mi);
             }
         } catch (JSONException | InvalidPortValueException | UnknownHostException e) {
             Log.e(TAG + ".discover", "", e);
         }
+    }
+
+    private boolean containsOurself(MessageIntent mi) {
+        for (String r: mi.getReceivers()) {
+            //we're one of the receivers, receive this intent
+            if (r.equals(netInfo.getOurselves().getNetworking().getHostAddress())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

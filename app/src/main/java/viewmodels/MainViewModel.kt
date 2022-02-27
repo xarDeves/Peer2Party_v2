@@ -44,7 +44,7 @@ import java.util.concurrent.Executors
 //TODO determine hotspot active https://stackoverflow.com/questions/12401108/how-to-check-programmatically-if-hotspot-is-enabled-or-disabled
 //TODO get hotspot ip if active https://stackoverflow.com/questions/9573196/how-to-get-the-ip-of-the-wifi-hotspot-in-androidhttps://stackoverflow.com/questions/9573196/how-to-get-the-ip-of-the-wifi-hotspot-in-android
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private val THREAD_COUNT = Runtime.getRuntime().availableProcessors() * 2 //this is somewhat taxing, but it's IO bound so it's alright
+    private val THREAD_COUNT = Runtime.getRuntime().availableProcessors()
     private val SERVER_PORT = 7788
 
     private lateinit var netIface: NetworkInterface
@@ -130,7 +130,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             multicastSocket,
             networkInformation,
             roomWrapper,
-            200
+            250
         )
 
         viewModelScope.launch {

@@ -40,7 +40,7 @@ public class InboundConnectionServer implements PeerServer {
         while (timeSpent < timeToReceiveMillis) {
             try {
                 handleIndividualClient(ss, soTimeToReceiveMillis);
-                Log.d(TAG + ".listen", "Finished handling user");
+                Log.d(TAG + ".listen", "Finished handling user!");
             } catch (SocketTimeoutException e) {
                 Log.v(TAG + ".listen", "", e);
             }
@@ -89,8 +89,8 @@ public class InboundConnectionServer implements PeerServer {
 
     private void handleNewPeer(User u, SocketAdapter s) throws IOException {
         u.getNetworking().replaceSocket(s);
-        Log.d(TAG + ".handleNewPeer", "Added socket to user " + u.getIDENTIFIER());
         rk.addPeer(new Peer(u));
+        Log.d(TAG + ".handleNewPeer", "Added user " + u.getIDENTIFIER());
     }
 
     private void handleExistingPeer(User u, SocketAdapter s) throws IOException {
@@ -114,6 +114,7 @@ public class InboundConnectionServer implements PeerServer {
 
         try {
             int bRead = is.read(buffer);
+            Log.d(TAG + ".getSalutation", "bRead " + bRead);
         } catch (SocketTimeoutException e) {
             Log.e(TAG + ".getSalutation", "", e);
             return "";

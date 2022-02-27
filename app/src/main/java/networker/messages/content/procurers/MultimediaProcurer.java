@@ -12,7 +12,6 @@ import networker.helpers.NetworkUtilities;
 import networker.messages.content.ContentProcurer;
 
 public class MultimediaProcurer implements ContentProcurer {
-
     private final byte[] header;
     private final long totalSize;
 

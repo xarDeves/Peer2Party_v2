@@ -48,7 +48,7 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
     private final int BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION;
     private static final int BO_TIMEOUT_HIGH_SPEED_MILLIS = 20;
     private static final int BO_TIMEOUT_MILLIS = 5_000;
-    private static final int SS_TIMEOUT_MILLIS = 30_000; //60s
+    private static final int SS_TIMEOUT_MILLIS = 15_000;
     private static final int SS_SO_TIMEOUT_MILLIS = 500;
 
     private final PeerReceiver receiver;
@@ -76,6 +76,12 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
 
         // FOR COMPLETENESS SAKE
         BO_TIMEOUT_MILLIS_HIGH_SPEED_DURATION = HIGH_SPEED_MILLIS;
+    }
+
+    @Override
+    public void listen() throws IOException {
+        serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
+        inboundServer.listen(serverSocket, SS_TIMEOUT_MILLIS, SS_SO_TIMEOUT_MILLIS);
     }
 
     /** This method is blocking, and should be run in a thread in a loop. */
@@ -108,12 +114,6 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
 
         LinkedList<User> usersFound = filterValidUsers(groupBroadcasts);
         processUsers(usersFound);
-    }
-
-    @Override
-    public void listen() throws IOException {
-        serverSocket.setSoTimeout(SS_TIMEOUT_MILLIS);
-        inboundServer.listen(serverSocket, SS_TIMEOUT_MILLIS, SS_SO_TIMEOUT_MILLIS);
     }
 
     private LinkedList<User> filterValidUsers(Queue<String> groupBroadcasts) {

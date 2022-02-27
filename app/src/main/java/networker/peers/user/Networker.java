@@ -1,7 +1,5 @@
 package networker.peers.user;
 
-import android.util.Log;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -45,7 +43,6 @@ class Networker implements Networking {
         shutdown();
         currentUserSocket = newSocket;
         currentUserSocket.setTimeout(SO_TIMEOUT);
-        Log.d(TAG + ".replaceSocket", "replaced socket, connected to " + currentUserSocket.log());
     }
 
     @Override

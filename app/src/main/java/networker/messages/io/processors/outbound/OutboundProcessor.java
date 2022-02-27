@@ -7,7 +7,10 @@ import androidx.annotation.NonNull;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 
 import helpers.db.DatabaseBridge;
@@ -43,15 +46,30 @@ public class OutboundProcessor implements OutboundMessageProcessor {
 
     @Override
     public void send(@NonNull final MessageIntent intent) {
+        Queue<User> q = filterReceivers(intent);
+        for (User u:q) {
+            dispatchThread(u, intent.getMessageDeclarations());
+        }
+
+        Iterator<MessageDeclaration> mdlIterator = intent.getMessageDeclarations();
+        addOutToDB(mdlIterator);
+    }
+
+    private Queue<User> filterReceivers(@NonNull final MessageIntent intent) {
+        Queue<User> q = new LinkedList<>();
         for (String r : intent.getReceivers()) {
             Peer p = rk.getPeer(r);
             //if the peer exists
             if (p != null) {
+                q.add(p.getUser());
                 dispatchThread(p.getUser(), intent.getMessageDeclarations());
             }
         }
 
-        Iterator<MessageDeclaration> mdlIterator = intent.getMessageDeclarations();
+        return q;
+    }
+
+    private void addOutToDB(Iterator<MessageDeclaration> mdlIterator) {
         while (mdlIterator.hasNext()) {
             MessageDeclaration md = mdlIterator.next();
             if (md.getContentType().isFile()) {
@@ -87,11 +105,18 @@ public class OutboundProcessor implements OutboundMessageProcessor {
         });
     }
 
-    /** Returns true if everything's okay, false to abort */
+    /** Returns true if everything's okay, false to abort. This spaghetti is, unfortunately, unavoidable. */
     private boolean createConnection(final User u) {
         try {
             u.getSynchronization().lock();
             NetworkUtilities.createConnectionIfThereIsNone(u, netInfo.getOurselves());
+        } catch (SocketTimeoutException e) {
+            //should we do something particular in this situation?
+            Log.d(TAG + ".createConnection", "", e);
+            return false;
+        } catch (InterruptedException | InvalidPortValueException | JSONException e) {
+            Log.e(TAG + ".createConnection", "", e);
+            return false;
         } catch (IOException e) {
             Log.e(TAG + ".createConnection", "Shutdown failed when IOException is thrown?", e);
             try {
@@ -99,9 +124,6 @@ public class OutboundProcessor implements OutboundMessageProcessor {
             } catch (IOException ioException) {
                 Log.e(TAG + ".createConnection", "Shutdown failed when IOException is thrown?", ioException);
             }
-            return false;
-        } catch (InterruptedException | InvalidPortValueException | JSONException e) {
-            Log.e(TAG + ".createConnection", "", e);
             return false;
         } finally {
             u.getSynchronization().unlock();

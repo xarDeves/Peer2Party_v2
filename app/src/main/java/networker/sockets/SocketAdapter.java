@@ -50,8 +50,7 @@ public class SocketAdapter implements Closeable, Loggable {
 
     @Override
     public String log() {
-        return  "remote SoAddr " + socket.getRemoteSocketAddress().toString() + "\nhost addr " +
-                socket.getInetAddress().getHostAddress() + " port " + socket.getPort() +
+        return  "host addr " + socket.getInetAddress().getHostAddress() + " port " + socket.getPort() +
                 "\nlocal address " + socket.getLocalAddress() + " local port " +
                 socket.getLocalPort() + "\nisclosed " + socket.isClosed();
     }

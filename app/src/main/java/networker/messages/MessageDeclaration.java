@@ -3,6 +3,7 @@ package networker.messages;
 import java.io.File;
 
 public class MessageDeclaration {
+    //TODO split into FileMessageDeclaration & TextMessageDeclaration (and make this abstract)
     private final int headerSize;
     private final int bodySize;
     private final MessageType contentType;

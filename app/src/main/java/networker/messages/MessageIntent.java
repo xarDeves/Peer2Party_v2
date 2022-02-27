@@ -7,7 +7,7 @@ import java.util.List;
 import networker.peers.user.User;
 
 public class MessageIntent {
-    //TODO split into ReceiveMessageIntent & SendMessageIntent
+    //TODO split into ReceiveMessageIntent & SendMessageIntent (and make this abstract)
     private final User source;
 
     private int count = 0;
