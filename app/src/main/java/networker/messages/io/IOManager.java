@@ -21,10 +21,11 @@ import networker.messages.io.receivers.MessageReceiver;
 public class IOManager implements MessageManager {
     private static final String TAG = "networker.messages.io:IOManager";
 
-    public static final int MULTIMEDIA_BLOCK_SIZE = 500_000; // 500 KB
-    public static final int TEXT_BLOCK_SIZE = 10_000; // 10 KB
-    public static final int MAXIMUM_TEXT_SIZE = 10_000_000; // 10 MB
-    public static final long MAXIMUM_MULTIMEDIA_SIZE = 1_000_000_000; // 1 GB
+    public static final int TEXT_BLOCK_SIZE = 10_000; // 10 KiB
+    public static final int MULTIMEDIA_BLOCK_SIZE = 5_000_000; // 5 MiB
+
+    public static final int MAXIMUM_TEXT_SIZE = 50_000_000; // 50 MiB
+    public static final long MAXIMUM_MULTIMEDIA_SIZE = 1_000_000_000; // 1 GiB
 
     public static final int BO_TIMEOUT_MILLIS = 5000;
 

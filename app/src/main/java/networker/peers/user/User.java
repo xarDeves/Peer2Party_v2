@@ -13,28 +13,25 @@ import networker.peers.user.synchronization.Synchronization;
 
 public class User {
     private static final String TAG = "networker.peers.user:User";
-    /* -------------------------- SYNCHRONIZATION STUFF ------------------------ */
-    private final Synchronization synchronizer = new Synchronizer((byte)3, (byte)2, (byte)1);
-
-    /* -------------------------- NETWORK STUFF -------------------------------- */
-    private final Networking networker;
-
     /* ------------------------- AUTHENTICATION STUFF ------------------------- */
     private final Authentication auth = new Authenticator();
-
+    /* -------------------------- SYNCHRONIZATION STUFF ------------------------ */
+    private final Synchronization synchronizer = new Synchronizer();
+    /* -------------------------- NETWORK STUFF -------------------------------- */
+    private final Networking networker;
     /* ------------------------- MISCELLANEOUS STUFF ------------------------- */
     private final String IDENTIFIER;
     private final String username;
     private volatile Status status;
 
-    public User(InetAddress adr, String name, int p, Status st, int priority) throws InvalidPortValueException {
+    public User(InetAddress adr, String name, int p, Status st) throws InvalidPortValueException {
         if (!NetworkUtilities.portIsValid(p)) throw new InvalidPortValueException();
 
         username = name;
         status = st;
 
         IDENTIFIER = adr.getHostAddress(); 
-        networker = new Networker(adr, p, priority);
+        networker = new Networker(adr, p);
 
         Log.d(TAG + ".User", "Created " + name);
     }
@@ -52,7 +49,7 @@ public class User {
     }
 
     public void setStatus(Status newStatus) {
-        this.status = newStatus;
+        status = newStatus;
     }
 
     public Synchronization getSynchronization() {
@@ -72,7 +69,7 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Networking userNetworking = ((User) o).getNetworking();
-        // the unique identifier comparison is not needed right now, but is here later on for completeness sake
+
         return userNetworking.getHostAddress().equals(getNetworking().getHostAddress());
     }
 

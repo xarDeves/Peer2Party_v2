@@ -11,6 +11,7 @@ import networker.RoomKnowledge;
 import networker.exceptions.OversizedMessage;
 import networker.exceptions.OversizedMultimediaMessage;
 import networker.exceptions.OversizedTextMessage;
+import networker.helpers.NetworkUtilities;
 import networker.messages.MessageDeclaration;
 import networker.messages.content.providers.MultimediaProvider;
 import networker.messages.content.providers.TextProvider;
@@ -36,9 +37,6 @@ public class InboundHandler {
         dbb = databaseBridge;
     }
 
-    //FIXME if multiple message declarations are to be received, a part of the last buffer
-    // (from the previous message decl after the first) will contain part of the message of the message after that.
-    // make sure for the last chunk we only get the relevant part for our message declaration (otherwise, cascading failure will occur)
     public void handle() {
         Synchronization sync = u.getSynchronization();
         try {
@@ -77,16 +75,17 @@ public class InboundHandler {
 
         int count;
         int totalbytesread = 0;
-        byte[] buffer = new byte[Math.toIntExact(mdl.getBodySize())];
+        byte[] buffer = NetworkUtilities.createBuffer(null, totalbytesread, mdl.getBodySize(), IOManager.TEXT_BLOCK_SIZE);
 
         TextProvider provider = new TextProvider(contentSize);
         while(totalbytesread < mdl.getBodySize() && (count = dis.read(buffer)) > 0) {
             totalbytesread += count;
             provider.insertData(buffer, count);
+            buffer = NetworkUtilities.createBuffer(buffer, totalbytesread, mdl.getBodySize(), IOManager.TEXT_BLOCK_SIZE);
         }
 
         dbb.onTextReceived(provider, u);
-        Log.d(TAG + ".readText", "added dbb text" + provider.getData());
+        Log.d(TAG + ".readText", "added dbb text");
     }
 
     private void readFile(DataInputStream dis) throws OversizedMultimediaMessage, IOException {
@@ -97,11 +96,12 @@ public class InboundHandler {
         {
             int count;
             int totalbytesread = 0;
-            byte[] buffer = new byte[Math.toIntExact(mdl.getHeaderSize())];
+            byte[] buffer = NetworkUtilities.createBuffer(null, totalbytesread, mdl.getHeaderSize(), IOManager.TEXT_BLOCK_SIZE);
 
             while (totalbytesread < mdl.getHeaderSize() && (count = dis.read(buffer)) > 0) {
                 totalbytesread += count;
                 provider.insertHeader(buffer, count);
+                buffer = NetworkUtilities.createBuffer(buffer, totalbytesread, mdl.getHeaderSize(), IOManager.TEXT_BLOCK_SIZE);
             }
         }
 
@@ -111,11 +111,12 @@ public class InboundHandler {
         {
             int count;
             int totalbytesread = 0;
-            byte[] buffer = new byte[Math.toIntExact(mdl.getHeaderSize())];
+            byte[] buffer = NetworkUtilities.createBuffer(null, totalbytesread, mdl.getBodySize(), IOManager.MULTIMEDIA_BLOCK_SIZE);
 
             while (totalbytesread < mdl.getBodySize() && (count = dis.read(buffer)) > 0 ) {
                 totalbytesread += count;
                 provider.insertBody(buffer, count);
+                buffer = NetworkUtilities.createBuffer(buffer, totalbytesread, mdl.getBodySize(), IOManager.MULTIMEDIA_BLOCK_SIZE);
             }
         }
 

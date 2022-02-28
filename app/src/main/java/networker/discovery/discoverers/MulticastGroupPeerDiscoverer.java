@@ -6,6 +6,7 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -168,14 +169,15 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
 
     private void processNewPeer(User u) throws IOException {
         try {
-            //FIXME corner case with same num, just sum the address of the user and compare to our sum, whichever is greater has priority
             Networking newUserNetworker = u.getNetworking();
-            if (netInfo.getOurselves().getNetworking().getPriority() < newUserNetworker.getPriority()) {
+            if (newUserNetworker.hasPriority(netInfo.getOurselves())) {
                 Log.d(TAG + ".processNewPeer", u.getUsername() + " has priority over us, creating socket");
                 newUserNetworker.createUserSocket();
                 NetworkUtilities.sendSalutation(u, netInfo.getOurselves());
                 rk.addPeer(new Peer(u));
             }
+        } catch (SocketTimeoutException e) {
+            Log.e(TAG + ".processNewPeer", "Timeout exception for " + u.getUsername(), e);
         } catch (JSONException e) {
             Log.e(TAG + ".processNewPeer", "Invalid json from ourself", e);
         }
@@ -189,8 +191,10 @@ public class MulticastGroupPeerDiscoverer implements PeerDiscoverer {
             sync.lock();
             //update status & priority
             uExisting.setStatus(u.getStatus());
-            uExisting.getNetworking().setPriority(u.getNetworking().getPriority());
             NetworkUtilities.createConnectionIfThereIsNone(uExisting, netInfo.getOurselves());
+        } catch (SocketTimeoutException e) {
+            //should we do something particular in this situation?
+            Log.e(TAG + ".processExistingPeer", "Timeout exception when creating conn if there's none " + u.getUsername(), e);
         } catch (JSONException | InterruptedException | InvalidPortValueException e) {
             Log.e(TAG + ".processExistingPeer", "", e);
         } catch (IOException e) {

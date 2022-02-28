@@ -1,5 +1,7 @@
 package networker.peers.user;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -13,14 +15,22 @@ class Networker implements Networking {
 
     private final InetAddress address;
     private final int port;
-    private int priority;
+    private final int priority;
 
     private SocketAdapter currentUserSocket = null;
 
-    Networker(InetAddress address, int port, int priority) {
+    Networker(InetAddress address, int port) {
         this.address = address;
         this.port = port;
-        this.priority = priority;
+
+        int sum = 0;
+        byte[] bs = address.getAddress();
+        for (byte b:bs) {
+            sum += Math.abs(b);
+        }
+
+        priority = sum;
+        Log.d(TAG + ".Networker", "Priority " + priority);
     }
 
     @Override
@@ -30,7 +40,6 @@ class Networker implements Networking {
         InetSocketAddress soAddr = new InetSocketAddress(address, port);
         currentUserSocket.connect(soAddr, SO_TIMEOUT);
         currentUserSocket.setTimeout(SO_TIMEOUT);
-        //FIXME add socket timeout catch exception to all callees
     }
 
     @Override
@@ -56,6 +65,11 @@ class Networker implements Networking {
     }
 
     @Override
+    public boolean hasPriority(User u) {
+        return priority < u.getNetworking().getPriority();
+    }
+
+    @Override
     public InetAddress getAddress() {
         return address;
     }
@@ -68,11 +82,6 @@ class Networker implements Networking {
     @Override
     public int getPriority() {
         return priority;
-    }
-
-    @Override
-    public void setPriority(int p) {
-        priority = p;
     }
 
     @Override

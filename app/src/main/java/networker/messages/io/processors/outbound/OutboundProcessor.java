@@ -62,7 +62,6 @@ public class OutboundProcessor implements OutboundMessageProcessor {
             //if the peer exists
             if (p != null) {
                 q.add(p.getUser());
-                dispatchThread(p.getUser(), intent.getMessageDeclarations());
             }
         }
 

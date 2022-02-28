@@ -2,6 +2,9 @@ package networker.helpers;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,7 +41,6 @@ public class NetworkUtilities {
     public static final String JSON_ADDRESS_PORT = "port";
     public static final String JSON_ADDRESS_USERNAME = "username";
     public static final String JSON_ADDRESS_STATUS = "status";
-    public static final String JSON_ADDRESS_PRIOTIY = "priority";
 
     // users should also declare themselves along with the message declaration(s)
     public static final int MAX_MESSAGE_DECLARATION_BUFFER_SIZE = 4096 + DISCOVERY_BUFFER_SIZE;
@@ -59,7 +61,6 @@ public class NetworkUtilities {
         salutation.put(JSON_ADDRESS_PORT, net.getPort());
         salutation.put(JSON_ADDRESS_USERNAME, u.getUsername());
         salutation.put(JSON_ADDRESS_STATUS, Status.toInt(u.getStatus()));
-        salutation.put(JSON_ADDRESS_PRIOTIY, net.getPriority());
 
         return salutation;
     }
@@ -71,13 +72,12 @@ public class NetworkUtilities {
     }
 
     public static User processUserSalutationJSON(JSONObject jObj) throws JSONException, UnknownHostException, InvalidPortValueException {
-        int priority = jObj.getInt(JSON_ADDRESS_PRIOTIY);
         Status status = Status.toStatus(jObj.getInt(JSON_ADDRESS_STATUS));
         String username = jObj.getString(JSON_ADDRESS_USERNAME);
         int port = jObj.getInt(JSON_ADDRESS_PORT);
         InetAddress addr = InetAddress.getByName(jObj.getString(JSON_ADDRESS_IP));
 
-        return new User(addr, username, port, status, priority);
+        return new User(addr, username, port, status);
     }
 
     public static MessageIntent processMessageIntent(String message) throws JSONException, InvalidPortValueException, UnknownHostException {
@@ -186,6 +186,28 @@ public class NetworkUtilities {
         DataOutputStream dos = receiver.getNetworking().getCurrentUserSocket().getDataOutputStream();
         dos.write(NetworkUtilities.convertUTF8StringToBytes(NetworkUtilities.createSalutationJSON(sender).toString()));
         dos.flush();
+    }
+
+    /**
+     * @param buffer Buffer, if it exists.
+     * @param count Current read sum by the stream.
+     * @param total Maximum bytes the stream will read.
+     * @param max   Maximum size of the buffer.
+     * @return Returns a new buffer if the difference is different than the size of the current buffer, or if it's null; otherwise, it will return the same buffer.
+     */
+    @NonNull
+    public static byte[] createBuffer(@Nullable byte[] buffer, long count, long total, int max) {
+        assert(count<=total);
+
+        int newSize;
+        long difference = total - count;
+
+        if (difference > Integer.MAX_VALUE) newSize = max;
+        else newSize = Math.min((int)difference, max);
+
+        if (buffer == null) return new byte[newSize];
+        if (buffer.length == newSize) return buffer;
+        return new byte[newSize];
     }
 
     public static HashMap<String, NetworkInterface> getViableNetworkInterfaces() {

@@ -84,15 +84,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         netIface = netIfaces["wlan0"]!!
         networkInetAddress = netIface.inetAddresses.nextElement()
 
-        val r = Random()
-        r.setSeed(System.currentTimeMillis()-r.nextInt())
-
         ourself = User(
             networkInetAddress,
             username,
             SERVER_PORT,
             Status.AVAILABLE,
-            r.nextInt(Int.MAX_VALUE)
         )
         networkInformation = NetworkInformation(netIface.displayName, ourself)
 
