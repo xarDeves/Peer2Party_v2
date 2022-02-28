@@ -1,0 +1,70 @@
+Key = unique identifier (IMEI number, for phones, probably)
+Salt = secure random generated number
+ID = sha(Key + Salt)
+
+P1 = Peer 1
+P2 = Peer 2
+Po = Peer Opposite
+Ps = Peer Self
+Pn = Nth Peer (meaning, for each peer in the communication involved)
+
+----------- Salutation Types ----------- 
+auSalute = Authentication salute (sends PsKey, PsID)
+Salute = salute (no auth stuff sent)
+
+----------- auResponse Types ----------- 
+auResponseNew  = NEW
+auResponseAuth = AUTHENTICATED
+auResponseFrad = FRADULENT
+
+Actors: P1, P2
+Data: Key, Salt, ID
+
+----------- Stage 1 ----------- 
+Pn auSalute Po
+
+----------- Stage 2 ----------- 
+Pn get auSalute from Po
+// what do we do if this is not an auSalute?
+
+----------- Stage 3 ----------- 
+Pn:
+    if PoKey exists in DB:
+        get PoSalt from DB
+        
+        if PoID matches sha(PoKey, PoSalt)
+            // all is good!
+            send auResponseAuth
+        else:
+            //fradulent connection? what do we do here?
+            send auResponseFrad // should we do this?
+    else:
+        send auResponseNew
+        // new user!
+        generate salt for the PoKey (PoSalt)
+        generate ID for Po
+
+        send PoID
+
+----------- Stage 4 -----------
+Pn:
+    get auResponse
+    
+    if auResponseAuth:
+        // OK, we're done
+    else if auResponseFrad:
+        // what do we do here?
+    else if auResponseNew:
+        get PsID
+        db store (PoKey, PoID, PsID, PoSalt)
+    else:
+        // fatal error
+
+
+----------- Done -----------
+
+Notes:
+    The PsKey is the same for each peer
+    The PoSalt is different for each peer
+    The PoKey + PoSalt is checked against the known hash
+    What should we do for fradulent hashes/hashes that don't match?
