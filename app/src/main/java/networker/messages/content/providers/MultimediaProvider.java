@@ -19,13 +19,26 @@ public class MultimediaProvider implements ContentProvider<String, String>, Clos
         //TODO create file in disk
     }
 
-    public void insertHeader(byte[] buffer, int count) {
+    private void insertHeader(byte[] buffer, int count) {
         System.arraycopy(buffer, 0, bNameArray, startingNameIndex, count);
         startingNameIndex += count;
     }
 
-    public void insertBody(byte[] buffer, int count) {
+    private void insertBody(byte[] buffer, int count) throws IOException {
         //TODO write to disk
+    }
+
+    @Override
+    @SuppressWarnings("UnnecessaryReturnStatement")
+    public void insertData(byte[] buffer, int count, Type dt) throws IOException {
+        switch (dt) {
+            case HEADER:
+                insertHeader(buffer, count);
+                return;
+            case BODY:
+                insertBody(buffer, count);
+                return;
+        }
     }
 
     //TODO return bare filename
