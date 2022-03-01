@@ -1,5 +1,7 @@
 package networker.messages.io.handlers;
 
+import static networker.messages.content.ContentProvider.Type;
+
 import android.util.Log;
 
 import java.io.DataInputStream;
@@ -13,6 +15,7 @@ import networker.exceptions.OversizedMultimediaMessage;
 import networker.exceptions.OversizedTextMessage;
 import networker.helpers.NetworkUtilities;
 import networker.messages.MessageDeclaration;
+import networker.messages.content.ContentProvider;
 import networker.messages.content.providers.MultimediaProvider;
 import networker.messages.content.providers.TextProvider;
 import networker.messages.io.IOManager;
@@ -71,59 +74,38 @@ public class InboundHandler {
 
     private void readText(DataInputStream dis) throws OversizedTextMessage, IOException {
         if (mdl.getBodySize() > IOManager.MAXIMUM_TEXT_SIZE) throw new OversizedTextMessage();
-        int contentSize = Math.toIntExact(mdl.getBodySize());
+        TextProvider provider = new TextProvider(Math.toIntExact(mdl.getBodySize()));
 
-        int count;
-        int totalbytesread = 0;
-        byte[] buffer = NetworkUtilities.createBuffer(null, totalbytesread, mdl.getBodySize(), IOManager.TEXT_BLOCK_SIZE);
-
-        TextProvider provider = new TextProvider(contentSize);
-        while(totalbytesread < mdl.getBodySize() && (count = dis.read(buffer)) > 0) {
-            totalbytesread += count;
-            provider.insertData(buffer, count);
-            buffer = NetworkUtilities.createBuffer(buffer, totalbytesread, mdl.getBodySize(), IOManager.TEXT_BLOCK_SIZE);
-        }
+        procureDataFromStream(dis, provider, Type.BODY, mdl.getBodySize(), IOManager.TEXT_BLOCK_SIZE);
 
         dbb.onTextReceived(provider, u);
         Log.d(TAG + ".readText", "added dbb text");
     }
 
     private void readFile(DataInputStream dis) throws OversizedMultimediaMessage, IOException {
-        if (mdl.getBodySize() > IOManager.MAXIMUM_MULTIMEDIA_SIZE) throw new OversizedMultimediaMessage();
+        if (mdl.getBodySize() > IOManager.MAXIMUM_MULTIMEDIA_SIZE)
+            throw new OversizedMultimediaMessage();
         MultimediaProvider provider = new MultimediaProvider(mdl.getHeaderSize(), mdl.getBodySize());
 
-        //HEADER STUFF
-        {
-            int count;
-            int totalbytesread = 0;
-            byte[] buffer = NetworkUtilities.createBuffer(null, totalbytesread, mdl.getHeaderSize(), IOManager.TEXT_BLOCK_SIZE);
-
-            while (totalbytesread < mdl.getHeaderSize() && (count = dis.read(buffer)) > 0) {
-                totalbytesread += count;
-                provider.insertHeader(buffer, count);
-                buffer = NetworkUtilities.createBuffer(buffer, totalbytesread, mdl.getHeaderSize(), IOManager.TEXT_BLOCK_SIZE);
-            }
-        }
-
-        provider.pre(provider.getHeader());
-
-        //BODY STUFF
-        {
-            int count;
-            int totalbytesread = 0;
-            byte[] buffer = NetworkUtilities.createBuffer(null, totalbytesread, mdl.getBodySize(), IOManager.MULTIMEDIA_BLOCK_SIZE);
-
-            while (totalbytesread < mdl.getBodySize() && (count = dis.read(buffer)) > 0 ) {
-                totalbytesread += count;
-                provider.insertBody(buffer, count);
-                buffer = NetworkUtilities.createBuffer(buffer, totalbytesread, mdl.getBodySize(), IOManager.MULTIMEDIA_BLOCK_SIZE);
-            }
-        }
-
-        provider.close();
+        procureDataFromStream(dis, provider, Type.HEADER, mdl.getHeaderSize(), IOManager.TEXT_BLOCK_SIZE); //get header
+        provider.pre(provider.getHeader()); //initialize file stuff
+        procureDataFromStream(dis, provider, Type.BODY, mdl.getBodySize(), IOManager.MULTIMEDIA_BLOCK_SIZE); //get body
+        provider.close(); //finalize file stuff
 
         dbb.onMultimediaReceived(provider, u);
         Log.d(TAG + ".readFile", "added dbb path " + provider.getData());
+    }
+
+    private void procureDataFromStream(DataInputStream dis, ContentProvider<?, ?> provider, Type dt, long size, int max) throws IOException {
+        int count;
+        int totalbytesread = 0;
+        byte[] buffer = NetworkUtilities.createBuffer(null, totalbytesread, size, max);
+
+        while (totalbytesread < size && (count = dis.read(buffer)) > 0) {
+            totalbytesread += count;
+            provider.insertData(buffer, count, dt);
+            buffer = NetworkUtilities.createBuffer(buffer, totalbytesread, size, max);
+        }
     }
 
 }
